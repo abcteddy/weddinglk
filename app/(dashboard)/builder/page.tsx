@@ -224,6 +224,7 @@ export default function BuilderPage() {
 
       const payload = {
         ...form,
+        rsvp_deadline: form.rsvp_deadline || null,
         slug,
         user_id: user.id,
         package: selectedPackage,
@@ -248,8 +249,26 @@ export default function BuilderPage() {
       if (result.error) throw result.error
       setSuccess('Saved successfully!')
       setTimeout(() => setSuccess(''), 3000)
-    } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Failed to save')
+    } catch (err: any) {
+      console.error('[Save Error]:', err)
+      let msg = 'Failed to save'
+      if (err) {
+        if (typeof err === 'string') {
+          msg = err
+        } else if (err.message) {
+          msg = err.message
+          if (err.details) msg += ` (${err.details})`
+          if (err.hint) msg += ` [Hint: ${err.hint}]`
+          if (err.code) msg += ` [Code: ${err.code}]`
+        } else {
+          try {
+            msg = JSON.stringify(err)
+          } catch (e) {
+            msg = String(err)
+          }
+        }
+      }
+      setError(msg)
     } finally {
       setSaveLoading(false)
     }
