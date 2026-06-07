@@ -1,6 +1,87 @@
 import { TemplateConfig, TemplateId } from '@/types/invitation'
 
 export const TEMPLATES: Record<TemplateId, TemplateConfig> = {
+  royalWax: {
+    id: 'royalWax',
+    name: '👑 Royal Wax Seal',
+    bgColor: 0x0b0b0f,
+    ambientColor: 0x1a1329,
+    keyLightColor: 0xffe8c0, // Warm studio light
+    envelopeColor: 0x0e111a, // Premium midnight blue cardstock
+    flapColor: 0x131724,
+    sealColor: 0x9c1a3c, // Royal red wax
+    sealEmissive: 0x5a0b20,
+    petalHue: 0.12, // Gold dust particles
+    fontFamily: "'Playfair Display', serif",
+    accentColor: '#d4af37', // Polished gold
+    textColor: '#f9f6f0',
+    previewGradient: 'linear-gradient(135deg, #0e111a 0%, #20132a 50%, #0e111a 100%)',
+  },
+  rosePetal: {
+    id: 'rosePetal',
+    name: '🌹 Champagne Rose Petal',
+    bgColor: 0x0f0b0d,
+    ambientColor: 0x221319,
+    keyLightColor: 0xffeae0,
+    envelopeColor: 0xf2ded1, // Luxury Champagne / Cream cardstock
+    flapColor: 0xe5d0c2,
+    sealColor: 0xb57c8d, // Velvet Rose Quartz wax
+    sealEmissive: 0x542e39,
+    petalHue: 0.95, // Soft rose petals
+    fontFamily: "'Cormorant Garamond', serif",
+    accentColor: '#c890a6',
+    textColor: '#fdfbfa',
+    previewGradient: 'linear-gradient(135deg, #f2ded1 0%, #c890a6 50%, #f2ded1 100%)',
+  },
+  sinhalaTraditional: {
+    id: 'sinhalaTraditional',
+    name: '🥁 Traditional Sri Lankan Teak',
+    bgColor: 0x160105,
+    ambientColor: 0x230005,
+    keyLightColor: 0xffcb80,
+    envelopeColor: 0x6e4325, // Teak Wood envelope
+    flapColor: 0xcca353,
+    sealColor: 0xcca353, // Traditional brass seal
+    sealEmissive: 0x7a5a1f,
+    petalHue: 0.08, // Golden/orange embers
+    fontFamily: "'Cinzel', serif",
+    accentColor: '#cca353',
+    textColor: '#ffffff',
+    previewGradient: 'linear-gradient(135deg, #160105 0%, #4a000e 50%, #160105 100%)',
+  },
+  royalGardenGate: {
+    id: 'royalGardenGate',
+    name: '🚪 Royal Arched Gate',
+    bgColor: 0x050806, // Deep English garden green
+    ambientColor: 0x101b12,
+    keyLightColor: 0xffe5b0,
+    envelopeColor: 0xd4af37, // Polished Gold
+    flapColor: 0xd4af37,
+    sealColor: 0xd4af37,
+    sealEmissive: 0x8b6914,
+    petalHue: 0.12, // Golden light dust
+    fontFamily: "'Playfair Display', serif",
+    accentColor: '#d4af37',
+    textColor: '#f9f6f0',
+    previewGradient: 'linear-gradient(135deg, #050806 0%, #172a1e 50%, #050806 100%)',
+  },
+  coupleMonogram: {
+    id: 'coupleMonogram',
+    name: '🖤 Luxury Monogram',
+    bgColor: 0x090909, // Matte velvet black
+    ambientColor: 0x141414,
+    keyLightColor: 0xffffff,
+    envelopeColor: 0x161616, // Textured Charcoal paper
+    flapColor: 0x1f1f1f,
+    sealColor: 0x7a0c24, // Embossed burgundy wax
+    sealEmissive: 0x3d030f,
+    petalHue: 0.12, // Floating gold foil flakes
+    fontFamily: "'Playfair Display', serif",
+    accentColor: '#d4af37', // Gold foil monogram
+    textColor: '#ffffff',
+    previewGradient: 'linear-gradient(135deg, #161616 0%, #2b2b2b 50%, #161616 100%)',
+  },
+  // Backwards compatibility fallbacks
   classic: {
     id: 'classic',
     name: 'Classic Ivory',

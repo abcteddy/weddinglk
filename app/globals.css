@@ -1,26 +1,365 @@
 @import "tailwindcss";
 
+
+/* ─── Tailwind v4 Custom Theme ──────────────────────────── */
+@theme {
+  /* Colors */
+  --color-rose-950: #1a0010;
+  --color-rose-900: #3d0020;
+  --color-rose-800: #6b1a36;
+  --color-rose-700: #8B1A4A;
+  --color-rose-600: #b0365e;
+  --color-rose-500: #c9516f;
+  --color-rose-400: #e07a8a;
+  --color-rose-300: #f0a8b5;
+  --color-rose-200: #f8d0d8;
+  --color-rose-100: #fdf0f3;
+
+  --color-gold-900: #3d2a00;
+  --color-gold-800: #6b4a00;
+  --color-gold-700: #8B6914;
+  --color-gold-600: #b8860b;
+  --color-gold-500: #d4a017;
+  --color-gold-400: #e8c040;
+  --color-gold-300: #f0d870;
+  --color-gold-200: #f8ecb0;
+  --color-gold-100: #fdf8e0;
+
+  --color-parchment-900: #5a3a20;
+  --color-parchment-800: #8a5a30;
+  --color-parchment-700: #b07840;
+  --color-parchment-600: #c89060;
+  --color-parchment-500: #d4a87a;
+  --color-parchment-400: #e0c09a;
+  --color-parchment-300: #ead8b8;
+  --color-parchment-200: #f2ecd8;
+  --color-parchment-100: #fdf8f0;
+  --color-parchment-50: #fffcf7;
+
+  /* Fonts */
+  --font-serif: 'Cormorant Garamond', Georgia, serif;
+  --font-display: 'Playfair Display', Georgia, serif;
+  --font-sans: 'Inter', system-ui, sans-serif;
+
+  /* Shadows */
+  --shadow-rose-glow: 0 0 30px rgba(139, 26, 74, 0.4);
+  --shadow-gold-glow: 0 0 30px rgba(184, 134, 11, 0.4);
+  --shadow-card: 0 4px 24px rgba(0, 0, 0, 0.12), 0 1px 4px rgba(0, 0, 0, 0.08);
+
+  /* Animations */
+  --animate-fade-in: fadeIn 0.5s ease-in-out;
+  --animate-fade-up: fadeUp 0.6s ease-out;
+  --animate-float: float 3.5s ease-in-out infinite;
+  --animate-shimmer: shimmer 2.5s linear infinite;
+  --animate-bounce-gentle: bounceGentle 2s ease-in-out infinite;
+  --animate-pulse-slow: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  --animate-spin-slow: spin 8s linear infinite;
+}
+
+/* ─── CSS Custom Properties ─────────────────────────────── */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --rose-deep: #0a0005;
+  --rose-card: #110009;
+  --rose-border: rgba(255, 255, 255, 0.08);
+  --rose-accent: #8B1A4A;
+  --rose-glow: rgba(139, 26, 74, 0.4);
+  --gold-accent: #b8860b;
+  --text-primary: #f5e8ef;
+  --text-muted: #9a7080;
+  --font-serif: 'Cormorant Garamond', Georgia, serif;
+  --font-display: 'Playfair Display', Georgia, serif;
+  --font-sans: 'Inter', system-ui, sans-serif;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+/* ─── Base Reset ────────────────────────────────────────── */
+*, *::before, *::after {
+  box-sizing: border-box;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: var(--rose-deep);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  min-height: 100vh;
 }
+
+/* ─── Selection ─────────────────────────────────────────── */
+::selection {
+  background: rgba(139, 26, 74, 0.4);
+  color: #f5d0df;
+}
+
+/* ─── Scrollbar ─────────────────────────────────────────── */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #080004;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(139, 26, 74, 0.5);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(139, 26, 74, 0.8);
+}
+
+/* ─── Typography ────────────────────────────────────────── */
+.font-serif { font-family: var(--font-serif); }
+.font-display { font-family: var(--font-display); }
+
+/* ─── Glassmorphism Cards ───────────────────────────────── */
+.glass-card {
+  background: rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--rose-border);
+  border-radius: 2px;
+}
+
+.glass-card-hover {
+  transition: background 0.3s, border-color 0.3s, box-shadow 0.3s;
+}
+.glass-card-hover:hover {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.15);
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.3);
+}
+
+/* ─── Gradient Backgrounds ──────────────────────────────── */
+.bg-wedding {
+  background:
+    radial-gradient(ellipse at 20% 50%, rgba(139, 26, 74, 0.15) 0%, transparent 60%),
+    radial-gradient(ellipse at 80% 20%, rgba(184, 134, 11, 0.08) 0%, transparent 50%),
+    var(--rose-deep);
+}
+
+.bg-grain {
+  position: relative;
+}
+.bg-grain::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ─── Gold shimmer effect ───────────────────────────────── */
+.shimmer-gold {
+  background: linear-gradient(90deg,
+    transparent 0%,
+    rgba(184, 134, 11, 0.15) 40%,
+    rgba(212, 160, 23, 0.3) 50%,
+    rgba(184, 134, 11, 0.15) 60%,
+    transparent 100%);
+  background-size: 200% 100%;
+  animation: shimmer 3s linear infinite;
+}
+
+/* ─── Rose glow on hover ────────────────────────────────── */
+.rose-glow-hover {
+  transition: box-shadow 0.3s;
+}
+.rose-glow-hover:hover {
+  box-shadow: 0 0 30px rgba(139, 26, 74, 0.4);
+}
+
+/* ─── Invitation page background ───────────────────────── */
+.inv-bg {
+  background:
+    radial-gradient(ellipse at center, rgba(139, 26, 74, 0.1) 0%, transparent 70%),
+    var(--rose-deep);
+  min-height: 100vh;
+}
+
+/* ─── Animations ────────────────────────────────────────── */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(24px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateX(-20px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-14px); }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes bounceGentle {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+
+@keyframes pulseSeal {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(139, 26, 74, 0.4); }
+  50% { box-shadow: 0 0 0 10px rgba(139, 26, 74, 0); }
+}
+
+@keyframes rotateIn {
+  from { opacity: 0; transform: rotate(-5deg) scale(0.95); }
+  to { opacity: 1; transform: rotate(0) scale(1); }
+}
+
+@keyframes detailsFadeIn {
+  from { opacity: 0; transform: translateY(24px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in { animation: fadeIn 0.5s ease-in-out; }
+.animate-fade-up { animation: fadeUp 0.6s ease-out; }
+.animate-slide-in { animation: slideIn 0.4s ease-out; }
+.animate-float { animation: float 3.5s ease-in-out infinite; }
+.animate-shimmer { animation: shimmer 2.5s linear infinite; }
+.animate-rotate-in { animation: rotateIn 0.5s ease-out; }
+
+/* ─── Stagger delays ────────────────────────────────────── */
+.delay-100 { animation-delay: 100ms; }
+.delay-200 { animation-delay: 200ms; }
+.delay-300 { animation-delay: 300ms; }
+.delay-400 { animation-delay: 400ms; }
+.delay-500 { animation-delay: 500ms; }
+
+/* ─── Table styles ──────────────────────────────────────── */
+table { border-collapse: collapse; }
+
+/* ─── Focus ring override ───────────────────────────────── */
+:focus-visible {
+  outline: 2px solid rgba(139, 26, 74, 0.8);
+  outline-offset: 2px;
+}
+
+/* ─── Utility: Divider ornament ─────────────────────────── */
+.divider-ornament {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+.divider-ornament::before,
+.divider-ornament::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(to right, transparent, rgba(201, 136, 158, 0.4), transparent);
+}
+
+/* ─── Mobile nav overlay ────────────────────────────────── */
+.nav-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  z-index: 40;
+}
+
+/* ─── Light Themes Overrides (Garden of Eden / Rose Petals details page) ─── */
+.theme-light-garden {
+  --page-bg: #f9f5f0;
+  --text-primary: #1a3221;
+  --text-secondary: #4a2e1b;
+  --text-accent: #4a0d1d;
+  --card-bg: rgba(255, 255, 255, 0.88);
+  --card-border: rgba(26, 50, 33, 0.12);
+  --input-bg: #fdfbf8;
+  --input-border: #e2dacd;
+  --input-text: #1a3221;
+  --input-placeholder: #a89a8c;
+  --focus-border: #1a3221;
+  --focus-ring: rgba(26, 50, 33, 0.1);
+  --select-option-bg: #f9f5f0;
+}
+
+.theme-light-rose {
+  --page-bg: #fdf8fa;
+  --text-primary: #5a2d3a;
+  --text-secondary: #70545c;
+  --text-accent: #c890a6;
+  --card-bg: rgba(255, 255, 255, 0.88);
+  --card-border: rgba(200, 144, 166, 0.2);
+  --input-bg: #fdfbfb;
+  --input-border: #edd8e0;
+  --input-text: #5a2d3a;
+  --input-placeholder: #c2a8b2;
+  --focus-border: #5a2d3a;
+  --focus-ring: rgba(90, 45, 58, 0.1);
+  --select-option-bg: #fdf8fa;
+}
+
+/* Apply variables to descendants in light themes */
+.theme-light-garden,
+.theme-light-rose {
+  color: var(--text-primary);
+}
+
+.theme-light-garden label,
+.theme-light-rose label {
+  color: var(--text-secondary) !important;
+}
+
+.theme-light-garden input,
+.theme-light-rose input,
+.theme-light-garden textarea,
+.theme-light-rose textarea,
+.theme-light-garden select,
+.theme-light-rose select {
+  background-color: var(--input-bg) !important;
+  border-color: var(--input-border) !important;
+  color: var(--input-text) !important;
+}
+
+.theme-light-garden input::placeholder,
+.theme-light-rose input::placeholder,
+.theme-light-garden textarea::placeholder,
+.theme-light-rose textarea::placeholder {
+  color: var(--input-placeholder) !important;
+}
+
+.theme-light-garden input:focus,
+.theme-light-rose input:focus,
+.theme-light-garden textarea:focus,
+.theme-light-rose textarea:focus,
+.theme-light-garden select:focus,
+.theme-light-rose select:focus {
+  border-color: var(--focus-border) !important;
+  --tw-ring-color: var(--focus-ring) !important;
+  background-color: #ffffff !important;
+}
+
+.theme-light-garden select option,
+.theme-light-rose select option {
+  background-color: var(--select-option-bg) !important;
+  color: var(--input-text) !important;
+}
+
+/* Target other headings & text elements specifically */
+.theme-light-garden .text-white,
+.theme-light-rose .text-white {
+  color: var(--text-primary) !important;
+}
+
+.theme-light-garden .text-parchment-400,
+.theme-light-garden .text-parchment-500,
+.theme-light-rose .text-parchment-400,
+.theme-light-rose .text-parchment-500 {
+  color: var(--text-secondary) !important;
+}
+

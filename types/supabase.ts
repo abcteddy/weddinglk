@@ -21,6 +21,10 @@ export interface Database {
           template_id: string
           custom_message: string | null
           photo_url: string | null
+          cover_url: string | null
+          music_url: string | null
+          video_url: string | null
+          gallery_urls: string[] | null
           couple_phone: string | null
           is_published: boolean
           is_paid: boolean
@@ -42,6 +46,10 @@ export interface Database {
           template_id?: string
           custom_message?: string | null
           photo_url?: string | null
+          cover_url?: string | null
+          music_url?: string | null
+          video_url?: string | null
+          gallery_urls?: string[] | null
           couple_phone?: string | null
           is_published?: boolean
           is_paid?: boolean
@@ -63,6 +71,10 @@ export interface Database {
           template_id?: string
           custom_message?: string | null
           photo_url?: string | null
+          cover_url?: string | null
+          music_url?: string | null
+          video_url?: string | null
+          gallery_urls?: string[] | null
           couple_phone?: string | null
           is_published?: boolean
           is_paid?: boolean

@@ -13,6 +13,12 @@ export const PACKAGES = {
     currency: 'LKR',
     description: 'WeddingLK Premium Package',
   },
+  luxury: {
+    price: 4990,
+    name: 'Luxury',
+    currency: 'LKR',
+    description: 'WeddingLK Luxury Package',
+  },
 } as const
 
 export type PackageKey = keyof typeof PACKAGES
