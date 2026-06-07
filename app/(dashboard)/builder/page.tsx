@@ -11,6 +11,7 @@ import { generateSlug } from '@/lib/utils/slug'
 import { Invitation, TimelineEvent, BuilderConfig, SectionConfig, TemplateConfig } from '@/types/invitation'
 import { PACKAGES } from '@/lib/payhere'
 import { GoogleFontLoader } from '@/components/ui/GoogleFontLoader'
+import { resolveVideo } from '@/lib/utils/videoEmbed'
 
 const DEFAULT_BUILDER_CONFIG: BuilderConfig = {
   global: {
@@ -178,6 +179,7 @@ export default function BuilderPage() {
   const [activeRightTab, setActiveRightTab] = useState<RightTab>('style')
   const [viewport, setViewport] = useState<Viewport>('desktop')
   const [activeSectionId, setActiveSectionId] = useState<string>('open-animation')
+  const [previewMode, setPreviewMode] = useState<'section' | 'full'>('section')
 
   // Save loading
   const [loading, setLoading] = useState(false)
@@ -478,7 +480,7 @@ export default function BuilderPage() {
     setTimeout(() => setSuccess(''), 2000)
   }
 
-  const handleSave = async () => {
+  const handleSave = async (shouldPublish?: boolean) => {
     setSaveLoading(true)
     setError('')
     setSuccess('')
@@ -495,7 +497,7 @@ export default function BuilderPage() {
       const coverUrl = builderConfig.sections.find(s => s.type === 'open')?.styles.bgUrl || form.cover_url
       const videoUrl = builderConfig.sections.find(s => s.type === 'intro')?.styles.bgUrl || form.video_url
 
-      const payload = {
+      const payload: any = {
         ...form,
         cover_url: coverUrl,
         video_url: videoUrl,
@@ -504,6 +506,10 @@ export default function BuilderPage() {
         user_id: user.id,
         package: selectedPackage,
         builder_config: builderConfig
+      }
+
+      if (shouldPublish) {
+        payload.is_published = true
       }
 
       let result: { data: Invitation | null; error: any }
@@ -523,7 +529,7 @@ export default function BuilderPage() {
       }
 
       if (result.error) throw result.error
-      setSuccess('All builder progress saved successfully!')
+      setSuccess(shouldPublish ? 'All builder progress saved and published successfully!' : 'All builder progress saved successfully!')
       setTimeout(() => setSuccess(''), 3000)
     } catch (err: any) {
       console.error('[Save Error]:', err)
@@ -893,6 +899,278 @@ export default function BuilderPage() {
     builderConfig.global.secondaryFont,
     ...builderConfig.sections.map(s => s.styles.fontFamily)
   ].filter(Boolean) as string[]
+
+  const renderSectionPreview = (sectionId: string, isFullPage: boolean) => {
+    const sec = builderConfig.sections.find(s => s.id === sectionId)
+    if (!sec || (!sec.visible && isFullPage)) return null
+
+    const secStyle = sec.styles
+    const isMainOpen = sectionId === 'open-animation'
+    const isIntro = sectionId === 'intro-animation'
+    const isDetails = sectionId === 'details-section'
+    const isGallery = sectionId === 'gallery-section'
+    const isRsvp = sectionId === 'rsvp-section'
+    const isFooter = sectionId === 'footer-section'
+
+    // Resolve bg media for open and intro
+    const videoInfo = (isMainOpen || isIntro) && secStyle.bgType === 'video' && secStyle.bgUrl 
+      ? resolveVideo(secStyle.bgUrl, { autoplay: true, muted: true, loop: true, controls: false }) 
+      : null;
+
+    return (
+      <div 
+        key={sectionId}
+        onClick={() => {
+          if (isFullPage) {
+            setActiveSectionId(sectionId)
+          }
+        }}
+        className={`relative w-full transition-all duration-200 group ${
+          isFullPage ? 'cursor-pointer border-b border-slate-800/40 hover:outline hover:outline-1 hover:outline-rose-500/50' : 'h-full flex flex-col justify-center'
+        } ${
+          isFullPage && activeSectionId === sectionId ? 'outline outline-2 outline-rose-500 z-10' : ''
+        }`}
+        style={{
+          backgroundColor: secStyle.bgColor || (isFooter ? '#080808' : '#0b0b0f'),
+          color: secStyle.textColor || (isFooter ? '#a3a3a3' : '#ffffff'),
+          paddingTop: isFullPage ? `${Math.max((secStyle.paddingTop ?? 80) / 2, 40)}px` : `${secStyle.paddingTop ?? 80}px`,
+          paddingBottom: isFullPage ? `${Math.max((secStyle.paddingBottom ?? 80) / 2, 40)}px` : `${secStyle.paddingBottom ?? 80}px`,
+          backgroundImage: secStyle.bgType === 'image' && secStyle.bgUrl ? `url(${secStyle.bgUrl})` : undefined,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          minHeight: isFullPage ? 'auto' : '100%'
+        }}
+      >
+        {/* Render backgrounds for video types */}
+        {secStyle.bgType === 'video' && secStyle.bgUrl && (
+          videoInfo ? (
+            videoInfo.type === 'direct' ? (
+              <video src={videoInfo.embedUrl} className="absolute inset-0 object-cover w-full h-full pointer-events-none" autoPlay loop muted playsInline />
+            ) : (
+              <iframe
+                src={videoInfo.embedUrl}
+                className="absolute inset-0 w-full h-full border-0 pointer-events-none scale-[1.35] origin-center"
+                allow="autoplay; mute"
+              />
+            )
+          ) : null
+        )}
+
+        {/* Overlay Color for media types */}
+        {['video', 'image'].includes(secStyle.bgType || '') && (
+          <div
+            className="absolute inset-0 pointer-events-none"
+            style={{
+              backgroundColor: secStyle.bgOverlayColor || '#000000',
+              opacity: (secStyle.bgOverlayOpacity ?? 50) / 100
+            }}
+          />
+        )}
+
+        <div className="relative z-10 w-full flex flex-col items-center justify-center text-center px-4">
+          {isMainOpen && (
+            <div className="max-w-md space-y-4 pointer-events-none p-4" style={{
+              borderRadius: `${secStyle.borderRadius || 0}px`,
+              boxShadow: secStyle.boxShadow ? '0 10px 50px rgba(0,0,0,0.8)' : 'none'
+            }}>
+              <div className="border border-[#D4AF37]/30 p-8 rounded-xl bg-black/45 backdrop-blur-md">
+                <p className="text-[9px] uppercase tracking-[0.4em] mb-2 preview-font-secondary" style={{ color: secStyle.textColor || '#D4AF37' }}>
+                  {sec.content.title || 'Together with their families'}
+                </p>
+                <h1 className="text-3xl font-bold tracking-wide leading-relaxed" style={{ 
+                  color: secStyle.textColor || '#D4AF37',
+                  fontFamily: `'${secStyle.fontFamily || builderConfig.global.primaryFont}', serif` 
+                }}>
+                  {form.partner1_name || 'Groom'} <span className="text-xl">&amp;</span> {form.partner2_name || 'Bride'}
+                </h1>
+                <p className="text-[10px] mt-3 tracking-widest leading-relaxed opacity-75 preview-font-secondary" style={{ color: secStyle.textColor || '#ffffff' }}>
+                  {sec.content.subtitle || 'Invite you to celebrate their wedding'}
+                </p>
+                <div className="h-0.5 w-16 mx-auto bg-[#D4AF37]/40 my-4"></div>
+                <button className="px-5 py-2.5 rounded-full text-[10px] uppercase font-semibold tracking-wider bg-[#D4AF37]/80 text-slate-950 shadow-md">
+                  {sec.content.buttonText || 'Click to Open'}
+                </button>
+              </div>
+            </div>
+          )}
+
+          {isIntro && (
+            <div className="space-y-2 pointer-events-none p-4" style={{
+              borderRadius: `${secStyle.borderRadius || 0}px`
+            }}>
+              <p className="text-[10px] uppercase tracking-widest preview-font-secondary" style={{ color: secStyle.textColor || '#ffffff' }}>
+                {sec.content.subtitle || 'Intro Showcase'}
+              </p>
+              <h1 className="text-2xl tracking-wider font-bold uppercase" style={{ 
+                color: secStyle.textColor || '#D4AF37',
+                fontFamily: `'${secStyle.fontFamily || builderConfig.global.primaryFont}', serif`
+              }}>
+                {sec.content.title || 'OUR MOVIE INTRO'}
+              </h1>
+              <span className="text-[10px] bg-black/40 text-slate-400 px-3 py-1 rounded-full border border-slate-800 inline-block mt-2">
+                🎬 Video Timeline: 00:03 / 00:08
+              </span>
+            </div>
+          )}
+
+          {isDetails && (
+            <div className="w-full max-w-sm mx-auto space-y-6 text-center border border-slate-800/80 p-6 rounded-2xl bg-slate-900/40 backdrop-blur-md" style={{
+              borderRadius: `${secStyle.borderRadius || 12}px`,
+              boxShadow: secStyle.boxShadow ? '0 10px 30px rgba(0,0,0,0.5)' : 'none'
+            }}>
+              <span className="text-[9px] uppercase tracking-[0.3em] font-semibold text-rose-400 preview-font-secondary">Celebrate With Us</span>
+              <h2 className="text-2xl font-bold leading-snug" style={{ 
+                color: secStyle.textColor || '#ffffff',
+                fontFamily: `'${secStyle.fontFamily || builderConfig.global.primaryFont}', serif`
+              }}>
+                {sec.content.title || 'Wedding Invitation'}
+              </h2>
+              <div className="h-0.5 w-12 mx-auto bg-rose-500/50"></div>
+              
+              <div className="space-y-4 text-xs font-light tracking-wide leading-relaxed">
+                <p className="preview-font-secondary" style={{ color: secStyle.textColor || '#ffffff' }}>
+                  {sec.content.subtitle || 'We joyfully request the pleasure of your company'}
+                </p>
+                
+                <div className="py-2">
+                  <div className="text-lg font-bold" style={{ 
+                    color: builderConfig.global.accentColor,
+                    fontFamily: `'${secStyle.fontFamily || builderConfig.global.primaryFont}', serif`
+                  }}>
+                    {form.partner1_name || 'Kamal'}
+                  </div>
+                  <div className="text-xs text-slate-500 my-1 font-serif">&amp;</div>
+                  <div className="text-lg font-bold" style={{ 
+                    color: builderConfig.global.accentColor,
+                    fontFamily: `'${secStyle.fontFamily || builderConfig.global.primaryFont}', serif`
+                  }}>
+                    {form.partner2_name || 'Nisha'}
+                  </div>
+                </div>
+
+                <div className="border-t border-b border-slate-800/60 py-3 space-y-1">
+                  <div className="font-bold uppercase tracking-widest preview-font-secondary text-rose-400 text-[10px]">
+                    {form.wedding_date ? new Date(form.wedding_date).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) : 'Date not set'}
+                  </div>
+                  <div className="text-slate-400 preview-font-secondary text-[10px]">
+                    Time: {form.wedding_time}
+                  </div>
+                </div>
+
+                <div className="space-y-0.5">
+                  <div className="font-bold text-slate-300 preview-font-secondary text-[11px]">{form.venue_name || 'Venue'}</div>
+                  <div className="text-slate-500 text-[10px] preview-font-secondary">{form.venue_address || 'Address'}</div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {isGallery && (
+            <div className="w-full max-w-sm mx-auto space-y-6 text-center border border-slate-800/80 p-6 rounded-2xl bg-slate-900/40 backdrop-blur-md" style={{
+              borderRadius: `${secStyle.borderRadius || 12}px`,
+              boxShadow: secStyle.boxShadow ? '0 10px 30px rgba(0,0,0,0.5)' : 'none'
+            }}>
+              <span className="text-[9px] uppercase tracking-[0.35em] mb-1 preview-font-secondary" style={{ color: builderConfig.global.accentColor || '#D4AF37' }}>
+                {sec.content.subtitle || 'Our Moments'}
+              </span>
+              <h2 className="text-2xl font-bold leading-snug" style={{ 
+                color: secStyle.textColor || '#ffffff',
+                fontFamily: `'${secStyle.fontFamily || builderConfig.global.primaryFont}', serif`
+              }}>
+                {sec.content.title || 'Photo Gallery'}
+              </h2>
+              <div className="h-px w-16 bg-white/20 mx-auto my-3" />
+              
+              {form.gallery_urls && form.gallery_urls.length > 0 ? (
+                <div className="grid grid-cols-2 gap-2 mt-4">
+                  {form.gallery_urls.slice(0, 4).map((url, i) => (
+                    <div key={i} className="aspect-square bg-slate-800 rounded-lg overflow-hidden border border-white/5">
+                      <img src={url} alt={`Gallery ${i}`} className="w-full h-full object-cover" />
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="grid grid-cols-2 gap-2 mt-4">
+                  {[1, 2, 3, 4].map((n) => (
+                    <div key={n} className="aspect-square bg-slate-800/50 rounded-lg flex items-center justify-center border border-dashed border-slate-700/60 text-slate-500 text-[10px]">
+                      Photo {n}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {isRsvp && (
+            <div className="w-full max-w-sm mx-auto space-y-6 border border-slate-800/80 p-6 rounded-2xl bg-slate-900/40 backdrop-blur-md" style={{
+              borderRadius: `${secStyle.borderRadius || 12}px`,
+              boxShadow: secStyle.boxShadow ? '0 10px 30px rgba(0,0,0,0.5)' : 'none'
+            }}>
+              <div className="text-center">
+                <span className="text-[9px] uppercase tracking-[0.35em] mb-1 preview-font-secondary" style={{ color: builderConfig.global.accentColor || '#D4AF37' }}>
+                  {sec.content.subtitle || 'Join Our Celebration'}
+                </span>
+                <h2 className="text-2xl font-bold leading-snug" style={{ 
+                  color: secStyle.textColor || '#ffffff',
+                  fontFamily: `'${secStyle.fontFamily || builderConfig.global.primaryFont}', serif`
+                }}>
+                  {sec.content.title || 'Kindly Respond'}
+                </h2>
+                <div className="h-px w-16 bg-white/20 mx-auto my-3" />
+              </div>
+
+              <div className="space-y-3 text-left">
+                <div>
+                  <label className="text-[9px] uppercase tracking-wider text-slate-400 block mb-1">Your Name</label>
+                  <input type="text" disabled placeholder="Guest Name" className="w-full text-xs bg-[#12161e]/85 border border-slate-800 rounded-lg p-2.5 text-slate-300" />
+                </div>
+
+                <div>
+                  <label className="text-[9px] uppercase tracking-wider text-slate-400 block mb-1">Will you attend?</label>
+                  <div className="grid grid-cols-2 gap-2">
+                    <button type="button" className="py-2 rounded-lg bg-rose-500/10 border border-rose-500/30 text-rose-400 text-xs font-semibold">Attending</button>
+                    <button type="button" className="py-2 rounded-lg bg-[#12161e]/85 border border-slate-800 text-slate-500 text-xs">Declining</button>
+                  </div>
+                </div>
+
+                <button type="button" className="w-full py-2.5 rounded-lg text-xs uppercase font-bold tracking-wider text-slate-950 shadow-md transition-all cursor-not-allowed" style={{ backgroundColor: builderConfig.global.accentColor || '#D4AF37' }}>
+                  Submit Response
+                </button>
+              </div>
+            </div>
+          )}
+
+          {isFooter && (
+            <div className="max-w-sm mx-auto space-y-4 p-8 border border-slate-850 rounded-xl bg-slate-900/30" style={{
+              borderRadius: `${secStyle.borderRadius || 12}px`,
+              boxShadow: secStyle.boxShadow ? '0 10px 30px rgba(0,0,0,0.5)' : 'none'
+            }}>
+              <span className="text-xl">💍</span>
+              <h2 className="text-2xl font-bold leading-snug" style={{ 
+                color: secStyle.textColor || '#ffffff',
+                fontFamily: `'${secStyle.fontFamily || builderConfig.global.primaryFont}', serif`
+              }}>
+                {sec.content.title || 'Thank You'}
+              </h2>
+              <p className="text-xs text-slate-400 leading-relaxed preview-font-secondary">
+                {sec.content.subtitle || 'We are excited to share our special day with you!'}
+              </p>
+              <p className="text-[10px] tracking-widest uppercase text-rose-400 preview-font-secondary mt-2">
+                {form.partner1_name || 'Groom'} &amp; {form.partner2_name || 'Bride'}
+              </p>
+            </div>
+          )}
+        </div>
+
+        {/* Focus indicator / section label when in Full page scroll */}
+        {isFullPage && (
+          <div className="absolute top-2 right-2 bg-black/60 border border-slate-850 rounded px-2 py-0.5 text-[8px] uppercase tracking-wider text-slate-400 z-20 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity">
+            {sec.title} {activeSectionId === sectionId ? '● Editing' : ''}
+          </div>
+        )}
+      </div>
+    )
+  }
 
   if (loading) {
     return (
@@ -1479,22 +1757,44 @@ export default function BuilderPage() {
           <div className="font-serif text-sm text-slate-300 font-bold tracking-widest hidden md:block">InviteCraft Template Builder</div>
           
           {/* Viewport controls */}
-          <div className="flex bg-[#12161e] border border-slate-800 rounded-lg p-0.5">
-            {[
-              { id: 'desktop', icon: '💻' },
-              { id: 'tablet', icon: '📱' },
-              { id: 'mobile', icon: '📞' }
-            ].map(v => (
+          <div className="flex items-center gap-2">
+            <div className="flex bg-[#12161e] border border-slate-800 rounded-lg p-0.5">
+              {[
+                { id: 'desktop', icon: '💻' },
+                { id: 'tablet', icon: '📱' },
+                { id: 'mobile', icon: '📞' }
+              ].map(v => (
+                <button
+                  key={v.id}
+                  onClick={() => setViewport(v.id as Viewport)}
+                  className={`p-1.5 rounded-md text-sm transition-all cursor-pointer ${
+                    viewport === v.id ? 'bg-rose-500/10 text-rose-400 font-extrabold' : 'text-slate-500 hover:text-slate-300'
+                  }`}
+                >
+                  {v.icon}
+                </button>
+              ))}
+            </div>
+
+            {/* Preview mode toggle */}
+            <div className="flex bg-[#12161e] border border-slate-800 rounded-lg p-0.5 ml-2">
               <button
-                key={v.id}
-                onClick={() => setViewport(v.id as Viewport)}
-                className={`p-1.5 rounded-md text-sm transition-all cursor-pointer ${
-                  viewport === v.id ? 'bg-rose-500/10 text-rose-400' : 'text-slate-500 hover:text-slate-300'
+                onClick={() => setPreviewMode('section')}
+                className={`px-2.5 py-1 rounded-md text-[9px] uppercase font-bold transition-all cursor-pointer ${
+                  previewMode === 'section' ? 'bg-rose-500/10 text-rose-400 font-extrabold' : 'text-slate-500 hover:text-slate-300'
                 }`}
               >
-                {v.icon}
+                Focus
               </button>
-            ))}
+              <button
+                onClick={() => setPreviewMode('full')}
+                className={`px-2.5 py-1 rounded-md text-[9px] uppercase font-bold transition-all cursor-pointer ${
+                  previewMode === 'full' ? 'bg-rose-500/10 text-rose-400 font-extrabold' : 'text-slate-500 hover:text-slate-300'
+                }`}
+              >
+                Full Scroll
+              </button>
+            </div>
           </div>
 
           <div className="flex items-center gap-2">
@@ -1504,7 +1804,7 @@ export default function BuilderPage() {
             <Button
               variant="secondary"
               className="text-xs py-1 px-3 border-slate-800 bg-[#12161e] rounded-lg cursor-pointer"
-              onClick={handleSave}
+              onClick={() => handleSave(false)}
               loading={saveLoading}
             >
               💾 Save
@@ -1512,7 +1812,7 @@ export default function BuilderPage() {
             <Button
               variant="primary"
               className="text-xs py-1 px-3 rounded-lg cursor-pointer"
-              onClick={handleSave}
+              onClick={() => handleSave(true)}
               loading={saveLoading}
             >
               🚀 Publish
@@ -1540,163 +1840,12 @@ export default function BuilderPage() {
               }
             `}</style>
 
-            {/* PREVIEW 1: OPEN ANIMATION SPLASH */}
-            {activeSectionId === 'open-animation' && (
-              <div className="relative w-full h-full flex flex-col items-center justify-center text-center px-4 overflow-hidden">
-                {activeSectionStyle.bgType === 'video' && activeSectionStyle.bgUrl ? (
-                  <video src={activeSectionStyle.bgUrl} className="absolute inset-0 object-cover w-full h-full" autoPlay loop muted playsInline />
-                ) : activeSectionStyle.bgType === 'image' && activeSectionStyle.bgUrl ? (
-                  <img src={activeSectionStyle.bgUrl} alt="Background" className="absolute inset-0 object-cover w-full h-full" />
-                ) : (
-                  <div className="absolute inset-0" style={{ backgroundColor: activeSectionStyle.bgColor || '#0b0b0f' }} />
-                )}
-                
-                {/* Overlay color */}
-                <div
-                  className="absolute inset-0"
-                  style={{
-                    backgroundColor: activeSectionStyle.bgOverlayColor || '#000000',
-                    opacity: (activeSectionStyle.bgOverlayOpacity ?? 50) / 100
-                  }}
-                />
-
-                {/* Envelope mock */}
-                <div className="relative z-10 max-w-md space-y-4 pointer-events-none p-4" style={{
-                  paddingTop: `${activeSectionStyle.paddingTop}px`,
-                  paddingBottom: `${activeSectionStyle.paddingBottom}px`,
-                  borderRadius: `${activeSectionStyle.borderRadius || 0}px`,
-                  boxShadow: activeSectionStyle.boxShadow ? '0 10px 50px rgba(0,0,0,0.8)' : 'none'
-                }}>
-                  {/* Rose floral envelope mock details */}
-                  <div className="border border-[#D4AF37]/30 p-8 rounded-xl bg-black/45 backdrop-blur-md">
-                    <p className="text-[9px] uppercase tracking-[0.4em] mb-2 preview-font-secondary" style={{ color: activeSectionStyle.textColor || '#D4AF37' }}>
-                      {activeSection.content.title || 'Together with their families'}
-                    </p>
-                    <h1 className="text-3xl font-bold tracking-wide preview-font-section leading-relaxed" style={{ color: activeSectionStyle.textColor || '#D4AF37' }}>
-                      {form.partner1_name || 'Groom'} <span className="text-xl">&amp;</span> {form.partner2_name || 'Bride'}
-                    </h1>
-                    <p className="text-[10px] mt-3 tracking-widest leading-relaxed opacity-75 preview-font-secondary" style={{ color: activeSectionStyle.textColor || '#ffffff' }}>
-                      {activeSection.content.subtitle || 'Invite you to celebrate their wedding'}
-                    </p>
-                    <div className="h-0.5 w-16 mx-auto bg-[#D4AF37]/40 my-4"></div>
-                    <button className="px-5 py-2.5 rounded-full text-[10px] uppercase font-semibold tracking-wider bg-[#D4AF37]/80 text-slate-950 shadow-md">
-                      {activeSection.content.buttonText || 'Click to Open'}
-                    </button>
-                  </div>
-                </div>
-
-                <div className="absolute bottom-4 left-4 z-10 text-[9px] text-white/40">Previewing Envelope Opening Screen</div>
+            {previewMode === 'full' ? (
+              <div className="w-full h-full overflow-y-auto divide-y divide-slate-900/50">
+                {builderConfig.sections.map(sec => renderSectionPreview(sec.id, true))}
               </div>
-            )}
-
-            {/* PREVIEW 2: CINEMATIC INTRO VIDEO */}
-            {activeSectionId === 'intro-animation' && (
-              <div className="relative w-full h-full flex flex-col items-center justify-center text-center px-4 overflow-hidden">
-                {activeSectionStyle.bgType === 'video' && activeSectionStyle.bgUrl ? (
-                  <video src={activeSectionStyle.bgUrl} className="absolute inset-0 object-cover w-full h-full" autoPlay loop muted playsInline />
-                ) : activeSectionStyle.bgType === 'image' && activeSectionStyle.bgUrl ? (
-                  <img src={activeSectionStyle.bgUrl} alt="Background" className="absolute inset-0 object-cover w-full h-full" />
-                ) : (
-                  <div className="absolute inset-0" style={{ backgroundColor: activeSectionStyle.bgColor || '#0b0b0f' }} />
-                )}
-                
-                {/* Overlay color */}
-                <div
-                  className="absolute inset-0"
-                  style={{
-                    backgroundColor: activeSectionStyle.bgOverlayColor || '#000000',
-                    opacity: (activeSectionStyle.bgOverlayOpacity ?? 50) / 100
-                  }}
-                />
-
-                <div className="relative z-10 space-y-2 pointer-events-none p-4" style={{
-                  paddingTop: `${activeSectionStyle.paddingTop}px`,
-                  paddingBottom: `${activeSectionStyle.paddingBottom}px`,
-                  borderRadius: `${activeSectionStyle.borderRadius || 0}px`
-                }}>
-                  <p className="text-[10px] uppercase tracking-widest preview-font-secondary" style={{ color: activeSectionStyle.textColor || '#ffffff' }}>
-                    {activeSection.content.subtitle || 'Intro Showcase'}
-                  </p>
-                  <h1 className="text-2xl tracking-wider font-bold uppercase preview-font-section" style={{ color: activeSectionStyle.textColor || '#D4AF37' }}>
-                    {activeSection.content.title || 'OUR MOVIE INTRO'}
-                  </h1>
-                  <span className="text-[10px] bg-black/40 text-slate-400 px-3 py-1 rounded-full border border-slate-800">
-                    🎬 Video Timeline: 00:03 / 00:08
-                  </span>
-                </div>
-
-                <div className="absolute bottom-4 left-4 z-10 text-[9px] text-white/40">Previewing Cinematic Intro Video Stage</div>
-              </div>
-            )}
-
-            {/* PREVIEW 3: DETAILS CARD SCROLL SECTION */}
-            {activeSectionId === 'details-section' && (
-              <div className="w-full h-full flex flex-col overflow-y-auto px-4 py-8" style={{
-                backgroundColor: activeSectionStyle.bgColor || '#0b0b0f',
-                paddingTop: `${activeSectionStyle.paddingTop}px`,
-                paddingBottom: `${activeSectionStyle.paddingBottom}px`
-              }}>
-                <div className="w-full max-w-sm mx-auto space-y-6 text-center border border-slate-800/80 p-6 rounded-2xl bg-slate-900/40 backdrop-blur-md" style={{
-                  borderRadius: `${activeSectionStyle.borderRadius || 12}px`,
-                  boxShadow: activeSectionStyle.boxShadow ? '0 10px 30px rgba(0,0,0,0.5)' : 'none'
-                }}>
-                  <span className="text-[9px] uppercase tracking-[0.3em] font-semibold text-rose-400 preview-font-secondary">Celebrate With Us</span>
-                  <h2 className="text-2xl font-bold font-serif leading-snug preview-font-section" style={{ color: activeSectionStyle.textColor || '#ffffff' }}>
-                    Wedding Invitation
-                  </h2>
-                  <div className="h-0.5 w-12 mx-auto bg-rose-500/50"></div>
-                  
-                  <div className="space-y-4 text-xs font-light tracking-wide leading-relaxed">
-                    <p className="preview-font-secondary" style={{ color: activeSectionStyle.textColor || '#ffffff' }}>
-                      We joyfully request the pleasure of your company at the wedding ceremony of
-                    </p>
-                    
-                    <div className="py-2">
-                      <div className="text-lg font-bold font-serif preview-font-section" style={{ color: builderConfig.global.accentColor }}>
-                        {form.partner1_name || 'Kamal'}
-                      </div>
-                      <div className="text-xs text-slate-500 my-1 font-serif">&amp;</div>
-                      <div className="text-lg font-bold font-serif preview-font-section" style={{ color: builderConfig.global.accentColor }}>
-                        {form.partner2_name || 'Nisha'}
-                      </div>
-                    </div>
-
-                    <div className="border-t border-b border-slate-800/60 py-3 space-y-1">
-                      <div className="font-bold uppercase tracking-widest preview-font-secondary text-rose-400 text-[10px]">
-                        {form.wedding_date ? new Date(form.wedding_date).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) : 'Date not set'}
-                      </div>
-                      <div className="text-slate-400 preview-font-secondary text-[10px]">
-                        Time: {form.wedding_time}
-                      </div>
-                    </div>
-
-                    <div className="space-y-0.5">
-                      <div className="font-bold text-slate-300 preview-font-secondary text-[11px]">{form.venue_name || 'Venue'}</div>
-                      <div className="text-slate-500 text-[10px] preview-font-secondary">{form.venue_address || 'Address'}</div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="text-center text-[10px] text-slate-500 mt-6">Scrollable details card layout</div>
-              </div>
-            )}
-
-            {/* PREVIEW 4: OTHER SECTIONS */}
-            {!['open-animation', 'intro-animation', 'details-section'].includes(activeSectionId) && (
-              <div className="w-full h-full flex flex-col items-center justify-center p-6 text-center" style={{
-                backgroundColor: activeSectionStyle.bgColor || '#0b0b0f',
-                color: activeSectionStyle.textColor || '#ffffff',
-                paddingTop: `${activeSectionStyle.paddingTop}px`,
-                paddingBottom: `${activeSectionStyle.paddingBottom}px`
-              }}>
-                <div className="max-w-sm mx-auto space-y-4 p-6 border border-slate-850 rounded-xl bg-slate-900/30">
-                  <span className="text-lg">📦</span>
-                  <h2 className="text-lg font-bold font-serif preview-font-section">{activeSection.title}</h2>
-                  <p className="text-xs text-slate-400 leading-relaxed preview-font-secondary">
-                    Custom configuration for the {activeSection.type.toUpperCase()} block. Customize properties in the settings sidebar on the right.
-                  </p>
-                </div>
-              </div>
+            ) : (
+              renderSectionPreview(activeSectionId, false)
             )}
           </div>
         </div>
