@@ -38,6 +38,8 @@ export interface SectionStyles {
   fontFamily?: string
   fontWeight?: string
   textColor?: string
+  titleColor?: string
+  subtitleColor?: string
   paddingTop?: number // in px
   paddingBottom?: number // in px
   borderRadius?: number // in px
@@ -69,6 +71,9 @@ export interface BuilderConfig {
     primaryColor: string
     accentColor: string
     bgMusicUrl?: string
+    bgType?: 'color' | 'image'
+    bgUrl?: string
+    bgColor?: string
   }
   sections: SectionConfig[]
 }

@@ -19,7 +19,10 @@ const DEFAULT_BUILDER_CONFIG: BuilderConfig = {
     secondaryFont: 'Montserrat',
     primaryColor: '#ffffff',
     accentColor: '#D4AF37',
-    bgMusicUrl: ''
+    bgMusicUrl: '',
+    bgType: 'color',
+    bgUrl: '',
+    bgColor: '#0b0b0f'
   },
   sections: [
     {
@@ -557,7 +560,7 @@ export default function BuilderPage() {
   }
 
   // Upload handler updated for builder section backgrounds
-  const handleUploadBg = async (e: React.ChangeEvent<HTMLInputElement>, fieldName: 'cover' | 'music' | 'video' | 'gallery' | 'groom_photo' | 'bride_photo' | 'registry_qr' | 'bg_url') => {
+  const handleUploadBg = async (e: React.ChangeEvent<HTMLInputElement>, fieldName: 'cover' | 'music' | 'video' | 'gallery' | 'groom_photo' | 'bride_photo' | 'registry_qr' | 'bg_url' | 'global_bg_url') => {
     const files = e.target.files
     if (!files || files.length === 0) return
 
@@ -570,7 +573,9 @@ export default function BuilderPage() {
       return
     }
 
-    const type = fieldName === 'bg_url' ? (activeSection.type === 'open' ? 'cover' : 'video') : fieldName
+    const type = fieldName === 'bg_url' 
+      ? (activeSection.type === 'open' ? 'cover' : 'video') 
+      : (fieldName === 'global_bg_url' ? 'global_bg' : fieldName)
 
     const uploadSingle = async (file: File) => {
       const fileExt = file.name.split('.').pop()
@@ -636,6 +641,8 @@ export default function BuilderPage() {
         const url = await uploadSingle(file)
         if (fieldName === 'bg_url') {
           handleUpdateSectionStyle('bgUrl', url)
+        } else if (fieldName === 'global_bg_url') {
+          handleUpdateGlobalStyle('bgUrl', url)
         } else {
           setForm(prev => ({
             ...prev,
@@ -931,7 +938,9 @@ export default function BuilderPage() {
           isFullPage && activeSectionId === sectionId ? 'outline outline-2 outline-rose-500 z-10' : ''
         }`}
         style={{
-          backgroundColor: secStyle.bgColor || (isFooter ? '#080808' : '#0b0b0f'),
+          backgroundColor: (builderConfig.global.bgType === 'image' || builderConfig.global.bgColor) && !['open', 'intro'].includes(sec.type)
+            ? 'transparent'
+            : secStyle.bgColor || (isFooter ? '#080808' : '#0b0b0f'),
           color: secStyle.textColor || (isFooter ? '#a3a3a3' : '#ffffff'),
           paddingTop: isFullPage ? `${Math.max((secStyle.paddingTop ?? 80) / 2, 40)}px` : `${secStyle.paddingTop ?? 80}px`,
           paddingBottom: isFullPage ? `${Math.max((secStyle.paddingBottom ?? 80) / 2, 40)}px` : `${secStyle.paddingBottom ?? 80}px`,
@@ -978,12 +987,12 @@ export default function BuilderPage() {
                   {sec.content.title || 'Together with their families'}
                 </p>
                 <h1 className="text-3xl font-bold tracking-wide leading-relaxed" style={{ 
-                  color: secStyle.textColor || '#D4AF37',
+                  color: secStyle.titleColor || secStyle.textColor || '#D4AF37',
                   fontFamily: `'${secStyle.fontFamily || builderConfig.global.primaryFont}', serif` 
                 }}>
                   {form.partner1_name || 'Groom'} <span className="text-xl">&amp;</span> {form.partner2_name || 'Bride'}
                 </h1>
-                <p className="text-[10px] mt-3 tracking-widest leading-relaxed opacity-75 preview-font-secondary" style={{ color: secStyle.textColor || '#ffffff' }}>
+                <p className="text-[10px] mt-3 tracking-widest leading-relaxed opacity-75 preview-font-secondary" style={{ color: secStyle.subtitleColor || secStyle.textColor || '#ffffff' }}>
                   {sec.content.subtitle || 'Invite you to celebrate their wedding'}
                 </p>
                 <div className="h-0.5 w-16 mx-auto bg-[#D4AF37]/40 my-4"></div>
@@ -998,11 +1007,11 @@ export default function BuilderPage() {
             <div className="space-y-2 pointer-events-none p-4" style={{
               borderRadius: `${secStyle.borderRadius || 0}px`
             }}>
-              <p className="text-[10px] uppercase tracking-widest preview-font-secondary" style={{ color: secStyle.textColor || '#ffffff' }}>
+              <p className="text-[10px] uppercase tracking-widest preview-font-secondary" style={{ color: secStyle.subtitleColor || secStyle.textColor || '#ffffff' }}>
                 {sec.content.subtitle || 'Intro Showcase'}
               </p>
               <h1 className="text-2xl tracking-wider font-bold uppercase" style={{ 
-                color: secStyle.textColor || '#D4AF37',
+                color: secStyle.titleColor || secStyle.textColor || '#D4AF37',
                 fontFamily: `'${secStyle.fontFamily || builderConfig.global.primaryFont}', serif`
               }}>
                 {sec.content.title || 'OUR MOVIE INTRO'}
@@ -1018,9 +1027,9 @@ export default function BuilderPage() {
               borderRadius: `${secStyle.borderRadius || 12}px`,
               boxShadow: secStyle.boxShadow ? '0 10px 30px rgba(0,0,0,0.5)' : 'none'
             }}>
-              <span className="text-[9px] uppercase tracking-[0.3em] font-semibold text-rose-400 preview-font-secondary">Celebrate With Us</span>
+              <span className="text-[9px] uppercase tracking-[0.3em] font-semibold preview-font-secondary" style={{ color: secStyle.subtitleColor || secStyle.textColor || '#rose-400' }}>Celebrate With Us</span>
               <h2 className="text-2xl font-bold leading-snug" style={{ 
-                color: secStyle.textColor || '#ffffff',
+                color: secStyle.titleColor || secStyle.textColor || '#ffffff',
                 fontFamily: `'${secStyle.fontFamily || builderConfig.global.primaryFont}', serif`
               }}>
                 {sec.content.title || 'Wedding Invitation'}
@@ -1034,14 +1043,14 @@ export default function BuilderPage() {
                 
                 <div className="py-2">
                   <div className="text-lg font-bold" style={{ 
-                    color: builderConfig.global.accentColor,
+                    color: secStyle.titleColor || builderConfig.global.accentColor || '#D4AF37',
                     fontFamily: `'${secStyle.fontFamily || builderConfig.global.primaryFont}', serif`
                   }}>
                     {form.partner1_name || 'Kamal'}
                   </div>
                   <div className="text-xs text-slate-500 my-1 font-serif">&amp;</div>
                   <div className="text-lg font-bold" style={{ 
-                    color: builderConfig.global.accentColor,
+                    color: secStyle.titleColor || builderConfig.global.accentColor || '#D4AF37',
                     fontFamily: `'${secStyle.fontFamily || builderConfig.global.primaryFont}', serif`
                   }}>
                     {form.partner2_name || 'Nisha'}
@@ -1049,17 +1058,17 @@ export default function BuilderPage() {
                 </div>
 
                 <div className="border-t border-b border-slate-800/60 py-3 space-y-1">
-                  <div className="font-bold uppercase tracking-widest preview-font-secondary text-rose-400 text-[10px]">
+                  <div className="font-bold uppercase tracking-widest preview-font-secondary text-[10px]" style={{ color: secStyle.subtitleColor || secStyle.textColor || '#f43f5e' }}>
                     {form.wedding_date ? new Date(form.wedding_date).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) : 'Date not set'}
                   </div>
-                  <div className="text-slate-400 preview-font-secondary text-[10px]">
+                  <div className="text-slate-400 preview-font-secondary text-[10px]" style={{ color: secStyle.textColor || '#94a3b8' }}>
                     Time: {form.wedding_time}
                   </div>
                 </div>
 
                 <div className="space-y-0.5">
-                  <div className="font-bold text-slate-300 preview-font-secondary text-[11px]">{form.venue_name || 'Venue'}</div>
-                  <div className="text-slate-500 text-[10px] preview-font-secondary">{form.venue_address || 'Address'}</div>
+                  <div className="font-bold text-slate-300 preview-font-secondary text-[11px]" style={{ color: secStyle.textColor || '#cbd5e1' }}>{form.venue_name || 'Venue'}</div>
+                  <div className="text-slate-500 text-[10px] preview-font-secondary" style={{ color: secStyle.textColor || '#64748b' }}>{form.venue_address || 'Address'}</div>
                 </div>
               </div>
             </div>
@@ -1070,11 +1079,11 @@ export default function BuilderPage() {
               borderRadius: `${secStyle.borderRadius || 12}px`,
               boxShadow: secStyle.boxShadow ? '0 10px 30px rgba(0,0,0,0.5)' : 'none'
             }}>
-              <span className="text-[9px] uppercase tracking-[0.35em] mb-1 preview-font-secondary" style={{ color: builderConfig.global.accentColor || '#D4AF37' }}>
+              <span className="text-[9px] uppercase tracking-[0.35em] mb-1 preview-font-secondary" style={{ color: secStyle.subtitleColor || secStyle.textColor || builderConfig.global.accentColor || '#D4AF37' }}>
                 {sec.content.subtitle || 'Our Moments'}
               </span>
               <h2 className="text-2xl font-bold leading-snug" style={{ 
-                color: secStyle.textColor || '#ffffff',
+                color: secStyle.titleColor || secStyle.textColor || '#ffffff',
                 fontFamily: `'${secStyle.fontFamily || builderConfig.global.primaryFont}', serif`
               }}>
                 {sec.content.title || 'Photo Gallery'}
@@ -1107,11 +1116,11 @@ export default function BuilderPage() {
               boxShadow: secStyle.boxShadow ? '0 10px 30px rgba(0,0,0,0.5)' : 'none'
             }}>
               <div className="text-center">
-                <span className="text-[9px] uppercase tracking-[0.35em] mb-1 preview-font-secondary" style={{ color: builderConfig.global.accentColor || '#D4AF37' }}>
+                <span className="text-[9px] uppercase tracking-[0.35em] mb-1 preview-font-secondary" style={{ color: secStyle.subtitleColor || secStyle.textColor || builderConfig.global.accentColor || '#D4AF37' }}>
                   {sec.content.subtitle || 'Join Our Celebration'}
                 </span>
                 <h2 className="text-2xl font-bold leading-snug" style={{ 
-                  color: secStyle.textColor || '#ffffff',
+                  color: secStyle.titleColor || secStyle.textColor || '#ffffff',
                   fontFamily: `'${secStyle.fontFamily || builderConfig.global.primaryFont}', serif`
                 }}>
                   {sec.content.title || 'Kindly Respond'}
@@ -1147,15 +1156,15 @@ export default function BuilderPage() {
             }}>
               <span className="text-xl">💍</span>
               <h2 className="text-2xl font-bold leading-snug" style={{ 
-                color: secStyle.textColor || '#ffffff',
+                color: secStyle.titleColor || secStyle.textColor || '#ffffff',
                 fontFamily: `'${secStyle.fontFamily || builderConfig.global.primaryFont}', serif`
               }}>
                 {sec.content.title || 'Thank You'}
               </h2>
-              <p className="text-xs text-slate-400 leading-relaxed preview-font-secondary">
+              <p className="text-xs text-slate-400 leading-relaxed preview-font-secondary" style={{ color: secStyle.textColor || '#94a3b8' }}>
                 {sec.content.subtitle || 'We are excited to share our special day with you!'}
               </p>
-              <p className="text-[10px] tracking-widest uppercase text-rose-400 preview-font-secondary mt-2">
+              <p className="text-[10px] tracking-widest uppercase preview-font-secondary mt-2" style={{ color: secStyle.subtitleColor || secStyle.textColor || '#f43f5e' }}>
                 {form.partner1_name || 'Groom'} &amp; {form.partner2_name || 'Bride'}
               </p>
             </div>
@@ -1389,6 +1398,72 @@ export default function BuilderPage() {
                   >
                     🎵 Upload Background Audio
                   </Button>
+                )}
+              </div>
+
+              <h3 className="text-xs font-bold text-slate-300 border-t border-slate-800/80 pt-3">Global Page Background</h3>
+              <div className="space-y-3">
+                <Select
+                  label="Background Type"
+                  value={builderConfig.global.bgType || 'color'}
+                  onChange={e => handleUpdateGlobalStyle('bgType', e.target.value)}
+                  options={[
+                    { value: 'color', label: 'Solid Color' },
+                    { value: 'image', label: 'Background Image' }
+                  ]}
+                />
+
+                {builderConfig.global.bgType === 'image' ? (
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider block">Background Image</label>
+                    <input
+                      type="file"
+                      id="global-bg-upload"
+                      accept="image/*"
+                      onChange={e => handleUploadBg(e, 'global_bg_url')}
+                      className="hidden"
+                    />
+                    {builderConfig.global.bgUrl ? (
+                      <div className="flex items-center justify-between bg-slate-900 border border-slate-800/60 p-2.5 rounded-xl">
+                        <div className="truncate text-xs text-rose-300 font-mono w-[80%]">🖼️ Image Configured</div>
+                        <button
+                          onClick={() => handleUpdateGlobalStyle('bgUrl', '')}
+                          className="text-xs hover:text-red-400 p-1 cursor-pointer"
+                        >
+                          🗑️
+                        </button>
+                      </div>
+                    ) : (
+                      <Button
+                        variant="secondary"
+                        className="w-full text-xs py-2"
+                        onClick={() => document.getElementById('global-bg-upload')?.click()}
+                        loading={!!uploading.global_bg}
+                      >
+                        🖼️ Upload Background Image
+                      </Button>
+                    )}
+                    
+                    <Input
+                      label="Or Image URL"
+                      placeholder="https://example.com/image.jpg"
+                      value={builderConfig.global.bgUrl || ''}
+                      onChange={e => handleUpdateGlobalStyle('bgUrl', e.target.value)}
+                    />
+                  </div>
+                ) : (
+                  <div>
+                    <label className="text-[10px] font-medium text-slate-400 block mb-1">Background Color</label>
+                    <div className="flex items-center gap-2 bg-[#12161e] border border-slate-800 p-2 rounded-xl">
+                      <input
+                        type="color"
+                        value={builderConfig.global.bgColor || '#0b0b0f'}
+                        onChange={e => handleUpdateGlobalStyle('bgColor', e.target.value)}
+                        className="w-8 h-6 bg-transparent border-0 cursor-pointer"
+                      />
+                      <span className="text-[10px] font-mono">{builderConfig.global.bgColor || '#0b0b0f'}</span>
+                    </div>
+                  </div>
                 )}
               </div>
             </div>
@@ -1823,9 +1898,15 @@ export default function BuilderPage() {
         {/* Viewport container */}
         <div className="flex-1 flex items-center justify-center p-6 overflow-y-auto h-full">
           <div
-            className={`bg-[#0b0b0f] border border-slate-800 rounded-2xl overflow-hidden shadow-2xl relative transition-all duration-300 flex flex-col h-[70vh] ${
+            className={`border border-slate-800 rounded-2xl overflow-hidden shadow-2xl relative transition-all duration-300 flex flex-col h-[70vh] ${
               viewport === 'desktop' ? 'w-full max-w-[800px]' : viewport === 'tablet' ? 'w-[600px]' : 'w-[360px]'
             }`}
+            style={{
+              backgroundColor: builderConfig.global.bgColor || '#0b0b0f',
+              backgroundImage: builderConfig.global.bgType === 'image' && builderConfig.global.bgUrl ? `url(${builderConfig.global.bgUrl})` : undefined,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+            }}
           >
             {/* Live customizer style definitions inserted locally in preview */}
             <style jsx global>{`
@@ -2132,7 +2213,33 @@ export default function BuilderPage() {
                 />
 
                 <div>
-                  <label className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider block mb-1">Text Color Override</label>
+                  <label className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider block mb-1">Title Color Override</label>
+                  <div className="flex items-center gap-2 bg-[#12161e] border border-slate-800 p-2 rounded-xl">
+                    <input
+                      type="color"
+                      value={activeSectionStyle.titleColor || activeSectionStyle.textColor || '#ffffff'}
+                      onChange={e => handleUpdateSectionStyle('titleColor', e.target.value)}
+                      className="w-8 h-6 bg-transparent border-0 cursor-pointer"
+                    />
+                    <span className="text-xs font-mono">{activeSectionStyle.titleColor || activeSectionStyle.textColor || '#ffffff'}</span>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider block mb-1">Subtitle Color Override</label>
+                  <div className="flex items-center gap-2 bg-[#12161e] border border-slate-800 p-2 rounded-xl">
+                    <input
+                      type="color"
+                      value={activeSectionStyle.subtitleColor || activeSectionStyle.textColor || '#ffffff'}
+                      onChange={e => handleUpdateSectionStyle('subtitleColor', e.target.value)}
+                      className="w-8 h-6 bg-transparent border-0 cursor-pointer"
+                    />
+                    <span className="text-xs font-mono">{activeSectionStyle.subtitleColor || activeSectionStyle.textColor || '#ffffff'}</span>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider block mb-1">Body Text Color Override</label>
                   <div className="flex items-center gap-2 bg-[#12161e] border border-slate-800 p-2 rounded-xl">
                     <input
                       type="color"

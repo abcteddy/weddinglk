@@ -288,7 +288,7 @@ export function InvitationPageClient({ invitation, guest, initialGuestUploads = 
     pageBgStyle: detailsConfig?.styles.bgColor || '#0b0b0f',
     cardBgStyle: 'rgba(15, 23, 42, 0.45)',
     cardBorderColor: detailsConfig?.styles.textColor ? `${detailsConfig.styles.textColor}22` : 'rgba(255,255,255,0.08)',
-    textPrimary: detailsConfig?.styles.textColor || builderConfig.global.primaryColor || '#ffffff',
+    textPrimary: detailsConfig?.styles.titleColor || detailsConfig?.styles.textColor || builderConfig.global.primaryColor || '#ffffff',
     textSecondary: detailsConfig?.styles.textColor || builderConfig.global.primaryColor || '#ffffff',
     timerBg: 'rgba(0, 0, 0, 0.45)',
     timerBorder: 'rgba(255, 255, 255, 0.05)',
@@ -298,7 +298,13 @@ export function InvitationPageClient({ invitation, guest, initialGuestUploads = 
   return (
     <div
       className={`min-h-screen relative overflow-x-hidden ${pageTheme.pageBgClass} ${pageTheme.isLight ? (invitation.template_id === 'royalGardenGate' ? 'theme-light-garden' : 'theme-light-rose') : ''}`}
-      style={{ backgroundColor: pageTheme.pageBgStyle }}
+      style={{
+        backgroundColor: builderConfig?.global.bgColor || pageTheme.pageBgStyle,
+        backgroundImage: builderConfig && builderConfig.global.bgType === 'image' && builderConfig.global.bgUrl ? `url(${builderConfig.global.bgUrl})` : undefined,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundAttachment: 'fixed',
+      }}
     >
       {builderConfig && <GoogleFontLoader fonts={activeFonts} />}
       
@@ -445,14 +451,14 @@ export function InvitationPageClient({ invitation, guest, initialGuestUploads = 
             </div>
             <p
               className="text-[10px] uppercase tracking-[0.55em] mb-4 font-light custom-font-secondary"
-              style={{ color: template.accentColor }}
+              style={{ color: detailsConfig?.styles.subtitleColor || detailsConfig?.styles.textColor || template.accentColor }}
             >
               {detailsConfig?.content.subtitle || 'Together With Their Families'}
             </p>
             <h1
               className="text-4xl md:text-6xl lg:text-7xl font-bold leading-tight custom-font-details"
               style={{
-                color: pageTheme.textPrimary,
+                color: detailsConfig?.styles.titleColor || detailsConfig?.styles.textColor || pageTheme.textPrimary,
                 textShadow: pageTheme.isLight
                   ? 'none'
                   : `0 0 80px ${template.accentColor}30, 0 2px 10px rgba(0,0,0,0.5)`,
@@ -462,20 +468,20 @@ export function InvitationPageClient({ invitation, guest, initialGuestUploads = 
             </h1>
             <div
               className="h-px w-24 mx-auto mt-6"
-              style={{ background: `linear-gradient(to right, transparent, ${template.accentColor}, transparent)` }}
+              style={{ background: `linear-gradient(to right, transparent, ${detailsConfig?.styles.subtitleColor || template.accentColor}, transparent)` }}
             />
             <p
               className="mt-4 text-sm font-light tracking-widest uppercase custom-font-secondary"
-              style={{ color: pageTheme.textSecondary, opacity: 0.7 }}
+              style={{ color: detailsConfig?.styles.textColor || pageTheme.textSecondary, opacity: 0.7 }}
             >
               {detailsConfig?.content.title || 'Wedding Invitation'}
             </p>
             {/* Scroll cue */}
             <div className="mt-12 flex flex-col items-center gap-2 animate-bounce">
-              <p className="text-[10px] uppercase tracking-widest custom-font-secondary" style={{ color: template.accentColor, opacity: 0.6 }}>
+              <p className="text-[10px] uppercase tracking-widest custom-font-secondary" style={{ color: detailsConfig?.styles.subtitleColor || detailsConfig?.styles.textColor || template.accentColor, opacity: 0.6 }}>
                 Scroll to explore
               </p>
-              <svg className="w-4 h-4" style={{ color: template.accentColor }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg className="w-4 h-4" style={{ color: detailsConfig?.styles.subtitleColor || detailsConfig?.styles.textColor || template.accentColor }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
               </svg>
             </div>
@@ -511,7 +517,11 @@ export function InvitationPageClient({ invitation, guest, initialGuestUploads = 
       <div
         className="relative px-6"
         style={{
-          backgroundColor: !builderConfig ? undefined : (detailsConfig?.styles.bgColor || '#0b0b0f'),
+          backgroundColor: !builderConfig 
+            ? undefined 
+            : ((builderConfig.global.bgType === 'image' || builderConfig.global.bgColor) 
+                ? 'transparent' 
+                : (detailsConfig?.styles.bgColor || '#0b0b0f')),
           backgroundImage: builderConfig && detailsConfig?.styles.bgType === 'image' && detailsConfig.styles.bgUrl ? `url(${detailsConfig.styles.bgUrl})` : undefined,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
@@ -590,8 +600,8 @@ export function InvitationPageClient({ invitation, guest, initialGuestUploads = 
               }}
             >
               <div className="text-center">
-                <p className="text-xs uppercase tracking-[0.35em] mb-1" style={{ color: template.accentColor }}>Meet the Couple</p>
-                <h3 className="text-2xl font-serif text-white font-medium">Groom & Bride</h3>
+                <p className="text-xs uppercase tracking-[0.35em] mb-1" style={{ color: detailsConfig?.styles.subtitleColor || template.accentColor }}>Meet the Couple</p>
+                <h3 className="text-2xl font-serif font-medium" style={{ color: detailsConfig?.styles.titleColor || '#ffffff' }}>Groom & Bride</h3>
                 <div className="h-px w-16 bg-white/20 mx-auto mt-3" />
               </div>
 
@@ -610,14 +620,14 @@ export function InvitationPageClient({ invitation, guest, initialGuestUploads = 
                       </div>
                     )}
                     <div>
-                      <h4 className="font-serif text-lg text-white font-bold">{invitation.groom_full_name}</h4>
-                      <p className="text-xs opacity-75 mt-0.5" style={{ color: template.accentColor }}>The Groom</p>
+                      <h4 className="font-serif text-lg font-bold" style={{ color: detailsConfig?.styles.titleColor || '#ffffff' }}>{invitation.groom_full_name}</h4>
+                      <p className="text-xs opacity-75 mt-0.5" style={{ color: detailsConfig?.styles.subtitleColor || template.accentColor }}>The Groom</p>
                       {invitation.groom_parents && (
-                        <p className="text-[11px] text-parchment-500 mt-1 italic">Son of {invitation.groom_parents}</p>
+                        <p className="text-[11px] mt-1 italic" style={{ color: detailsConfig?.styles.textColor || '#ead8b8', opacity: 0.8 }}>Son of {invitation.groom_parents}</p>
                       )}
                     </div>
                     {invitation.groom_bio && (
-                      <p className="text-xs text-parchment-400 leading-relaxed font-light line-clamp-4">{invitation.groom_bio}</p>
+                      <p className="text-xs leading-relaxed font-light line-clamp-4" style={{ color: detailsConfig?.styles.textColor || '#ead8b8' }}>{invitation.groom_bio}</p>
                     )}
                   </div>
                 )}
@@ -636,14 +646,14 @@ export function InvitationPageClient({ invitation, guest, initialGuestUploads = 
                       </div>
                     )}
                     <div>
-                      <h4 className="font-serif text-lg text-white font-bold">{invitation.bride_full_name}</h4>
-                      <p className="text-xs opacity-75 mt-0.5" style={{ color: template.accentColor }}>The Bride</p>
+                      <h4 className="font-serif text-lg font-bold" style={{ color: detailsConfig?.styles.titleColor || '#ffffff' }}>{invitation.bride_full_name}</h4>
+                      <p className="text-xs opacity-75 mt-0.5" style={{ color: detailsConfig?.styles.subtitleColor || template.accentColor }}>The Bride</p>
                       {invitation.bride_parents && (
-                        <p className="text-[11px] text-parchment-500 mt-1 italic">Daughter of {invitation.bride_parents}</p>
+                        <p className="text-[11px] mt-1 italic" style={{ color: detailsConfig?.styles.textColor || '#ead8b8', opacity: 0.8 }}>Daughter of {invitation.bride_parents}</p>
                       )}
                     </div>
                     {invitation.bride_bio && (
-                      <p className="text-xs text-parchment-400 leading-relaxed font-light line-clamp-4">{invitation.bride_bio}</p>
+                      <p className="text-xs leading-relaxed font-light line-clamp-4" style={{ color: detailsConfig?.styles.textColor || '#ead8b8' }}>{invitation.bride_bio}</p>
                     )}
                   </div>
                 )}
@@ -664,8 +674,8 @@ export function InvitationPageClient({ invitation, guest, initialGuestUploads = 
               }}
             >
               <div className="text-center">
-                <p className="text-xs uppercase tracking-[0.35em] mb-1" style={{ color: template.accentColor }}>Our Journey</p>
-                <h3 className="text-2xl font-serif text-white font-medium">Love Story</h3>
+                <p className="text-xs uppercase tracking-[0.35em] mb-1" style={{ color: detailsConfig?.styles.subtitleColor || template.accentColor }}>Our Journey</p>
+                <h3 className="text-2xl font-serif font-medium" style={{ color: detailsConfig?.styles.titleColor || '#ffffff' }}>Love Story</h3>
                 <div className="h-px w-16 bg-white/20 mx-auto mt-3" />
               </div>
 
@@ -675,18 +685,18 @@ export function InvitationPageClient({ invitation, guest, initialGuestUploads = 
                     {/* Timeline bullet dot */}
                     <div
                       className="absolute -left-[31px] top-1.5 w-4 h-4 rounded-full border-2 bg-black transition-all group-hover:scale-125"
-                      style={{ borderColor: template.accentColor }}
+                      style={{ borderColor: detailsConfig?.styles.subtitleColor || template.accentColor }}
                     />
                     <div className="space-y-2">
                       <div className="flex flex-wrap items-baseline gap-2">
-                        <h4 className="font-serif text-base font-bold text-white">{event.title}</h4>
+                        <h4 className="font-serif text-base font-bold" style={{ color: detailsConfig?.styles.titleColor || '#ffffff' }}>{event.title}</h4>
                         {event.date && (
-                          <span className="text-[10px] uppercase font-mono px-2 py-0.5 bg-white/5 border border-white/10 text-parchment-400 rounded-sm">
+                          <span className="text-[10px] uppercase font-mono px-2 py-0.5 bg-white/5 border border-white/10 rounded-sm" style={{ color: detailsConfig?.styles.subtitleColor || '#ead8b8' }}>
                             {event.date}
                           </span>
                         )}
                       </div>
-                      <p className="text-xs text-parchment-400 font-light leading-relaxed">{event.description}</p>
+                      <p className="text-xs font-light leading-relaxed" style={{ color: detailsConfig?.styles.textColor || '#ead8b8' }}>{event.description}</p>
                       {event.photo_url && (
                         <div className="w-full max-w-[240px] aspect-[4/3] rounded-sm overflow-hidden border border-white/10 mt-2">
                           {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -712,39 +722,39 @@ export function InvitationPageClient({ invitation, guest, initialGuestUploads = 
             }}
           >
             <div className="text-center">
-              <p className="text-xs uppercase tracking-[0.35em] mb-1" style={{ color: template.accentColor }}>Join Us For</p>
-              <h3 className="text-2xl font-serif text-white font-medium">Event Information</h3>
+              <p className="text-xs uppercase tracking-[0.35em] mb-1" style={{ color: detailsConfig?.styles.subtitleColor || template.accentColor }}>Join Us For</p>
+              <h3 className="text-2xl font-serif font-medium" style={{ color: detailsConfig?.styles.titleColor || '#ffffff' }}>Event Information</h3>
               <div className="h-px w-16 bg-white/20 mx-auto mt-3" />
             </div>
 
             <div className="grid md:grid-cols-2 gap-8 text-sm text-parchment-400">
               <div className="space-y-4">
                 <div>
-                  <h4 className="text-white font-medium text-xs uppercase tracking-wider mb-1 opacity-70">Date & Time</h4>
-                  <p className="text-base text-white">{formatDate(invitation.wedding_date)}</p>
-                  <p className="text-sm">Ceremony: <span className="text-white">{invitation.wedding_time}</span></p>
+                  <h4 className="font-medium text-xs uppercase tracking-wider mb-1 opacity-70" style={{ color: detailsConfig?.styles.titleColor || '#ffffff' }}>Date & Time</h4>
+                  <p className="text-base font-semibold" style={{ color: detailsConfig?.styles.textColor || '#ffffff' }}>{formatDate(invitation.wedding_date)}</p>
+                  <p className="text-sm" style={{ color: detailsConfig?.styles.textColor || '#ead8b8' }}>Ceremony: <span style={{ color: detailsConfig?.styles.titleColor || '#ffffff' }}>{invitation.wedding_time}</span></p>
                   {invitation.reception_time && (
-                    <p className="text-sm">Reception: <span className="text-white">{invitation.reception_time}</span></p>
+                    <p className="text-sm" style={{ color: detailsConfig?.styles.textColor || '#ead8b8' }}>Reception: <span style={{ color: detailsConfig?.styles.titleColor || '#ffffff' }}>{invitation.reception_time}</span></p>
                   )}
                 </div>
 
                 <div>
-                  <h4 className="text-white font-medium text-xs uppercase tracking-wider mb-1 opacity-70">Location</h4>
-                  <p className="text-base text-white font-semibold">{invitation.venue_name}</p>
-                  {invitation.venue_address && <p className="text-sm">{invitation.venue_address}</p>}
+                  <h4 className="font-medium text-xs uppercase tracking-wider mb-1 opacity-70" style={{ color: detailsConfig?.styles.titleColor || '#ffffff' }}>Location</h4>
+                  <p className="text-base font-semibold" style={{ color: detailsConfig?.styles.textColor || '#ffffff' }}>{invitation.venue_name}</p>
+                  {invitation.venue_address && <p className="text-sm" style={{ color: detailsConfig?.styles.textColor || '#ead8b8' }}>{invitation.venue_address}</p>}
                 </div>
 
                 {invitation.dress_code && (
                   <div>
-                    <h4 className="text-white font-medium text-xs uppercase tracking-wider mb-1 opacity-70">Dress Code</h4>
-                    <p className="text-sm text-white italic">{invitation.dress_code}</p>
+                    <h4 className="font-medium text-xs uppercase tracking-wider mb-1 opacity-70" style={{ color: detailsConfig?.styles.titleColor || '#ffffff' }}>Dress Code</h4>
+                    <p className="text-sm italic" style={{ color: detailsConfig?.styles.textColor || '#ffffff' }}>{invitation.dress_code}</p>
                   </div>
                 )}
 
                 {invitation.additional_instructions && (
                   <div>
-                    <h4 className="text-white font-medium text-xs uppercase tracking-wider mb-1 opacity-70">Note</h4>
-                    <p className="text-xs leading-relaxed font-light">{invitation.additional_instructions}</p>
+                    <h4 className="font-medium text-xs uppercase tracking-wider mb-1 opacity-70" style={{ color: detailsConfig?.styles.titleColor || '#ffffff' }}>Note</h4>
+                    <p className="text-xs leading-relaxed font-light" style={{ color: detailsConfig?.styles.textColor || '#ead8b8' }}>{invitation.additional_instructions}</p>
                   </div>
                 )}
               </div>
@@ -819,8 +829,8 @@ export function InvitationPageClient({ invitation, guest, initialGuestUploads = 
               }}
             >
               <div className="text-center">
-                <p className="text-xs uppercase tracking-[0.35em] mb-1" style={{ color: template.accentColor }}>Registry</p>
-                <h3 className="text-2xl font-serif text-white font-medium">Gift Registry</h3>
+                <p className="text-xs uppercase tracking-[0.35em] mb-1" style={{ color: detailsConfig?.styles.subtitleColor || template.accentColor }}>Registry</p>
+                <h3 className="text-2xl font-serif font-medium" style={{ color: detailsConfig?.styles.titleColor || '#ffffff' }}>Gift Registry</h3>
                 <div className="h-px w-16 bg-white/20 mx-auto mt-3" />
               </div>
 
@@ -828,9 +838,9 @@ export function InvitationPageClient({ invitation, guest, initialGuestUploads = 
                 <div className="space-y-4">
                   {invitation.registry_bank_details && (
                     <div className="space-y-1">
-                      <h4 className="text-white font-medium text-xs uppercase tracking-wider opacity-75">Bank Account Details</h4>
+                      <h4 className="font-medium text-xs uppercase tracking-wider opacity-75" style={{ color: detailsConfig?.styles.titleColor || '#ffffff' }}>Bank Account Details</h4>
                       <div className="p-3 bg-white/5 border border-white/10 rounded-sm font-mono text-xs text-parchment-300 relative group">
-                        <p className="whitespace-pre-wrap">{invitation.registry_bank_details}</p>
+                        <p className="whitespace-pre-wrap" style={{ color: detailsConfig?.styles.textColor || '#ead8b8' }}>{invitation.registry_bank_details}</p>
                         <button
                           onClick={() => {
                             navigator.clipboard.writeText(invitation.registry_bank_details ?? '')
@@ -846,8 +856,8 @@ export function InvitationPageClient({ invitation, guest, initialGuestUploads = 
 
                   {invitation.registry_preferences && (
                     <div className="space-y-1">
-                      <h4 className="text-white font-medium text-xs uppercase tracking-wider opacity-75">Gift Preferences</h4>
-                      <p className="text-xs text-parchment-400 leading-relaxed font-light">{invitation.registry_preferences}</p>
+                      <h4 className="font-medium text-xs uppercase tracking-wider opacity-75" style={{ color: detailsConfig?.styles.titleColor || '#ffffff' }}>Gift Preferences</h4>
+                      <p className="text-xs leading-relaxed font-light" style={{ color: detailsConfig?.styles.textColor || '#ead8b8' }}>{invitation.registry_preferences}</p>
                     </div>
                   )}
 
@@ -862,12 +872,12 @@ export function InvitationPageClient({ invitation, guest, initialGuestUploads = 
                 {/* QR payment Code */}
                 {invitation.registry_qr_url && (
                   <div className="flex flex-col items-center space-y-2 border border-white/5 bg-black/20 p-4 rounded-sm">
-                    <h4 className="text-white font-medium text-xs uppercase tracking-wider opacity-75">Scan to Gift</h4>
+                    <h4 className="font-medium text-xs uppercase tracking-wider opacity-75" style={{ color: detailsConfig?.styles.titleColor || '#ffffff' }}>Scan to Gift</h4>
                     <div className="w-40 h-40 border border-white/10 rounded-sm overflow-hidden bg-white p-2">
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img src={invitation.registry_qr_url} alt="Registry Payment QR" className="w-full h-full object-contain" />
                     </div>
-                    <p className="text-[10px] text-parchment-500 font-light">Scan using any local bank app</p>
+                    <p className="text-[10px] font-light" style={{ color: detailsConfig?.styles.textColor || '#ead8b8' }}>Scan using any local bank app</p>
                   </div>
                 )}
               </div>
@@ -890,8 +900,8 @@ export function InvitationPageClient({ invitation, guest, initialGuestUploads = 
                 <span className="w-2 h-2 rounded-full bg-red-500" />
                 Live Broadcast
               </div>
-              <h3 className="text-xl font-serif text-white font-medium">Watch Wedding Live</h3>
-              <p className="text-xs text-parchment-500 max-w-sm mx-auto font-light">
+              <h3 className="text-xl font-serif font-medium" style={{ color: detailsConfig?.styles.titleColor || '#ffffff' }}>Watch Wedding Live</h3>
+              <p className="text-xs max-w-sm mx-auto font-light" style={{ color: detailsConfig?.styles.textColor || '#ead8b8' }}>
                 For friends and family who are joining us remotely, watch our live stream ceremony broadcasted via {invitation.live_stream_platform ?? 'YouTube'}.
               </p>
               <a
@@ -918,16 +928,16 @@ export function InvitationPageClient({ invitation, guest, initialGuestUploads = 
               }}
             >
               <div className="text-center">
-                <p className="text-xs uppercase tracking-[0.35em] mb-1" style={{ color: template.accentColor }}>Get in Touch</p>
-                <h3 className="text-2xl font-serif text-white font-medium">Contact Organizers</h3>
+                <p className="text-xs uppercase tracking-[0.35em] mb-1" style={{ color: detailsConfig?.styles.subtitleColor || template.accentColor }}>Get in Touch</p>
+                <h3 className="text-2xl font-serif font-medium" style={{ color: detailsConfig?.styles.titleColor || '#ffffff' }}>Contact Organizers</h3>
                 <div className="h-px w-16 bg-white/20 mx-auto mt-3" />
               </div>
 
               <div className="flex flex-wrap justify-center gap-6 md:gap-12 text-sm text-parchment-400">
                 {invitation.bride_contact && (
                   <div className="text-center">
-                    <p className="text-xs text-white opacity-60">Bride Details</p>
-                    <a href={`tel:${invitation.bride_contact}`} className="text-base text-white hover:underline mt-1 block">
+                    <p className="text-xs opacity-60" style={{ color: detailsConfig?.styles.textColor || '#ffffff' }}>Bride Details</p>
+                    <a href={`tel:${invitation.bride_contact}`} className="text-base hover:underline mt-1 block" style={{ color: detailsConfig?.styles.titleColor || '#ffffff' }}>
                       📞 {invitation.bride_contact}
                     </a>
                   </div>
@@ -935,8 +945,8 @@ export function InvitationPageClient({ invitation, guest, initialGuestUploads = 
 
                 {invitation.groom_contact && (
                   <div className="text-center">
-                    <p className="text-xs text-white opacity-60">Groom Details</p>
-                    <a href={`tel:${invitation.groom_contact}`} className="text-base text-white hover:underline mt-1 block">
+                    <p className="text-xs opacity-60" style={{ color: detailsConfig?.styles.textColor || '#ffffff' }}>Groom Details</p>
+                    <a href={`tel:${invitation.groom_contact}`} className="text-base hover:underline mt-1 block" style={{ color: detailsConfig?.styles.titleColor || '#ffffff' }}>
                       📞 {invitation.groom_contact}
                     </a>
                   </div>
@@ -944,8 +954,8 @@ export function InvitationPageClient({ invitation, guest, initialGuestUploads = 
 
                 {invitation.family_contact && (
                   <div className="text-center">
-                    <p className="text-xs text-white opacity-60">Family Contact</p>
-                    <a href={`tel:${invitation.family_contact}`} className="text-base text-white hover:underline mt-1 block">
+                    <p className="text-xs opacity-60" style={{ color: detailsConfig?.styles.textColor || '#ffffff' }}>Family Contact</p>
+                    <a href={`tel:${invitation.family_contact}`} className="text-base hover:underline mt-1 block" style={{ color: detailsConfig?.styles.titleColor || '#ffffff' }}>
                       📞 {invitation.family_contact}
                     </a>
                   </div>
@@ -967,18 +977,18 @@ export function InvitationPageClient({ invitation, guest, initialGuestUploads = 
               }}
             >
               <div className="text-center">
-                <p className="text-xs uppercase tracking-[0.35em] mb-1" style={{ color: template.accentColor }}>Share Memories</p>
-                <h3 className="text-2xl font-serif text-white font-medium">Guest Photo Wall</h3>
+                <p className="text-xs uppercase tracking-[0.35em] mb-1" style={{ color: detailsConfig?.styles.subtitleColor || template.accentColor }}>Share Memories</p>
+                <h3 className="text-2xl font-serif font-medium" style={{ color: detailsConfig?.styles.titleColor || '#ffffff' }}>Guest Photo Wall</h3>
                 <div className="h-px w-16 bg-white/20 mx-auto mt-3" />
               </div>
 
               {/* Upload Form */}
               <div className="p-6 bg-white/5 border border-white/10 rounded-sm space-y-4">
-                <h4 className="text-white text-xs font-semibold uppercase tracking-wider">Upload a photo or selfie</h4>
+                <h4 className="text-xs font-semibold uppercase tracking-wider" style={{ color: detailsConfig?.styles.titleColor || '#ffffff' }}>Upload a photo or selfie</h4>
                 
                 <div className="space-y-4">
                   <div className="grid grid-cols-1 gap-3">
-                    <label className="text-xs text-parchment-500">Your Name (to display under photo)</label>
+                    <label className="text-xs" style={{ color: detailsConfig?.styles.textColor || '#ead8b8' }}>Your Name (to display under photo)</label>
                     <input
                       type="text"
                       placeholder="e.g. Nimal Perera"
@@ -1008,7 +1018,7 @@ export function InvitationPageClient({ invitation, guest, initialGuestUploads = 
                           ? 'border-white/10 text-parchment-700 cursor-not-allowed'
                           : 'border-white/20 hover:bg-white/10 text-white'
                       }`}
-                      style={!uploading && uploadName.trim() ? { borderColor: template.accentColor, color: template.accentColor } : {}}
+                      style={!uploading && uploadName.trim() ? { borderColor: detailsConfig?.styles.subtitleColor || template.accentColor, color: detailsConfig?.styles.subtitleColor || template.accentColor } : {}}
                     >
                       {uploading ? '⏳ Uploading...' : '📷 Select & Upload Photo'}
                     </label>
@@ -1069,7 +1079,8 @@ export function InvitationPageClient({ invitation, guest, initialGuestUploads = 
       <div className="text-center py-8 px-4 border-t border-white/5">
         <a
           href="/"
-          className="text-xs text-parchment-700 hover:text-parchment-500 transition-colors"
+          className="text-xs hover:text-parchment-500 transition-colors"
+          style={{ color: footerConfig?.styles.textColor || detailsConfig?.styles.textColor || '#ead8b8' }}
         >
           Powered by 💍 WeddingLK · Create your own 3D invitation
         </a>
