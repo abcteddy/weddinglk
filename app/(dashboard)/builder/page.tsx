@@ -6,36 +6,180 @@ import dynamic from 'next/dynamic'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/Button'
 import { Input, Textarea, Select } from '@/components/ui/Input'
-import { TemplateSelector } from '@/components/invitation/TemplateSelector'
 import { TEMPLATES } from '@/lib/three/templates'
 import { generateSlug } from '@/lib/utils/slug'
-import { TemplateId, Invitation, TimelineEvent } from '@/types/invitation'
+import { Invitation, TimelineEvent, BuilderConfig, SectionConfig, TemplateConfig } from '@/types/invitation'
 import { PACKAGES } from '@/lib/payhere'
+import { GoogleFontLoader } from '@/components/ui/GoogleFontLoader'
 
-const InvitationScene = dynamic(
-  () => import('@/components/3d/InvitationScene').then(m => m.InvitationScene),
-  { ssr: false, loading: () => <div className="w-full h-full bg-rose-950/30 animate-pulse rounded-sm" /> },
-)
+const DEFAULT_BUILDER_CONFIG: BuilderConfig = {
+  global: {
+    primaryFont: 'Playfair Display',
+    secondaryFont: 'Montserrat',
+    primaryColor: '#ffffff',
+    accentColor: '#D4AF37',
+    bgMusicUrl: ''
+  },
+  sections: [
+    {
+      id: 'open-animation',
+      type: 'open',
+      title: 'Open Animation',
+      visible: true,
+      styles: {
+        bgType: 'video',
+        bgUrl: '',
+        bgOverlayOpacity: 60,
+        bgOverlayColor: '#000000',
+        fontFamily: 'Great Vibes',
+        textColor: '#D4AF37',
+        paddingTop: 120,
+        paddingBottom: 120,
+        borderRadius: 16,
+        boxShadow: true
+      },
+      content: {
+        title: 'Together with their families',
+        subtitle: 'Invite you to celebrate their wedding',
+        buttonText: 'Click to Open'
+      }
+    },
+    {
+      id: 'intro-animation',
+      type: 'intro',
+      title: 'Intro Animation',
+      visible: true,
+      styles: {
+        bgType: 'video',
+        bgUrl: '',
+        bgOverlayOpacity: 40,
+        bgOverlayColor: '#000000',
+        fontFamily: 'Playfair Display',
+        textColor: '#ffffff',
+        paddingTop: 100,
+        paddingBottom: 100,
+        borderRadius: 0,
+        boxShadow: false
+      },
+      content: {
+        title: 'Our Story',
+        subtitle: 'Moments to Remember'
+      }
+    },
+    {
+      id: 'details-section',
+      type: 'details',
+      title: 'Details Section',
+      visible: true,
+      styles: {
+        bgType: 'color',
+        bgColor: '#0b0b0f',
+        fontFamily: 'Playfair Display',
+        textColor: '#ffffff',
+        paddingTop: 80,
+        paddingBottom: 80,
+        borderRadius: 8,
+        boxShadow: true
+      },
+      content: {
+        title: 'Wedding Details',
+        subtitle: 'The Celebration'
+      }
+    },
+    {
+      id: 'gallery-section',
+      type: 'gallery',
+      title: 'Gallery Section',
+      visible: true,
+      styles: {
+        bgType: 'color',
+        bgColor: '#0b0b0f',
+        fontFamily: 'Playfair Display',
+        textColor: '#ffffff',
+        paddingTop: 80,
+        paddingBottom: 80,
+        borderRadius: 8,
+        boxShadow: true
+      },
+      content: {
+        title: 'Our Moments',
+        subtitle: 'Sweet Memories'
+      }
+    },
+    {
+      id: 'rsvp-section',
+      type: 'rsvp',
+      title: 'RSVP Section',
+      visible: true,
+      styles: {
+        bgType: 'color',
+        bgColor: '#0b0b0f',
+        fontFamily: 'Playfair Display',
+        textColor: '#ffffff',
+        paddingTop: 80,
+        paddingBottom: 80,
+        borderRadius: 8,
+        boxShadow: true
+      },
+      content: {
+        title: 'Kindly Respond',
+        subtitle: 'Join Our Celebration'
+      }
+    },
+    {
+      id: 'footer-section',
+      type: 'footer',
+      title: 'Footer Section',
+      visible: true,
+      styles: {
+        bgType: 'color',
+        bgColor: '#080808',
+        fontFamily: 'Montserrat',
+        textColor: '#a3a3a3',
+        paddingTop: 60,
+        paddingBottom: 60,
+        borderRadius: 0,
+        boxShadow: false
+      },
+      content: {
+        title: 'Thank You',
+        subtitle: 'Made with love'
+      }
+    }
+  ]
+}
 
-type Tab = 'details' | 'profile' | 'events' | 'timeline' | 'registry' | 'guests' | 'template' | 'media' | 'payment'
+type Tab = 'templates' | 'sections' | 'styles' | 'content' | 'photos' | 'animations' | 'settings'
+type RightTab = 'content' | 'style' | 'animation'
+type Viewport = 'desktop' | 'tablet' | 'mobile'
 
-const TABS: { id: Tab; label: string; icon: string; minPackage?: 'basic' | 'premium' | 'luxury' }[] = [
-  { id: 'details', label: 'Details', icon: '📋' },
-  { id: 'profile', label: 'Profiles', icon: '🤵👰' },
-  { id: 'events', label: 'Events & Maps', icon: '📍' },
-  { id: 'timeline', label: 'Timeline', icon: '⏳' },
-  { id: 'registry', label: 'Registry & Live', icon: '🎁', minPackage: 'luxury' },
-  { id: 'guests', label: 'Guest Links', icon: '👥', minPackage: 'premium' },
-  { id: 'template', label: 'Template', icon: '🎨' },
-  { id: 'media', label: 'Media', icon: '🎵' },
-  { id: 'payment', label: 'Activate', icon: '💳' },
+const GOOGLE_FONTS = [
+  'Inter',
+  'Montserrat',
+  'Playfair Display',
+  'Great Vibes',
+  'Alex Brush',
+  'Cinzel',
+  'Rochester',
+  'Cormorant Garamond',
+  'Pinyon Script',
+  'Outfit',
+  'Italianno',
+  'Sacramento',
+  'Parisienne'
 ]
 
 export default function BuilderPage() {
   const router = useRouter()
   const supabase = createClient()
 
-  const [tab, setTab] = useState<Tab>('details')
+  // App layouts states
+  const [activeTab, setActiveTab] = useState<Tab>('templates')
+  const [activeRightTab, setActiveRightTab] = useState<RightTab>('style')
+  const [viewport, setViewport] = useState<Viewport>('desktop')
+  const [activeSectionId, setActiveSectionId] = useState<string>('open-animation')
+
+  // Save loading
   const [loading, setLoading] = useState(false)
   const [saveLoading, setSaveLoading] = useState(false)
   const [freeLoading, setFreeLoading] = useState(false)
@@ -54,6 +198,7 @@ export default function BuilderPage() {
   // Timeline Event Form State
   const [newEvent, setNewEvent] = useState({ title: '', date: '', description: '' })
 
+  // Core Structured Form State
   const [form, setForm] = useState({
     partner1_name: '',
     partner2_name: '',
@@ -62,7 +207,7 @@ export default function BuilderPage() {
     venue_name: '',
     venue_address: '',
     rsvp_deadline: '',
-    template_id: 'classic' as TemplateId,
+    template_id: 'classic',
     custom_message: '',
     couple_phone: '',
     cover_url: '',
@@ -109,6 +254,9 @@ export default function BuilderPage() {
     live_stream_active: false,
   })
 
+  // Builder Config State
+  const [builderConfig, setBuilderConfig] = useState<BuilderConfig>(DEFAULT_BUILDER_CONFIG)
+
   // Load existing invitation
   useEffect(() => {
     async function loadInvitation() {
@@ -131,7 +279,7 @@ export default function BuilderPage() {
           venue_name: data.venue_name ?? '',
           venue_address: data.venue_address ?? '',
           rsvp_deadline: data.rsvp_deadline ?? '',
-          template_id: (data.template_id as TemplateId) ?? 'classic',
+          template_id: data.template_id ?? 'classic',
           custom_message: data.custom_message ?? '',
           couple_phone: (data as any).couple_phone ?? '',
           cover_url: data.cover_url ?? '',
@@ -178,6 +326,39 @@ export default function BuilderPage() {
           live_stream_active: data.live_stream_active ?? false,
         })
         setSelectedPackage((data.package as 'basic' | 'premium' | 'luxury') ?? 'basic')
+
+        // Initialize Builder Config
+        if (data.builder_config) {
+          // Merge with default config to ensure missing keys are present
+          const mergedConfig = {
+            global: { ...DEFAULT_BUILDER_CONFIG.global, ...data.builder_config.global },
+            sections: DEFAULT_BUILDER_CONFIG.sections.map(defSec => {
+              const matchingSec = data.builder_config?.sections.find(s => s.id === defSec.id)
+              return matchingSec ? {
+                ...defSec,
+                ...matchingSec,
+                styles: { ...defSec.styles, ...matchingSec.styles },
+                content: { ...defSec.content, ...matchingSec.content }
+              } : defSec
+            })
+          }
+          setBuilderConfig(mergedConfig)
+        } else {
+          // Initialize default configurations with cover_url & video_url if they exist
+          const initializedConfig = {
+            ...DEFAULT_BUILDER_CONFIG,
+            sections: DEFAULT_BUILDER_CONFIG.sections.map(sec => {
+              if (sec.id === 'open-animation') {
+                return { ...sec, styles: { ...sec.styles, bgUrl: data.cover_url ?? '' } }
+              }
+              if (sec.id === 'intro-animation') {
+                return { ...sec, styles: { ...sec.styles, bgUrl: data.video_url ?? '' } }
+              }
+              return sec
+            })
+          }
+          setBuilderConfig(initializedConfig)
+        }
       } else if (user.user_metadata) {
         // Pre-fill from registration
         setForm(prev => ({
@@ -192,7 +373,7 @@ export default function BuilderPage() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  // Load guest list if Guest manager tab is active
+  // Load guest list if Settings/Guests manager tab is active
   useEffect(() => {
     async function loadGuests() {
       if (!existingId) return
@@ -204,10 +385,98 @@ export default function BuilderPage() {
       if (data) setGuests(data)
       setGuestLoading(false)
     }
-    if (tab === 'guests' && existingId) {
+    if (activeTab === 'settings' && existingId) {
       loadGuests()
     }
-  }, [tab, existingId, supabase])
+  }, [activeTab, existingId, supabase])
+
+  // Get active section styles & content
+  const activeSection = builderConfig.sections.find(s => s.id === activeSectionId) || builderConfig.sections[0]
+
+  const handleUpdateSectionStyle = (key: string, value: any) => {
+    setBuilderConfig(prev => ({
+      ...prev,
+      sections: prev.sections.map(sec => 
+        sec.id === activeSectionId 
+          ? { ...sec, styles: { ...sec.styles, [key]: value } }
+          : sec
+      )
+    }))
+  }
+
+  const handleUpdateSectionContent = (key: string, value: any) => {
+    setBuilderConfig(prev => ({
+      ...prev,
+      sections: prev.sections.map(sec => 
+        sec.id === activeSectionId 
+          ? { ...sec, content: { ...sec.content, [key]: value } }
+          : sec
+      )
+    }))
+  }
+
+  const handleUpdateGlobalStyle = (key: string, value: any) => {
+    setBuilderConfig(prev => ({
+      ...prev,
+      global: { ...prev.global, [key]: value }
+    }))
+  }
+
+  // Preset Template loader
+  const handleApplyPreset = (presetId: string) => {
+    const config = TEMPLATES[presetId]
+    if (!config) return
+
+    setBuilderConfig(prev => {
+      // Create new config set
+      return {
+        global: {
+          ...prev.global,
+          primaryFont: config.fontFamily,
+          accentColor: config.accentColor,
+          primaryColor: config.textColor
+        },
+        sections: prev.sections.map(sec => {
+          // Apply font and text styles based on preset
+          const updatedStyles = {
+            ...sec.styles,
+            fontFamily: config.fontFamily,
+            textColor: config.textColor
+          }
+
+          if (presetId === 'royalRose') {
+            updatedStyles.bgColor = '#290109'
+            updatedStyles.bgOverlayColor = '#000000'
+          } else if (presetId === 'goldenLove') {
+            updatedStyles.bgColor = '#f7f5f2'
+            updatedStyles.textColor = '#705b45'
+            updatedStyles.bgOverlayColor = '#ffffff'
+          } else if (presetId === 'elegantWhite') {
+            updatedStyles.bgColor = '#ffffff'
+            updatedStyles.textColor = '#3a3a3a'
+          } else if (presetId === 'glitterGold') {
+            updatedStyles.bgColor = '#110d06'
+            updatedStyles.textColor = '#D4AF37'
+          } else if (presetId === 'greenery') {
+            updatedStyles.bgColor = '#f4fbf7'
+            updatedStyles.textColor = '#1d3f2a'
+          } else if (presetId === 'lavenderDreams') {
+            updatedStyles.bgColor = '#fbf8ff'
+            updatedStyles.textColor = '#5a4666'
+          }
+
+          return {
+            ...sec,
+            styles: updatedStyles
+          }
+        })
+      }
+    })
+
+    setForm(prev => ({ ...prev, template_id: presetId }))
+    setSuccess(`Applied ${config.name} theme preset!`)
+    setTimeout(() => setSuccess(''), 2000)
+  }
 
   const handleSave = async () => {
     setSaveLoading(true)
@@ -222,12 +491,19 @@ export default function BuilderPage() {
 
       const slug = generateSlug(form.partner1_name, form.partner2_name, new Date(form.wedding_date).getFullYear())
 
+      // Get background URLs from open and intro animations
+      const coverUrl = builderConfig.sections.find(s => s.type === 'open')?.styles.bgUrl || form.cover_url
+      const videoUrl = builderConfig.sections.find(s => s.type === 'intro')?.styles.bgUrl || form.video_url
+
       const payload = {
         ...form,
+        cover_url: coverUrl,
+        video_url: videoUrl,
         rsvp_deadline: form.rsvp_deadline || null,
         slug,
         user_id: user.id,
         package: selectedPackage,
+        builder_config: builderConfig
       }
 
       let result: { data: Invitation | null; error: any }
@@ -247,7 +523,7 @@ export default function BuilderPage() {
       }
 
       if (result.error) throw result.error
-      setSuccess('Saved successfully!')
+      setSuccess('All builder progress saved successfully!')
       setTimeout(() => setSuccess(''), 3000)
     } catch (err: any) {
       console.error('[Save Error]:', err)
@@ -274,91 +550,8 @@ export default function BuilderPage() {
     }
   }
 
-  const handlePayHere = async () => {
-    if (!existingId) {
-      setError('Please save your invitation details first')
-      return
-    }
-
-    try {
-      const res = await fetch('/api/payment/hash', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ invitationId: existingId, package: selectedPackage }),
-      })
-      const { hash, orderId, amount, merchantId, checkoutUrl } = await res.json()
-
-      const form_el = document.createElement('form')
-      form_el.method = 'POST'
-      form_el.action = checkoutUrl
-
-      const fields = {
-        merchant_id: merchantId,
-        return_url: `${window.location.origin}/payment/success`,
-        cancel_url: `${window.location.origin}/payment/cancel`,
-        notify_url: `${window.location.origin}/api/payment`,
-        order_id: orderId,
-        items: `WeddingLK ${PACKAGES[selectedPackage].name} Package`,
-        amount: amount,
-        currency: 'LKR',
-        hash: hash,
-        first_name: form.partner1_name,
-        last_name: form.partner2_name,
-        email: '',
-        phone: form.couple_phone,
-        address: 'Sri Lanka',
-        city: 'Colombo',
-        country: 'Sri Lanka',
-      }
-
-      Object.entries(fields).forEach(([k, v]) => {
-        const input = document.createElement('input')
-        input.type = 'hidden'
-        input.name = k
-        input.value = v ?? ''
-        form_el.appendChild(input)
-      })
-
-      document.body.appendChild(form_el)
-      form_el.submit()
-    } catch (err) {
-      setError('Failed to initiate payment. Please try again.')
-    }
-  }
-
-  const handleFreeActivate = async () => {
-    if (!existingId) {
-      setError('Please save your invitation details first')
-      return
-    }
-
-    setFreeLoading(true)
-    setError('')
-    setSuccess('')
-
-    try {
-      const { error: updateError } = await (supabase.from('couples') as any)
-        .update({
-          is_published: true,
-          is_paid: true,
-          package: selectedPackage,
-        })
-        .eq('id', existingId)
-
-      if (updateError) throw updateError
-
-      setSuccess('Free Test Version activated successfully! Redirecting...')
-      setTimeout(() => {
-        router.push('/dashboard')
-      }, 1500)
-    } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Failed to activate free test version')
-    } finally {
-      setFreeLoading(false)
-    }
-  }
-
-  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>, type: 'cover' | 'music' | 'video' | 'gallery' | 'groom_photo' | 'bride_photo' | 'registry_qr') => {
+  // Upload handler updated for builder section backgrounds
+  const handleUploadBg = async (e: React.ChangeEvent<HTMLInputElement>, fieldName: 'cover' | 'music' | 'video' | 'gallery' | 'groom_photo' | 'bride_photo' | 'registry_qr' | 'bg_url') => {
     const files = e.target.files
     if (!files || files.length === 0) return
 
@@ -370,6 +563,8 @@ export default function BuilderPage() {
       setError('You must be logged in to upload files')
       return
     }
+
+    const type = fieldName === 'bg_url' ? (activeSection.type === 'open' ? 'cover' : 'video') : fieldName
 
     const uploadSingle = async (file: File) => {
       const fileExt = file.name.split('.').pop()
@@ -433,15 +628,19 @@ export default function BuilderPage() {
         }
 
         const url = await uploadSingle(file)
-        setForm(prev => ({
-          ...prev,
-          [`${type}_url`]: url
-        }))
+        if (fieldName === 'bg_url') {
+          handleUpdateSectionStyle('bgUrl', url)
+        } else {
+          setForm(prev => ({
+            ...prev,
+            [`${type}_url`]: url
+          }))
+        }
       }
       setSuccess(`${type.toUpperCase()} uploaded successfully!`)
       setTimeout(() => setSuccess(''), 3000)
-    } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : `Failed to upload ${type}`)
+    } catch (err: any) {
+      setError(err?.message || `Failed to upload ${type}`)
       setUploading(prev => {
         const next = { ...prev }
         delete next[type]
@@ -450,6 +649,7 @@ export default function BuilderPage() {
     }
   }
 
+  // Delete file action
   const handleDeleteFile = async (type: 'cover' | 'music' | 'video' | 'gallery' | 'groom_photo' | 'bride_photo' | 'registry_qr', index?: number) => {
     setError('')
     setSuccess('')
@@ -487,8 +687,8 @@ export default function BuilderPage() {
       }
       setSuccess('File removed successfully!')
       setTimeout(() => setSuccess(''), 2000)
-    } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Failed to remove file')
+    } catch (err: any) {
+      setError(err?.message || 'Failed to remove file')
     }
   }
 
@@ -584,7 +784,7 @@ export default function BuilderPage() {
     const updatedEvents = [...(form.timeline_events ?? []), newEvent]
     setForm(prev => ({ ...prev, timeline_events: updatedEvents }))
     setNewEvent({ title: '', date: '', description: '' })
-    setSuccess('Event added to story!')
+    setSuccess('Event added to timeline!')
     setTimeout(() => setSuccess(''), 2000)
   }
 
@@ -594,28 +794,89 @@ export default function BuilderPage() {
     setForm(prev => ({ ...prev, timeline_events: updatedEvents }))
   }
 
-  const previewTemplate = TEMPLATES[form.template_id] ?? TEMPLATES.classic
+  // Payment triggers
+  const handlePayHere = async () => {
+    if (!existingId) {
+      setError('Please save your invitation details first')
+      return
+    }
 
-  const packageBadgeText = (minPkg: 'basic' | 'premium' | 'luxury') => {
-    if (minPkg === 'luxury') return '💎 Luxury Feature'
-    if (minPkg === 'premium') return '🌟 Premium Feature'
-    return ''
+    try {
+      const res = await fetch('/api/payment/hash', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ invitationId: existingId, package: selectedPackage }),
+      })
+      const { hash, orderId, amount, merchantId, checkoutUrl } = await res.json()
+
+      const form_el = document.createElement('form')
+      form_el.method = 'POST'
+      form_el.action = checkoutUrl
+
+      const fields = {
+        merchant_id: merchantId,
+        return_url: `${window.location.origin}/payment/success`,
+        cancel_url: `${window.location.origin}/payment/cancel`,
+        notify_url: `${window.location.origin}/api/payment`,
+        order_id: orderId,
+        items: `WeddingLK ${PACKAGES[selectedPackage].name} Package`,
+        amount: amount,
+        currency: 'LKR',
+        hash: hash,
+        first_name: form.partner1_name,
+        last_name: form.partner2_name,
+        email: '',
+        phone: form.couple_phone,
+        address: 'Sri Lanka',
+        city: 'Colombo',
+        country: 'Sri Lanka',
+      }
+
+      Object.entries(fields).forEach(([k, v]) => {
+        const input = document.createElement('input')
+        input.type = 'hidden'
+        input.name = k
+        input.value = v ?? ''
+        form_el.appendChild(input)
+      })
+
+      document.body.appendChild(form_el)
+      form_el.submit()
+    } catch (err) {
+      setError('Failed to initiate payment. Please try again.')
+    }
   }
 
-  const isFeatureLocked = (minPkg?: 'basic' | 'premium' | 'luxury') => {
-    if (!minPkg) return false
-    if (selectedPackage === 'luxury') return false
-    if (selectedPackage === 'premium' && minPkg === 'luxury') return true
-    if (selectedPackage === 'basic' && minPkg !== 'basic') return true
-    return false
-  }
+  const handleFreeActivate = async () => {
+    if (!existingId) {
+      setError('Please save your invitation details first')
+      return
+    }
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="text-parchment-500">Loading...</div>
-      </div>
-    )
+    setFreeLoading(true)
+    setError('')
+    setSuccess('')
+
+    try {
+      const { error: updateError } = await (supabase.from('couples') as any)
+        .update({
+          is_published: true,
+          is_paid: true,
+          package: selectedPackage,
+        })
+        .eq('id', existingId)
+
+      if (updateError) throw updateError
+
+      setSuccess('Free Test Version activated successfully! Redirecting...')
+      setTimeout(() => {
+        router.push('/dashboard')
+      }, 1500)
+    } catch (err: any) {
+      setError(err?.message || 'Failed to activate free test version')
+    } finally {
+      setFreeLoading(false)
+    }
   }
 
   const filteredGuests = guests.filter(g =>
@@ -624,1146 +885,1202 @@ export default function BuilderPage() {
     (g.email && g.email.toLowerCase().includes(guestSearch.toLowerCase()))
   )
 
-  return (
-    <div className="space-y-6">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <h1 className="font-serif text-3xl text-white">
-          {existingId ? 'Edit Your Invitation' : 'Create Your Invitation'}
-        </h1>
-        <div className="flex items-center gap-3">
-          <span className="text-xs px-2.5 py-1 rounded bg-rose-700/20 border border-rose-700/40 text-rose-300 font-semibold uppercase tracking-wider">
-            Plan: {PACKAGES[selectedPackage].name}
-          </span>
-          <Button
-            id="save-invitation-btn"
-            variant="primary"
-            onClick={handleSave}
-            loading={saveLoading}
-          >
-            {existingId ? '💾 Save Changes' : '💍 Create Invitation'}
-          </Button>
-        </div>
+  const activeSectionStyle = activeSection.styles
+
+  // Collect all fonts being used in builder for Google Fonts Loader
+  const activeFonts = [
+    builderConfig.global.primaryFont,
+    builderConfig.global.secondaryFont,
+    ...builderConfig.sections.map(s => s.styles.fontFamily)
+  ].filter(Boolean) as string[]
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-[#0d0f14]">
+        <div className="text-rose-400 font-serif text-lg animate-pulse">Loading builder configuration...</div>
       </div>
+    )
+  }
 
-      {error && (
-        <div className="px-4 py-3 bg-red-900/30 border border-red-700/40 rounded-sm text-sm text-red-400">
-          {error}
-        </div>
-      )}
-      {success && (
-        <div className="px-4 py-3 bg-green-900/30 border border-green-700/40 rounded-sm text-sm text-green-400 animate-fade-in">
-          ✓ {success}
-        </div>
-      )}
+  return (
+    <div className="flex flex-col md:flex-row h-screen w-screen bg-[#090b0e] text-slate-200 overflow-hidden font-sans select-none">
+      {/* Load dynamic google fonts */}
+      <GoogleFontLoader fonts={activeFonts} />
 
-      {/* Scrollable Tab bar on mobile */}
-      <div className="flex gap-1 bg-black/30 rounded-sm p-1 overflow-x-auto scrollbar-none whitespace-nowrap max-w-full">
-        {TABS.map(t => {
-          const locked = isFeatureLocked(t.minPackage)
-          return (
+      {/* ── LEFT ICON SIDEBAR ── */}
+      <div className="flex md:flex-col items-center justify-between md:justify-start gap-4 md:gap-6 bg-[#0c0f13] border-b md:border-b-0 md:border-r border-slate-800/80 p-3 md:py-6 w-full md:w-[70px] z-20 shrink-0">
+        <div className="font-serif text-rose-500 text-xl font-bold tracking-wider hidden md:block select-none mb-4 cursor-pointer" onClick={() => router.push('/dashboard')}>IC</div>
+        
+        <div className="flex md:flex-col items-center gap-1.5 md:gap-3 w-full">
+          {[
+            { id: 'templates', label: 'Templates', icon: '🎨' },
+            { id: 'sections', label: 'Sections', icon: '📋' },
+            { id: 'styles', label: 'Styles', icon: '✨' },
+            { id: 'content', label: 'Content', icon: '✍️' },
+            { id: 'photos', label: 'Photos', icon: '🖼️' },
+            { id: 'animations', label: 'Transitions', icon: '🎬' },
+            { id: 'settings', label: 'Guests', icon: '👥' },
+          ].map(t => (
             <button
               key={t.id}
-              id={`builder-tab-${t.id}`}
-              onClick={() => setTab(t.id)}
-              className={`flex items-center gap-2 px-3 py-2 rounded-sm text-xs md:text-sm transition-all ${
-                tab === t.id
-                  ? 'bg-rose-700 text-white font-medium'
-                  : locked
-                  ? 'text-parchment-700 hover:text-white/60'
-                  : 'text-parchment-500 hover:text-white hover:bg-white/10'
+              onClick={() => setActiveTab(t.id as Tab)}
+              className={`flex flex-col items-center gap-1 w-full p-2.5 rounded-xl transition-all cursor-pointer ${
+                activeTab === t.id
+                  ? 'bg-rose-500/10 border border-rose-500/25 text-rose-400 font-medium'
+                  : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/40 border border-transparent'
               }`}
             >
-              <span>{t.icon}</span>
-              {t.label}
-              {locked && <span className="text-[10px]">🔒</span>}
+              <span className="text-lg leading-none">{t.icon}</span>
+              <span className="text-[9px] uppercase tracking-wider font-semibold scale-90">{t.label}</span>
             </button>
-          )
-        })}
+          ))}
+        </div>
+
+        <div className="mt-auto hidden md:block">
+          <button onClick={() => router.push('/dashboard')} className="p-2.5 rounded-full hover:bg-slate-800 text-slate-400 hover:text-slate-200 cursor-pointer">
+            🏠
+          </button>
+        </div>
       </div>
 
-      {/* Main layout: Form + Preview */}
-      <div className="grid lg:grid-cols-2 gap-6">
-        {/* Left: Form */}
-        <div className="space-y-6">
-          {/* ── DETAILS TAB ── */}
-          {tab === 'details' && (
-            <div className="glass-card p-6 space-y-5">
-              <h2 className="text-lg font-serif text-white border-b border-white/10 pb-3">Wedding Details</h2>
+      {/* ── LEFT DETAIL PANEL (Accordion-like sidebar based on active tab) ── */}
+      <div className="w-full md:w-[320px] bg-[#0c0f13]/90 border-b md:border-b-0 md:border-r border-slate-800/80 flex flex-col z-10 shrink-0 select-none overflow-y-auto max-h-[40vh] md:max-h-full">
+        <div className="p-5 border-b border-slate-800/80 flex items-center justify-between">
+          <h2 className="font-serif text-sm font-bold uppercase tracking-wider text-slate-300">
+            {activeTab.toUpperCase()}
+          </h2>
+          <span className="text-[10px] bg-rose-500/20 text-rose-400 px-2 py-0.5 rounded font-mono font-bold uppercase scale-90">Builder Pro</span>
+        </div>
 
-              <div className="grid grid-cols-2 gap-4">
+        <div className="flex-1 p-5 space-y-5">
+          {/* TAB 1: TEMPLATE PRESETS */}
+          {activeTab === 'templates' && (
+            <div className="space-y-4">
+              <p className="text-xs text-slate-400">Select a curated visual design template. Applying a preset configures colors, typography layouts, and spacings instantly.</p>
+              
+              <div className="grid grid-cols-2 gap-3">
+                {Object.values(TEMPLATES).map((tmpl) => (
+                  <button
+                    key={tmpl.id}
+                    onClick={() => handleApplyPreset(tmpl.id)}
+                    className={`group relative rounded-xl border p-2 text-left cursor-pointer transition-all hover:scale-[1.02] active:scale-[0.98] ${
+                      form.template_id === tmpl.id
+                        ? 'border-rose-500/60 bg-rose-500/[0.04]'
+                        : 'border-slate-800 bg-[#12161e] hover:border-slate-700'
+                    }`}
+                  >
+                    <div className="h-16 w-full rounded-lg mb-2 flex items-center justify-center overflow-hidden" style={{ background: tmpl.previewGradient }}>
+                      <span className="text-xs font-serif font-bold text-white tracking-widest">{tmpl.name.substring(0, 1)}</span>
+                    </div>
+                    <div className="flex justify-between items-center w-full">
+                      <span className="text-[11px] font-medium text-slate-300 truncate w-[75%]">{tmpl.name}</span>
+                      {tmpl.isPremium && <span className="text-[8px] bg-amber-500/20 text-amber-400 px-1 rounded uppercase font-semibold font-mono leading-none">Pro</span>}
+                    </div>
+                  </button>
+                ))}
+              </div>
+
+              <div className="pt-2">
+                <Button variant="secondary" className="w-full text-xs py-2 rounded-xl" onClick={() => {
+                  setBuilderConfig(DEFAULT_BUILDER_CONFIG)
+                  setSuccess('Reset to default blank configurations!')
+                  setTimeout(() => setSuccess(''), 2000)
+                }}>
+                  Create Blank Template
+                </Button>
+              </div>
+            </div>
+          )}
+
+          {/* TAB 2: SECTIONS CHECKLIST & ORDER */}
+          {activeTab === 'sections' && (
+            <div className="space-y-4">
+              <p className="text-xs text-slate-400">Toggle section visibility and configure order. Tap a section to navigate to it directly in the style customizer.</p>
+              
+              <div className="space-y-2">
+                {builderConfig.sections.map((sec, idx) => (
+                  <div
+                    key={sec.id}
+                    onClick={() => setActiveSectionId(sec.id)}
+                    className={`flex items-center justify-between p-3 rounded-xl border transition-all cursor-pointer ${
+                      activeSectionId === sec.id
+                        ? 'border-rose-500 bg-rose-500/5'
+                        : 'border-slate-800 bg-[#12161e] hover:border-slate-700'
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <span className="text-xs font-bold font-mono text-rose-400/80">{idx + 1}</span>
+                      <div>
+                        <div className="text-xs font-medium text-slate-200">{sec.title}</div>
+                        <div className="text-[10px] text-slate-500 capitalize">{sec.styles.bgType} Background</div>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          setBuilderConfig(prev => ({
+                            ...prev,
+                            sections: prev.sections.map(s => s.id === sec.id ? { ...s, visible: !s.visible } : s)
+                          }))
+                        }}
+                        className={`text-sm cursor-pointer p-1 rounded hover:bg-slate-800 ${sec.visible ? 'text-rose-400' : 'text-slate-600'}`}
+                      >
+                        {sec.visible ? '👁️' : '🙈'}
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* TAB 3: GLOBAL STYLES */}
+          {activeTab === 'styles' && (
+            <div className="space-y-4">
+              <h3 className="text-xs font-bold text-slate-300">Global Fonts</h3>
+              <div className="space-y-3">
+                <Select
+                  label="Primary Script Font"
+                  value={builderConfig.global.primaryFont}
+                  onChange={e => handleUpdateGlobalStyle('primaryFont', e.target.value)}
+                  options={GOOGLE_FONTS.map(f => ({ value: f, label: f }))}
+                />
+                <Select
+                  label="Secondary Text Font"
+                  value={builderConfig.global.secondaryFont}
+                  onChange={e => handleUpdateGlobalStyle('secondaryFont', e.target.value)}
+                  options={GOOGLE_FONTS.map(f => ({ value: f, label: f }))}
+                />
+              </div>
+
+              <h3 className="text-xs font-bold text-slate-300 border-t border-slate-800/80 pt-3">Global Color Palette</h3>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-[10px] font-medium text-slate-400 block mb-1">Accent Color</label>
+                  <div className="flex items-center gap-2 bg-[#12161e] border border-slate-800 p-2 rounded-xl">
+                    <input
+                      type="color"
+                      value={builderConfig.global.accentColor}
+                      onChange={e => handleUpdateGlobalStyle('accentColor', e.target.value)}
+                      className="w-8 h-6 bg-transparent border-0 cursor-pointer"
+                    />
+                    <span className="text-[10px] font-mono">{builderConfig.global.accentColor}</span>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="text-[10px] font-medium text-slate-400 block mb-1">Text Color</label>
+                  <div className="flex items-center gap-2 bg-[#12161e] border border-slate-800 p-2 rounded-xl">
+                    <input
+                      type="color"
+                      value={builderConfig.global.primaryColor}
+                      onChange={e => handleUpdateGlobalStyle('primaryColor', e.target.value)}
+                      className="w-8 h-6 bg-transparent border-0 cursor-pointer"
+                    />
+                    <span className="text-[10px] font-mono">{builderConfig.global.primaryColor}</span>
+                  </div>
+                </div>
+              </div>
+
+              <h3 className="text-xs font-bold text-slate-300 border-t border-slate-800/80 pt-3">Background Music</h3>
+              <div className="space-y-2">
+                <input
+                  type="file"
+                  id="music-upload"
+                  accept="audio/*"
+                  onChange={e => handleUploadBg(e, 'music')}
+                  className="hidden"
+                />
+                {form.music_url ? (
+                  <div className="flex items-center justify-between bg-slate-900 border border-slate-800/60 p-2.5 rounded-xl">
+                    <div className="truncate text-xs text-rose-300 font-mono w-[80%]">🎵 Music Active</div>
+                    <button
+                      onClick={() => handleDeleteFile('music')}
+                      className="text-xs hover:text-red-400 p-1 cursor-pointer"
+                    >
+                      🗑️
+                    </button>
+                  </div>
+                ) : (
+                  <Button
+                    variant="secondary"
+                    className="w-full text-xs py-2"
+                    onClick={() => document.getElementById('music-upload')?.click()}
+                    loading={!!uploading.music}
+                  >
+                    🎵 Upload Background Audio
+                  </Button>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* TAB 4: WEDDING DETAILS CONTENT */}
+          {activeTab === 'content' && (
+            <div className="space-y-4">
+              <div className="space-y-3">
                 <Input
-                  id="builder-partner1"
-                  label="Partner 1 Name (Groom / Bride)"
-                  placeholder="Kamal"
+                  label="Partner 1 (Groom / Bride)"
                   value={form.partner1_name}
                   onChange={e => setForm(prev => ({ ...prev, partner1_name: e.target.value }))}
                 />
                 <Input
-                  id="builder-partner2"
-                  label="Partner 2 Name (Bride / Groom)"
-                  placeholder="Nisha"
+                  label="Partner 2 (Bride / Groom)"
                   value={form.partner2_name}
                   onChange={e => setForm(prev => ({ ...prev, partner2_name: e.target.value }))}
                 />
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
                 <Input
-                  id="builder-date"
                   label="Wedding Date"
                   type="date"
                   value={form.wedding_date}
                   onChange={e => setForm(prev => ({ ...prev, wedding_date: e.target.value }))}
                 />
                 <Input
-                  id="builder-time"
                   label="Ceremony Time"
-                  placeholder="6:00 PM"
                   value={form.wedding_time}
                   onChange={e => setForm(prev => ({ ...prev, wedding_time: e.target.value }))}
                 />
+                <Input
+                  label="Venue Name"
+                  placeholder="Shangri-La Hotel Colombo"
+                  value={form.venue_name}
+                  onChange={e => setForm(prev => ({ ...prev, venue_name: e.target.value }))}
+                />
+                <Input
+                  label="Venue Address"
+                  placeholder="Colombo 03, Sri Lanka"
+                  value={form.venue_address}
+                  onChange={e => setForm(prev => ({ ...prev, venue_address: e.target.value }))}
+                />
+                <Input
+                  label="RSVP Deadline"
+                  type="date"
+                  value={form.rsvp_deadline}
+                  onChange={e => setForm(prev => ({ ...prev, rsvp_deadline: e.target.value }))}
+                />
+                <Input
+                  label="Couple Phone (For SMS)"
+                  placeholder="07X XXX XXXX"
+                  value={form.couple_phone}
+                  onChange={e => setForm(prev => ({ ...prev, couple_phone: e.target.value }))}
+                />
               </div>
 
-              <Input
-                id="builder-venue"
-                label="Venue Name"
-                placeholder="Shangri-La Hotel Colombo"
-                value={form.venue_name}
-                onChange={e => setForm(prev => ({ ...prev, venue_name: e.target.value }))}
-              />
-
-              <Input
-                id="builder-address"
-                label="Venue Address (optional)"
-                placeholder="Colombo 03, Sri Lanka"
-                value={form.venue_address}
-                onChange={e => setForm(prev => ({ ...prev, venue_address: e.target.value }))}
-              />
-
-              <Input
-                id="builder-rsvp-deadline"
-                label="RSVP Deadline (optional)"
-                type="date"
-                value={form.rsvp_deadline}
-                onChange={e => setForm(prev => ({ ...prev, rsvp_deadline: e.target.value }))}
-              />
-
-              <Input
-                id="builder-phone"
-                label="Your Phone Number (for SMS alerts)"
-                placeholder="07X XXX XXXX"
-                type="tel"
-                value={form.couple_phone}
-                onChange={e => setForm(prev => ({ ...prev, couple_phone: e.target.value }))}
-                hint="We'll SMS you when guests RSVP"
-              />
-
-              <Textarea
-                id="builder-message"
-                label="Custom Welcome Message (optional)"
-                placeholder="We joyfully request the pleasure of your company..."
-                rows={3}
-                value={form.custom_message}
-                onChange={e => setForm(prev => ({ ...prev, custom_message: e.target.value }))}
-              />
-
-              {form.partner1_name && form.partner2_name && form.wedding_date && (
-                <div className="px-4 py-3 bg-white/5 border border-white/10 rounded-sm">
-                  <p className="text-xs text-parchment-600 mb-1">Your public invitation link:</p>
-                  <p className="text-sm font-mono text-rose-400">
-                    /inv/{generateSlug(form.partner1_name, form.partner2_name, new Date(form.wedding_date).getFullYear())}
-                  </p>
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* ── PROFILE TAB ── */}
-          {tab === 'profile' && (
-            <div className="glass-card p-6 space-y-6">
-              <h2 className="text-lg font-serif text-white border-b border-white/10 pb-3">Couple Profiles</h2>
-
-              {/* Groom Profile details */}
-              <div className="space-y-4 p-4 border border-white/5 bg-white/5 rounded-sm">
-                <h3 className="text-sm font-bold text-white font-serif">🤵 Groom Profile Details</h3>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <Input
-                    id="groom-fullname"
-                    label="Groom Full Name"
-                    placeholder="Kamal Perera"
-                    value={form.groom_full_name}
-                    onChange={e => setForm(prev => ({ ...prev, groom_full_name: e.target.value }))}
-                  />
-                  <Input
-                    id="groom-parents"
-                    label="Groom's Parents Name"
-                    placeholder="Mr. & Mrs. Perera"
-                    value={form.groom_parents}
-                    onChange={e => setForm(prev => ({ ...prev, groom_parents: e.target.value }))}
-                  />
-                </div>
-
+              <h3 className="text-xs font-bold text-slate-300 border-t border-slate-800/80 pt-3">👦 Groom Details</h3>
+              <div className="space-y-3">
+                <Input
+                  label="Groom Full Name"
+                  value={form.groom_full_name}
+                  onChange={e => setForm(prev => ({ ...prev, groom_full_name: e.target.value }))}
+                />
+                <Input
+                  label="Groom Parents Name"
+                  value={form.groom_parents}
+                  onChange={e => setForm(prev => ({ ...prev, groom_parents: e.target.value }))}
+                />
                 <Textarea
-                  id="groom-bio"
-                  label="Short Bio / Note"
-                  placeholder="Tell your guests a bit about the groom..."
+                  label="Groom Bio/Note"
                   rows={2}
                   value={form.groom_bio}
                   onChange={e => setForm(prev => ({ ...prev, groom_bio: e.target.value }))}
                 />
-
-                <div className="space-y-2">
-                  <label className="text-xs font-medium text-white block">Groom Photo</label>
-                  {form.groom_photo_url ? (
-                    <div className="flex items-center gap-4">
-                      <div className="w-16 h-16 rounded-full overflow-hidden border border-white/10">
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={form.groom_photo_url} alt="Groom Avatar" className="w-full h-full object-cover" />
-                      </div>
-                      <Button variant="secondary" size="sm" onClick={() => handleDeleteFile('groom_photo')}>Remove Photo</Button>
-                    </div>
-                  ) : (
-                    <div className="flex items-center gap-3">
-                      <input
-                        type="file"
-                        accept="image/*"
-                        id="groom-photo-upload"
-                        className="hidden"
-                        onChange={e => handleUpload(e, 'groom_photo')}
-                      />
-                      <label
-                        htmlFor="groom-photo-upload"
-                        className="cursor-pointer px-3 py-1.5 bg-white/5 border border-white/10 hover:bg-white/10 rounded-sm text-xs text-white"
-                      >
-                        {uploading.groom_photo ? `Uploading...` : 'Upload Groom Photo'}
-                      </label>
-                    </div>
-                  )}
-                </div>
               </div>
 
-              {/* Bride Profile details */}
-              <div className="space-y-4 p-4 border border-white/5 bg-white/5 rounded-sm">
-                <h3 className="text-sm font-bold text-white font-serif">👰 Bride Profile Details</h3>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <Input
-                    id="bride-fullname"
-                    label="Bride Full Name"
-                    placeholder="Nisha Fernando"
-                    value={form.bride_full_name}
-                    onChange={e => setForm(prev => ({ ...prev, bride_full_name: e.target.value }))}
-                  />
-                  <Input
-                    id="bride-parents"
-                    label="Bride's Parents Name"
-                    placeholder="Mr. & Mrs. Fernando"
-                    value={form.bride_parents}
-                    onChange={e => setForm(prev => ({ ...prev, bride_parents: e.target.value }))}
-                  />
-                </div>
-
+              <h3 className="text-xs font-bold text-slate-300 border-t border-slate-800/80 pt-3">👧 Bride Details</h3>
+              <div className="space-y-3">
+                <Input
+                  label="Bride Full Name"
+                  value={form.bride_full_name}
+                  onChange={e => setForm(prev => ({ ...prev, bride_full_name: e.target.value }))}
+                />
+                <Input
+                  label="Bride Parents Name"
+                  value={form.bride_parents}
+                  onChange={e => setForm(prev => ({ ...prev, bride_parents: e.target.value }))}
+                />
                 <Textarea
-                  id="bride-bio"
-                  label="Short Bio / Note"
-                  placeholder="Tell your guests a bit about the bride..."
+                  label="Bride Bio/Note"
                   rows={2}
                   value={form.bride_bio}
                   onChange={e => setForm(prev => ({ ...prev, bride_bio: e.target.value }))}
                 />
-
-                <div className="space-y-2">
-                  <label className="text-xs font-medium text-white block">Bride Photo</label>
-                  {form.bride_photo_url ? (
-                    <div className="flex items-center gap-4">
-                      <div className="w-16 h-16 rounded-full overflow-hidden border border-white/10">
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={form.bride_photo_url} alt="Bride Avatar" className="w-full h-full object-cover" />
-                      </div>
-                      <Button variant="secondary" size="sm" onClick={() => handleDeleteFile('bride_photo')}>Remove Photo</Button>
-                    </div>
-                  ) : (
-                    <div className="flex items-center gap-3">
-                      <input
-                        type="file"
-                        accept="image/*"
-                        id="bride-photo-upload"
-                        className="hidden"
-                        onChange={e => handleUpload(e, 'bride_photo')}
-                      />
-                      <label
-                        htmlFor="bride-photo-upload"
-                        className="cursor-pointer px-3 py-1.5 bg-white/5 border border-white/10 hover:bg-white/10 rounded-sm text-xs text-white"
-                      >
-                        {uploading.bride_photo ? `Uploading...` : 'Upload Bride Photo'}
-                      </label>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* ── EVENTS & CONTACTS TAB ── */}
-          {tab === 'events' && (
-            <div className="glass-card p-6 space-y-5">
-              <h2 className="text-lg font-serif text-white border-b border-white/10 pb-3">Event Settings & Maps</h2>
-
-              <div className="grid grid-cols-2 gap-4">
-                <Input
-                  id="reception-time"
-                  label="Reception Start Time"
-                  placeholder="7:00 PM"
-                  value={form.reception_time ?? ''}
-                  onChange={e => setForm(prev => ({ ...prev, reception_time: e.target.value }))}
-                />
-                <Input
-                  id="dress-code"
-                  label="Dress Code"
-                  placeholder="Elegant / Traditional Sri Lankan"
-                  value={form.dress_code ?? ''}
-                  onChange={e => setForm(prev => ({ ...prev, dress_code: e.target.value }))}
-                />
               </div>
 
-              <Textarea
-                id="maps-embed"
-                label="Google Maps Embed Code / Share URL"
-                placeholder="Paste the <iframe...> code or maps.google.com link here"
-                rows={2}
-                value={form.google_maps_embed_url ?? ''}
-                onChange={e => setForm(prev => ({ ...prev, google_maps_embed_url: e.target.value }))}
-              />
-              <p className="text-[10px] text-parchment-600 mt-1">Allows guests to navigate directly to the venue</p>
-
-              <Textarea
-                id="additional-instructions"
-                label="Additional Instructions / Parking / Travel Info"
-                placeholder="e.g. Free parking is available at Level 3 of the hotel. Children are welcome."
-                rows={2}
-                value={form.additional_instructions ?? ''}
-                onChange={e => setForm(prev => ({ ...prev, additional_instructions: e.target.value }))}
-              />
-
-              <div className="border-t border-white/10 pt-4 space-y-4">
-                <h3 className="text-sm font-bold text-white font-serif">📞 Contact Information (For Questions / WhatsApp)</h3>
-                
-                <div className="grid grid-cols-2 gap-4">
-                  <Input
-                    id="bride-contact"
-                    label="Bride Phone Number"
-                    placeholder="07X XXX XXXX"
-                    value={form.bride_contact ?? ''}
-                    onChange={e => setForm(prev => ({ ...prev, bride_contact: e.target.value }))}
-                  />
-                  <Input
-                    id="groom-contact"
-                    label="Groom Phone Number"
-                    placeholder="07X XXX XXXX"
-                    value={form.groom_contact ?? ''}
-                    onChange={e => setForm(prev => ({ ...prev, groom_contact: e.target.value }))}
-                  />
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <Input
-                    id="family-contact"
-                    label="Family/Coordinator Phone"
-                    placeholder="07X XXX XXXX"
-                    value={form.family_contact ?? ''}
-                    onChange={e => setForm(prev => ({ ...prev, family_contact: e.target.value }))}
-                  />
-                  <Input
-                    id="whatsapp-contact"
-                    label="WhatsApp Chat Number"
-                    placeholder="0771234567"
-                    value={form.whatsapp_number ?? ''}
-                    onChange={e => setForm(prev => ({ ...prev, whatsapp_number: e.target.value }))}
-                    hint="For direct WhatsApp Us floating buttons"
-                  />
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* ── TIMELINE TAB ── */}
-          {tab === 'timeline' && (
-            <div className="glass-card p-6 space-y-6">
-              <h2 className="text-lg font-serif text-white border-b border-white/10 pb-3">Love Story Timeline</h2>
-
-              {/* Add event form */}
-              <form onSubmit={handleAddTimelineEvent} className="p-4 border border-white/5 bg-white/5 rounded-sm space-y-4">
-                <h3 className="text-xs font-bold text-white uppercase tracking-wider">Add Story Journey Event</h3>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <Input
-                    id="timeline-title"
-                    label="Event Title"
-                    placeholder="e.g. First Meeting, First Date, Engagement"
-                    value={newEvent.title}
-                    onChange={e => setNewEvent(prev => ({ ...prev, title: e.target.value }))}
-                    required
-                  />
-                  <Input
-                    id="timeline-date"
-                    label="Event Date / Timeframe"
-                    placeholder="e.g. June 2024"
-                    value={newEvent.date}
-                    onChange={e => setNewEvent(prev => ({ ...prev, date: e.target.value }))}
-                  />
-                </div>
-
+              <h3 className="text-xs font-bold text-slate-300 border-t border-slate-800/80 pt-3">🗺️ Google Maps Embed Link</h3>
+              <div className="space-y-3">
                 <Textarea
-                  id="timeline-desc"
-                  label="Description / Short Story"
-                  placeholder="Share a sweet summary of what happened during this milestone..."
+                  label="Google Maps Embed Link / iframe"
+                  placeholder="Paste embed code or URL"
+                  rows={2}
+                  value={form.google_maps_embed_url}
+                  onChange={e => setForm(prev => ({ ...prev, google_maps_embed_url: e.target.value }))}
+                />
+              </div>
+            </div>
+          )}
+
+          {/* TAB 5: DYNAMIC PHOTO UPLOADS */}
+          {activeTab === 'photos' && (
+            <div className="space-y-4">
+              <h3 className="text-xs font-bold text-slate-300">👦 Groom Photo</h3>
+              <div className="space-y-2">
+                <input
+                  type="file"
+                  id="groom-photo-upload"
+                  accept="image/*"
+                  onChange={e => handleUploadBg(e, 'groom_photo')}
+                  className="hidden"
+                />
+                {form.groom_photo_url ? (
+                  <div className="relative h-28 w-24 rounded-lg overflow-hidden border border-slate-700 bg-slate-900 group">
+                    <img src={form.groom_photo_url} alt="Groom" className="object-cover w-full h-full" />
+                    <button
+                      onClick={() => handleDeleteFile('groom_photo')}
+                      className="absolute inset-0 bg-black/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity text-xs cursor-pointer text-red-400"
+                    >
+                      Delete
+                    </button>
+                  </div>
+                ) : (
+                  <Button
+                    variant="secondary"
+                    className="w-full text-xs py-2"
+                    onClick={() => document.getElementById('groom-photo-upload')?.click()}
+                    loading={!!uploading.groom_photo}
+                  >
+                    Upload Groom Photo
+                  </Button>
+                )}
+              </div>
+
+              <h3 className="text-xs font-bold text-slate-300 border-t border-slate-800/80 pt-3">👧 Bride Photo</h3>
+              <div className="space-y-2">
+                <input
+                  type="file"
+                  id="bride-photo-upload"
+                  accept="image/*"
+                  onChange={e => handleUploadBg(e, 'bride_photo')}
+                  className="hidden"
+                />
+                {form.bride_photo_url ? (
+                  <div className="relative h-28 w-24 rounded-lg overflow-hidden border border-slate-700 bg-slate-900 group">
+                    <img src={form.bride_photo_url} alt="Bride" className="object-cover w-full h-full" />
+                    <button
+                      onClick={() => handleDeleteFile('bride_photo')}
+                      className="absolute inset-0 bg-black/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity text-xs cursor-pointer text-red-400"
+                    >
+                      Delete
+                    </button>
+                  </div>
+                ) : (
+                  <Button
+                    variant="secondary"
+                    className="w-full text-xs py-2"
+                    onClick={() => document.getElementById('bride-photo-upload')?.click()}
+                    loading={!!uploading.bride_photo}
+                  >
+                    Upload Bride Photo
+                  </Button>
+                )}
+              </div>
+
+              <h3 className="text-xs font-bold text-slate-300 border-t border-slate-800/80 pt-3">📸 Gallery Photos</h3>
+              <div className="space-y-2">
+                <input
+                  type="file"
+                  id="gallery-photo-upload"
+                  accept="image/*"
+                  multiple
+                  onChange={e => handleUploadBg(e, 'gallery')}
+                  className="hidden"
+                />
+                <Button
+                  variant="secondary"
+                  className="w-full text-xs py-2"
+                  onClick={() => document.getElementById('gallery-photo-upload')?.click()}
+                  loading={!!uploading.gallery}
+                >
+                  📸 Upload Gallery Photos (Max 8)
+                </Button>
+                
+                <div className="grid grid-cols-4 gap-2 pt-2">
+                  {form.gallery_urls?.map((url, idx) => (
+                    <div key={idx} className="relative aspect-square rounded-md overflow-hidden bg-slate-900 border border-slate-800 group">
+                      <img src={url} alt={`Gallery ${idx}`} className="object-cover w-full h-full" />
+                      <button
+                        onClick={() => handleDeleteFile('gallery', idx)}
+                        className="absolute inset-0 bg-black/75 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity text-[10px] text-red-400 cursor-pointer"
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* TAB 6: TIMELINE & TRANSITIONS */}
+          {activeTab === 'animations' && (
+            <div className="space-y-4">
+              <h3 className="text-xs font-bold text-slate-300">Wedding Timeline/Story</h3>
+              <p className="text-xs text-slate-400">Add milestones or schedules to show on the details scroll section.</p>
+              
+              <form onSubmit={handleAddTimelineEvent} className="space-y-2.5 bg-slate-900 border border-slate-800/80 p-3 rounded-xl">
+                <Input
+                  label="Title"
+                  placeholder="Poruwa Ceremony"
+                  value={newEvent.title}
+                  onChange={e => setNewEvent(prev => ({ ...prev, title: e.target.value }))}
+                />
+                <Input
+                  label="Date/Time"
+                  placeholder="10:30 AM"
+                  value={newEvent.date}
+                  onChange={e => setNewEvent(prev => ({ ...prev, date: e.target.value }))}
+                />
+                <Textarea
+                  label="Description"
+                  placeholder="Optional details"
                   rows={2}
                   value={newEvent.description}
                   onChange={e => setNewEvent(prev => ({ ...prev, description: e.target.value }))}
                 />
-
-                <Button type="submit" variant="secondary" className="w-full text-xs py-1.5">➕ Add to Story</Button>
+                <Button variant="primary" type="submit" className="w-full text-xs py-1.5 rounded-lg">
+                  ➕ Add Event
+                </Button>
               </form>
 
-              {/* Events list */}
-              <div className="space-y-4">
-                <h3 className="text-sm font-bold text-white font-serif">Current Timeline Milestones</h3>
-                
-                {(form.timeline_events ?? []).length === 0 ? (
-                  <p className="text-xs text-parchment-600 italic">No timeline milestones added yet. Add milestones above like "First Meeting" or "The Proposal".</p>
-                ) : (
-                  <div className="space-y-2">
-                    {(form.timeline_events ?? []).map((ev, i) => (
-                      <div key={i} className="flex justify-between items-start p-3 bg-white/5 border border-white/10 rounded-sm text-xs">
-                        <div className="space-y-1">
-                          <p className="font-bold text-white flex items-center gap-2">
-                            <span>{ev.title}</span>
-                            {ev.date && <span className="px-1.5 py-0.5 bg-rose-700/20 text-rose-300 font-mono text-[9px] rounded-sm">{ev.date}</span>}
-                          </p>
-                          <p className="text-parchment-400 font-light leading-relaxed">{ev.description}</p>
-                        </div>
-                        <button
-                          type="button"
-                          onClick={() => handleDeleteTimelineEvent(i)}
-                          className="text-red-500 hover:text-red-400 font-medium ml-4 cursor-pointer"
-                        >
-                          Remove
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
-
-          {/* ── REGISTRY & LIVE STREAM TAB ── */}
-          {tab === 'registry' && (
-            <div className="glass-card p-6 space-y-6">
-              <div className="flex items-center justify-between border-b border-white/10 pb-3">
-                <h2 className="text-lg font-serif text-white">Gift Registry & Live Streaming</h2>
-                <span className="text-[10px] px-2 py-0.5 bg-amber-500/20 text-amber-300 border border-amber-500/30 font-semibold rounded-full">
-                  💎 Luxury Feature
-                </span>
-              </div>
-
-              {isFeatureLocked('luxury') ? (
-                <div className="p-5 text-center border border-white/10 bg-black/25 rounded-sm space-y-3">
-                  <p className="text-sm text-white font-medium">🔒 Registry & Live Stream is locked</p>
-                  <p className="text-xs text-parchment-500 max-w-sm mx-auto">
-                    Gift registry details, scan-to-pay QR uploads, and virtual live stream links are available on the Luxury package.
-                  </p>
-                  <Button variant="secondary" size="sm" onClick={() => setTab('payment')}>
-                    Upgrade Plan in Activate Tab
-                  </Button>
-                </div>
-              ) : (
-                <div className="space-y-6">
-                  {/* Registry details */}
-                  <div className="space-y-4">
-                    <h3 className="text-sm font-bold text-white font-serif">🎁 Gift Registry Details</h3>
-                    
-                    <Textarea
-                      id="registry-bank"
-                      label="Bank Account Details (For gifts/transfer)"
-                      placeholder="Bank Name: Commercial Bank&#10;Account Holder: K. Perera&#10;Account Number: 1000998822&#10;Branch: Colombo Fort"
-                      rows={4}
-                      value={form.registry_bank_details ?? ''}
-                      onChange={e => setForm(prev => ({ ...prev, registry_bank_details: e.target.value }))}
-                    />
-
-                    <div className="space-y-2">
-                      <label className="text-xs font-medium text-white block">Upload Payment QR Code image</label>
-                      {form.registry_qr_url ? (
-                        <div className="flex items-center gap-4">
-                          <div className="w-24 h-24 border border-white/10 rounded overflow-hidden p-1 bg-white">
-                            {/* eslint-disable-next-line @next/next/no-img-element */}
-                            <img src={form.registry_qr_url} alt="Registry QR" className="w-full h-full object-contain" />
-                          </div>
-                          <Button variant="secondary" size="sm" onClick={() => handleDeleteFile('registry_qr')}>Remove QR</Button>
-                        </div>
-                      ) : (
-                        <div>
-                          <input
-                            type="file"
-                            accept="image/*"
-                            id="registry-qr-upload"
-                            className="hidden"
-                            onChange={e => handleUpload(e, 'registry_qr')}
-                          />
-                          <label
-                            htmlFor="registry-qr-upload"
-                            className="cursor-pointer px-3 py-1.5 bg-white/5 border border-white/10 hover:bg-white/10 rounded-sm text-xs text-white"
-                          >
-                            {uploading.registry_qr ? `Uploading...` : 'Upload Payment QR'}
-                          </label>
-                        </div>
-                      )}
-                    </div>
-
-                    <Textarea
-                      id="registry-preferences"
-                      label="Gift Preferences / Wishlist / Honeymoon Registry note"
-                      placeholder="e.g. Your presence is gift enough, but if you'd like to support us, we appreciate contributions towards our honeymoon registry."
-                      rows={2}
-                      value={form.registry_preferences ?? ''}
-                      onChange={e => setForm(prev => ({ ...prev, registry_preferences: e.target.value }))}
-                    />
-
-                    <div className="flex items-center gap-2">
-                      <input
-                        type="checkbox"
-                        id="registry-online"
-                        checked={form.registry_online_contributions}
-                        onChange={e => setForm(prev => ({ ...prev, registry_online_contributions: e.target.checked }))}
-                        className="rounded bg-black border-white/10"
-                      />
-                      <label htmlFor="registry-online" className="text-xs text-parchment-400">Enable "Online Contributions Active" note banner</label>
-                    </div>
-                  </div>
-
-                  {/* Streaming details */}
-                  <div className="space-y-4 border-t border-white/10 pt-5">
-                    <h3 className="text-sm font-bold text-white font-serif">📹 Virtual Ceremony Live Streaming</h3>
-                    
-                    <div className="flex items-center gap-2 mb-3">
-                      <input
-                        type="checkbox"
-                        id="live-stream-active"
-                        checked={form.live_stream_active}
-                        onChange={e => setForm(prev => ({ ...prev, live_stream_active: e.target.checked }))}
-                        className="rounded bg-black border-white/10"
-                      />
-                      <label htmlFor="live-stream-active" className="text-xs text-parchment-400 font-semibold">Enable Live Streaming Section on invitation</label>
-                    </div>
-
-                    {form.live_stream_active && (
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 animate-fade-in">
-                        <Select
-                          id="stream-platform"
-                          label="Streaming Platform"
-                          value={form.live_stream_platform ?? 'youtube'}
-                          onChange={e => setForm(prev => ({ ...prev, live_stream_platform: e.target.value }))}
-                          options={[
-                            { value: 'youtube', label: 'YouTube Live' },
-                            { value: 'facebook', label: 'Facebook Live' },
-                            { value: 'zoom', label: 'Zoom Webinar' },
-                          ]}
-                        />
-                        <Input
-                          id="stream-url"
-                          label="Live Stream Link / Video URL"
-                          placeholder="e.g. https://www.youtube.com/watch?v=..."
-                          value={form.live_stream_url ?? ''}
-                          onChange={e => setForm(prev => ({ ...prev, live_stream_url: e.target.value }))}
-                        />
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* ── GUEST MANAGER TAB ── */}
-          {tab === 'guests' && (
-            <div className="glass-card p-6 space-y-6">
-              <div className="flex items-center justify-between border-b border-white/10 pb-3">
-                <h2 className="text-lg font-serif text-white">Personalized Guest Invitations</h2>
-                <span className="text-[10px] px-2 py-0.5 bg-rose-500/20 text-rose-300 border border-rose-500/30 font-semibold rounded-full">
-                  🌟 Premium Feature
-                </span>
-              </div>
-
-              {isFeatureLocked('premium') ? (
-                <div className="p-5 text-center border border-white/10 bg-black/25 rounded-sm space-y-3">
-                  <p className="text-sm text-white font-medium">🔒 Guest Management is locked</p>
-                  <p className="text-xs text-parchment-500 max-w-sm mx-auto">
-                    Personalized links, guest checkin tracking, and RSVP list generation are locked on the Basic package.
-                  </p>
-                  <Button variant="secondary" size="sm" onClick={() => setTab('payment')}>
-                    Upgrade Plan in Activate Tab
-                  </Button>
-                </div>
-              ) : !existingId ? (
-                <div className="px-4 py-3 bg-amber-900/20 border border-amber-700/30 rounded-sm text-sm text-amber-400">
-                  ⚠️ Please save your wedding details first before adding guests.
-                </div>
-              ) : (
-                <div className="space-y-6">
-                  {/* Add guest form */}
-                  <form onSubmit={handleAddGuest} className="p-4 border border-white/5 bg-white/5 rounded-sm space-y-3">
-                    <h3 className="text-xs font-bold text-white uppercase tracking-wider">Generate Guest Invite Link</h3>
-                    
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                      <input
-                        type="text"
-                        placeholder="Guest Name (e.g. Nimal Perera)"
-                        value={newGuest.name}
-                        onChange={e => setNewGuest(prev => ({ ...prev, name: e.target.value }))}
-                        className="px-3 py-1.5 bg-black/40 border border-white/10 rounded-sm text-xs text-white focus:outline-none focus:border-rose-400 placeholder:text-parchment-700"
-                        required
-                      />
-                      <input
-                        type="tel"
-                        placeholder="Phone (optional)"
-                        value={newGuest.phone}
-                        onChange={e => setNewGuest(prev => ({ ...prev, phone: e.target.value }))}
-                        className="px-3 py-1.5 bg-black/40 border border-white/10 rounded-sm text-xs text-white focus:outline-none focus:border-rose-400 placeholder:text-parchment-700"
-                      />
-                      <input
-                        type="email"
-                        placeholder="Email (optional)"
-                        value={newGuest.email}
-                        onChange={e => setNewGuest(prev => ({ ...prev, email: e.target.value }))}
-                        className="px-3 py-1.5 bg-black/40 border border-white/10 rounded-sm text-xs text-white focus:outline-none focus:border-rose-400 placeholder:text-parchment-700"
-                      />
-                    </div>
-                    
-                    <Button type="submit" variant="secondary" className="w-full text-xs py-1.5 mt-2">
-                      🔗 Generate Link
-                    </Button>
-                  </form>
-
-                  {/* Guest list filter */}
-                  <div className="flex gap-2">
-                    <input
-                      type="text"
-                      placeholder="Search guests..."
-                      value={guestSearch}
-                      onChange={e => setGuestSearch(e.target.value)}
-                      className="w-full px-3 py-1.5 bg-black/40 border border-white/10 rounded-sm text-xs text-white focus:outline-none focus:border-rose-400"
-                    />
-                  </div>
-
-                  {/* Guest list table */}
-                  {guestLoading ? (
-                    <div className="text-center py-6 text-xs text-parchment-600">Loading guest records...</div>
-                  ) : filteredGuests.length === 0 ? (
-                    <div className="text-center py-6 text-xs text-parchment-600 italic">No guests match your query. Add them above!</div>
-                  ) : (
-                    <div className="overflow-x-auto max-h-96 border border-white/10 rounded-sm">
-                      <table className="w-full text-[11px] text-left">
-                        <thead>
-                          <tr className="bg-black/35 border-b border-white/10 text-white font-serif">
-                            <th className="px-3 py-2">Name</th>
-                            <th className="px-3 py-2">Invite Link Status</th>
-                            <th className="px-3 py-2">RSVP Response</th>
-                            <th className="px-3 py-2 text-right">Actions</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {filteredGuests.map((g, i) => (
-                            <tr key={g.id} className="border-b border-white/5 hover:bg-white/5">
-                              <td className="px-3 py-2.5 font-medium text-white">{g.name}</td>
-                              <td className="px-3 py-2.5">
-                                <span className={`inline-flex px-1.5 py-0.5 rounded text-[9px] font-mono ${
-                                  g.status === 'opened'
-                                    ? 'bg-green-900/40 text-green-400 border border-green-800/30'
-                                    : g.status === 'sent'
-                                    ? 'bg-blue-900/40 text-blue-400 border border-blue-800/30'
-                                    : 'bg-amber-900/40 text-amber-400 border border-amber-800/30'
-                                }`}>
-                                  {g.status.toUpperCase()}
-                                </span>
-                              </td>
-                              <td className="px-3 py-2.5">
-                                <span className={`inline-flex px-1.5 py-0.5 rounded text-[9px] font-mono ${
-                                  g.rsvp_status === 'yes'
-                                    ? 'bg-green-900/40 text-green-400 border border-green-800/30'
-                                    : g.rsvp_status === 'no'
-                                    ? 'bg-red-900/40 text-red-400 border border-red-800/30'
-                                    : g.rsvp_status === 'maybe'
-                                    ? 'bg-amber-900/40 text-amber-400 border border-amber-800/30'
-                                    : 'bg-white/5 text-parchment-500 border border-white/10'
-                                }`}>
-                                  {g.rsvp_status.toUpperCase()}
-                                </span>
-                              </td>
-                              <td className="px-3 py-2.5 text-right space-x-2">
-                                <button
-                                  type="button"
-                                  onClick={() => handleCopyLink(g)}
-                                  className="text-rose-400 hover:underline cursor-pointer"
-                                >
-                                  Copy Link
-                                </button>
-                                <button
-                                  type="button"
-                                  onClick={() => copyGuestMessage(g)}
-                                  className="text-[#25D366] hover:underline cursor-pointer font-medium"
-                                >
-                                  WhatsApp Invite
-                                </button>
-                                <button
-                                  type="button"
-                                  onClick={() => handleDeleteGuest(g.id)}
-                                  className="text-red-500 hover:underline cursor-pointer"
-                                >
-                                  Remove
-                                </button>
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* ── TEMPLATE TAB ── */}
-          {tab === 'template' && (
-            <div className="glass-card p-6">
-              <h2 className="text-lg font-serif text-white border-b border-white/10 pb-3 mb-5">Choose Your Template</h2>
-              <TemplateSelector
-                value={form.template_id}
-                onChange={id => setForm(prev => ({ ...prev, template_id: id }))}
-              />
-            </div>
-          )}
-
-          {/* ── MEDIA TAB ── */}
-          {tab === 'media' && (
-            <div className="glass-card p-6 space-y-6">
-              <h2 className="text-lg font-serif text-white border-b border-white/10 pb-3 mb-4">Media Uploads</h2>
-
-              {/* ── Opening Animation Video (cover_url) ── */}
-              <div className="space-y-3">
-                <div>
-                  <label className="text-sm font-medium text-white block mb-0.5">
-                    🎬 Opening Animation Video
-                  </label>
-                  <p className="text-[11px] text-parchment-500">
-                    Plays first when a guest opens the invitation. Paste a YouTube / Vimeo link, or upload a video file.
-                  </p>
-                </div>
-
-                {form.cover_url ? (
-                  /* Preview */
-                  <div className="space-y-2">
-                    <div className="relative w-full aspect-video max-w-sm rounded-sm overflow-hidden border border-white/10 bg-black">
-                      {/youtu|vimeo/.test(form.cover_url) ? (
-                        <iframe
-                          src={form.cover_url.replace('watch?v=', 'embed/').replace('youtu.be/', 'www.youtube.com/embed/')}
-                          className="w-full h-full"
-                          style={{ border: 'none' }}
-                          allow="autoplay"
-                          title="Opening video preview"
-                        />
-                      ) : (
-                        <video src={form.cover_url} controls className="w-full h-full object-contain" />
-                      )}
-                      <div className="absolute top-2 left-2 px-2 py-0.5 bg-black/70 backdrop-blur-sm rounded text-[10px] text-white font-medium">
-                        Opening Video ✓
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => handleDeleteFile('cover')}
-                        className="absolute top-2 right-2 bg-red-600 hover:bg-red-700 text-white rounded-full p-1.5 shadow cursor-pointer"
-                        title="Remove"
-                      >
-                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                      </button>
-                    </div>
-                  </div>
-                ) : (
-                  /* Input panel */
-                  <div className="border border-dashed border-rose-500/30 rounded-sm bg-rose-950/10 p-5 space-y-4">
-                    {/* URL input */}
-                    <div className="space-y-1.5">
-                      <label className="text-[11px] font-medium text-white/80 uppercase tracking-wider">
-                        🔗 Paste YouTube or Vimeo URL
-                      </label>
-                      <div className="flex gap-2">
-                        <input
-                          type="url"
-                          placeholder="https://www.youtube.com/watch?v=..."
-                          className="flex-1 px-3 py-2 bg-black/50 border border-white/10 rounded-sm text-xs text-white placeholder:text-parchment-700 focus:outline-none focus:border-rose-400"
-                          onBlur={e => {
-                            const val = e.target.value.trim()
-                            if (val) setForm(prev => ({ ...prev, cover_url: val }))
-                          }}
-                          onKeyDown={e => {
-                            if (e.key === 'Enter') {
-                              const val = (e.target as HTMLInputElement).value.trim()
-                              if (val) setForm(prev => ({ ...prev, cover_url: val }))
-                            }
-                          }}
-                        />
-                      </div>
-                      <p className="text-[10px] text-parchment-600">YouTube, Vimeo, or any direct video URL — press Enter or click outside to apply</p>
-                    </div>
-
-                    {/* Divider */}
-                    <div className="flex items-center gap-3">
-                      <div className="flex-1 h-px bg-white/10" />
-                      <span className="text-[10px] text-parchment-600 uppercase tracking-widest">or upload a file</span>
-                      <div className="flex-1 h-px bg-white/10" />
-                    </div>
-
-                    {/* File upload */}
-                    <div className="flex flex-col items-center gap-2">
-                      <input
-                        type="file"
-                        accept="video/mp4,video/webm,video/quicktime"
-                        id="cover-video-upload"
-                        className="hidden"
-                        onChange={e => handleUpload(e, 'cover')}
-                      />
-                      <label
-                        htmlFor="cover-video-upload"
-                        className="cursor-pointer px-5 py-2.5 bg-rose-700/30 border border-rose-600/40 hover:bg-rose-700/50 rounded-sm text-sm font-medium text-white transition-all"
-                      >
-                        {uploading.cover ? `Uploading... ${uploading.cover}%` : '📤 Upload MP4 / WebM (max 50MB)'}
-                      </label>
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* Background Music */}
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-white block">Background Music (Audio)</label>
-                {form.music_url ? (
-                  <div className="flex items-center justify-between p-4 bg-white/5 border border-white/10 rounded-sm max-w-md">
-                    <div className="flex items-center gap-3">
-                      <span className="text-2xl">🎵</span>
-                      <div>
-                        <p className="text-xs text-white font-medium">Background Music Active</p>
-                        <audio src={form.music_url} controls className="h-8 mt-2 scale-90 -translate-x-4" />
-                      </div>
+              <div className="space-y-2 pt-2">
+                {form.timeline_events?.map((ev, idx) => (
+                  <div key={idx} className="flex items-start justify-between bg-slate-950 p-2.5 rounded-lg border border-slate-850">
+                    <div className="text-xs">
+                      <span className="font-bold text-rose-400 mr-2">{ev.date}</span>
+                      <span className="text-slate-300 font-serif font-bold">{ev.title}</span>
                     </div>
                     <button
-                      type="button"
-                      onClick={() => handleDeleteFile('music')}
-                      className="bg-red-600 hover:bg-red-700 text-white rounded-full p-1.5 shadow transition-all cursor-pointer"
-                      title="Delete Music"
+                      onClick={() => handleDeleteTimelineEvent(idx)}
+                      className="text-xs hover:text-red-400 p-0.5 cursor-pointer"
                     >
-                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                      </svg>
+                      ✕
                     </button>
                   </div>
-                ) : (
-                  <div className="flex flex-col items-center justify-center border-2 border-dashed border-white/10 rounded-sm p-6 hover:border-white/20 transition-all bg-black/10">
-                    <span className="text-3xl mb-2">🎶</span>
-                    <input
-                      type="file"
-                      accept="audio/*"
-                      id="music-upload"
-                      className="hidden"
-                      onChange={e => handleUpload(e, 'music')}
-                    />
-                    <label
-                      htmlFor="music-upload"
-                      className="cursor-pointer px-4 py-2 bg-white/5 border border-white/10 hover:bg-white/10 rounded-sm text-xs font-medium text-white transition-all"
-                    >
-                      {uploading.music ? `Uploading (${uploading.music}%)` : 'Upload Audio File'}
-                    </label>
-                    <p className="text-[10px] text-parchment-600 mt-2">Max size: 10MB (MP3, WAV, OGG)</p>
-                  </div>
-                )}
-              </div>
-
-              {/* ── Main Intro Video (video_url) ── */}
-              <div className="space-y-3">
-                <div>
-                  <label className="text-sm font-medium text-white block mb-0.5">
-                    🎥 Main Intro Video (Title Animation)
-                  </label>
-                  <p className="text-[11px] text-parchment-500">
-                    Auto-plays fullscreen after the opening animation. Paste a YouTube / Vimeo link, or upload a video file.
-                  </p>
-                </div>
-
-                {form.video_url ? (
-                  <div className="space-y-2">
-                    <div className="relative w-full aspect-video max-w-sm rounded-sm overflow-hidden border border-white/10 bg-black">
-                      {/youtu|vimeo/.test(form.video_url) ? (
-                        <iframe
-                          src={form.video_url.replace('watch?v=', 'embed/').replace('youtu.be/', 'www.youtube.com/embed/')}
-                          className="w-full h-full"
-                          style={{ border: 'none' }}
-                          allow="autoplay"
-                          title="Intro video preview"
-                        />
-                      ) : (
-                        <video src={form.video_url} controls className="w-full h-full object-cover" />
-                      )}
-                      <div className="absolute top-2 left-2 px-2 py-0.5 bg-black/70 backdrop-blur-sm rounded text-[10px] text-white font-medium">
-                        Intro Video ✓
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => handleDeleteFile('video')}
-                        className="absolute top-2 right-2 bg-red-600 hover:bg-red-700 text-white rounded-full p-1.5 shadow cursor-pointer"
-                        title="Remove"
-                      >
-                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                      </button>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="border border-dashed border-white/15 rounded-sm bg-white/5 p-5 space-y-4">
-                    <div className="space-y-1.5">
-                      <label className="text-[11px] font-medium text-white/80 uppercase tracking-wider">
-                        🔗 Paste YouTube or Vimeo URL
-                      </label>
-                      <input
-                        type="url"
-                        placeholder="https://www.youtube.com/watch?v=..."
-                        className="w-full px-3 py-2 bg-black/50 border border-white/10 rounded-sm text-xs text-white placeholder:text-parchment-700 focus:outline-none focus:border-rose-400"
-                        onBlur={e => {
-                          const val = e.target.value.trim()
-                          if (val) setForm(prev => ({ ...prev, video_url: val }))
-                        }}
-                        onKeyDown={e => {
-                          if (e.key === 'Enter') {
-                            const val = (e.target as HTMLInputElement).value.trim()
-                            if (val) setForm(prev => ({ ...prev, video_url: val }))
-                          }
-                        }}
-                      />
-                      <p className="text-[10px] text-parchment-600">YouTube, Vimeo, or direct URL — press Enter or click outside to apply</p>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <div className="flex-1 h-px bg-white/10" />
-                      <span className="text-[10px] text-parchment-600 uppercase tracking-widest">or upload a file</span>
-                      <div className="flex-1 h-px bg-white/10" />
-                    </div>
-                    <div className="flex flex-col items-center gap-2">
-                      <input
-                        type="file"
-                        accept="video/mp4,video/webm,video/quicktime"
-                        id="video-upload"
-                        className="hidden"
-                        onChange={e => handleUpload(e, 'video')}
-                      />
-                      <label
-                        htmlFor="video-upload"
-                        className="cursor-pointer px-5 py-2.5 bg-white/5 border border-white/10 hover:bg-white/10 rounded-sm text-sm font-medium text-white transition-all"
-                      >
-                        {uploading.video ? `Uploading... ${uploading.video}%` : '📤 Upload MP4 / WebM (max 50MB)'}
-                      </label>
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* Photo Gallery */}
-              <div className="space-y-4">
-                <div className="flex justify-between items-center">
-                  <label className="text-sm font-medium text-white block">Photo Gallery (Max 8 images)</label>
-                  <span className="text-xs text-parchment-500">{(form.gallery_urls ?? []).length} / 8 uploaded</span>
-                </div>
-
-                {(form.gallery_urls ?? []).length > 0 && (
-                  <div className="grid grid-cols-4 gap-2">
-                    {(form.gallery_urls ?? []).map((url, idx) => (
-                      <div key={idx} className="relative aspect-square rounded-sm overflow-hidden border border-white/10 group">
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={url} alt={`Gallery ${idx + 1}`} className="w-full h-full object-cover" />
-                        <button
-                          type="button"
-                          onClick={() => handleDeleteFile('gallery', idx)}
-                          className="absolute inset-0 bg-red-950/80 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer font-medium text-xs gap-1"
-                        >
-                          <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                          </svg>
-                          Delete
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                )}
-
-                {(form.gallery_urls ?? []).length < 8 && (
-                  <div className="flex flex-col items-center justify-center border-2 border-dashed border-white/10 rounded-sm p-6 hover:border-white/20 transition-all bg-black/10">
-                    <span className="text-3xl mb-2">📸</span>
-                    <input
-                      type="file"
-                      accept="image/*"
-                      multiple
-                      id="gallery-upload"
-                      className="hidden"
-                      onChange={e => handleUpload(e, 'gallery')}
-                    />
-                    <label
-                      htmlFor="gallery-upload"
-                      className="cursor-pointer px-4 py-2 bg-white/5 border border-white/10 hover:bg-white/10 rounded-sm text-xs font-medium text-white transition-all"
-                    >
-                      {uploading.gallery ? `Uploading (${uploading.gallery}%)` : 'Upload Gallery Photos'}
-                    </label>
-                    <p className="text-[10px] text-parchment-600 mt-2">Up to 8 files, Max size: 5MB each (JPEG, PNG, WebP)</p>
-                  </div>
-                )}
+                ))}
               </div>
             </div>
           )}
 
-          {/* ── PAYMENT TAB ── */}
-          {tab === 'payment' && (
-            <div className="glass-card p-6 space-y-6">
-              <h2 className="text-lg font-serif text-white border-b border-white/10 pb-3">Activate Your Invitation</h2>
+          {/* TAB 7: GUEST LINKS & RSVP LIST */}
+          {activeTab === 'settings' && (
+            <div className="space-y-4">
+              <h3 className="text-xs font-bold text-slate-300">Invite Guests</h3>
+              <p className="text-xs text-slate-400">Generate personalized links and tracking invites for your guests.</p>
+              
+              <form onSubmit={handleAddGuest} className="space-y-2 bg-slate-900 border border-slate-800/80 p-3 rounded-xl">
+                <Input
+                  label="Guest Name"
+                  placeholder="Amara Perera"
+                  value={newGuest.name}
+                  onChange={e => setNewGuest(prev => ({ ...prev, name: e.target.value }))}
+                />
+                <Input
+                  label="Phone (optional)"
+                  placeholder="07XXXXXXXX"
+                  value={newGuest.phone}
+                  onChange={e => setNewGuest(prev => ({ ...prev, phone: e.target.value }))}
+                />
+                <Button variant="primary" type="submit" className="w-full text-xs py-1.5 rounded-lg">
+                  Generate Link
+                </Button>
+              </form>
 
-              <div className="grid grid-cols-3 gap-3">
-                {Object.entries(PACKAGES).map(([key, pkg]) => (
-                  <button
-                    key={key}
-                    id={`package-${key}`}
-                    type="button"
-                    onClick={() => setSelectedPackage(key as any)}
-                    className={`p-4 rounded-sm border text-left transition-all ${
-                      selectedPackage === key
-                        ? key === 'luxury'
-                          ? 'border-yellow-600/70 bg-yellow-950/20'
-                          : key === 'premium'
-                          ? 'border-rose-600/60 bg-rose-900/20'
-                          : 'border-white/30 bg-white/8'
-                        : 'border-white/10 hover:border-white/25'
-                    }`}
-                  >
-                    {key === 'luxury' && (
-                      <span className="text-[9px] bg-yellow-700/20 text-yellow-300 border border-yellow-700/40 px-1.5 py-0.5 rounded-full block mb-2 w-fit font-bold uppercase tracking-wider">Luxury</span>
-                    )}
-                    {key === 'premium' && (
-                      <span className="text-[9px] bg-rose-700/20 text-rose-300 border border-rose-700/40 px-1.5 py-0.5 rounded-full block mb-2 w-fit font-bold uppercase tracking-wider">Premium</span>
-                    )}
-                    {key === 'basic' && (
-                      <span className="text-[9px] bg-white/10 text-white/70 border border-white/10 px-1.5 py-0.5 rounded-full block mb-2 w-fit font-bold uppercase tracking-wider">Basic</span>
-                    )}
-                    <p className="text-white font-medium capitalize text-sm">{pkg.name}</p>
-                    <p className="text-lg font-bold text-white mt-1">Rs. {pkg.price.toLocaleString()}</p>
-                    <p className="text-[9px] text-parchment-600 mt-0.5">LKR · One-time</p>
-                  </button>
-                ))}
-              </div>
+              <div className="space-y-2 border-t border-slate-800/80 pt-3">
+                <Input
+                  placeholder="Search guests..."
+                  value={guestSearch}
+                  onChange={e => setGuestSearch(e.target.value)}
+                />
 
-              <div className="p-4 bg-white/5 border border-white/10 rounded-sm text-xs space-y-3">
-                <p className="font-bold text-white">Included Features by Package:</p>
-                <div className="grid grid-cols-3 gap-2">
-                  <div className="space-y-1">
-                    <p className="text-white font-medium">Basic</p>
-                    <p className="text-[10px] text-parchment-500">✓ 3D envelope scene<br />✓ Music & Gallery<br />✓ Google Maps embed</p>
-                  </div>
-                  <div className="space-y-1">
-                    <p className="text-rose-400 font-medium">Premium</p>
-                    <p className="text-[10px] text-parchment-500">✓ Basic Package plus...<br />✓ RSVP Form System<br />✓ Guest link manager<br />✓ Admin Dashboard</p>
-                  </div>
-                  <div className="space-y-1">
-                    <p className="text-yellow-400 font-medium">Luxury</p>
-                    <p className="text-[10px] text-parchment-500">✓ Premium Package plus...<br />✓ Live stream player<br />✓ Gift registry<br />✓ Guest Photo Wall<br />✓ Photo Moderation</p>
-                  </div>
+                <div className="space-y-2 max-h-40 overflow-y-auto pr-1">
+                  {guestLoading ? (
+                    <div className="text-xs text-slate-400 py-2">Loading guests...</div>
+                  ) : filteredGuests.length > 0 ? (
+                    filteredGuests.map((g) => (
+                      <div key={g.id} className="bg-slate-950 p-2.5 rounded-lg border border-slate-850/80 space-y-1.5 text-xs">
+                        <div className="flex justify-between items-center">
+                          <span className="font-bold text-slate-200">{g.name}</span>
+                          <span className={`text-[9px] uppercase px-1.5 py-0.5 rounded font-mono ${
+                            g.status === 'opened' ? 'bg-green-500/20 text-green-400' : 'bg-slate-800 text-slate-400'
+                          }`}>
+                            {g.status}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-1.5 pt-0.5">
+                          <button
+                            onClick={() => handleCopyLink(g)}
+                            className="bg-slate-900 hover:bg-slate-800 px-2 py-1 rounded text-[10px] cursor-pointer"
+                          >
+                            🔗 Link
+                          </button>
+                          <button
+                            onClick={() => copyGuestMessage(g)}
+                            className="bg-slate-900 hover:bg-slate-800 px-2 py-1 rounded text-[10px] cursor-pointer"
+                          >
+                            💬 Message
+                          </button>
+                          <button
+                            onClick={() => handleDeleteGuest(g.id)}
+                            className="text-red-400 hover:bg-red-500/10 px-2 py-1 rounded text-[10px] ml-auto cursor-pointer"
+                          >
+                            Delete
+                          </button>
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="text-xs text-slate-500 py-2">No guests found.</div>
+                  )}
                 </div>
               </div>
 
-              <div className="space-y-2 text-sm text-parchment-400">
-                <p className="flex items-center gap-2"><span className="text-green-500">✓</span> Secure payment via PayHere</p>
-                <p className="flex items-center gap-2"><span className="text-green-500">✓</span> Invitation published immediately after payment</p>
-                <p className="flex items-center gap-2"><span className="text-green-500">✓</span> All features active for your wedding period</p>
-              </div>
-
-              {!existingId && (
-                <div className="px-4 py-3 bg-amber-900/20 border border-amber-700/30 rounded-sm text-sm text-amber-400">
-                  ⚠️ Please fill in your wedding details and save before activating.
-                </div>
-              )}
-
-              <Button
-                id="payhere-pay-btn"
-                variant="gold"
-                size="lg"
-                className="w-full"
-                onClick={handlePayHere}
-                disabled={!existingId}
-              >
-                Pay Rs. {PACKAGES[selectedPackage].price.toLocaleString()} with PayHere
-              </Button>
-
-              <p className="text-xs text-center text-parchment-700">
-                Payments processed securely via PayHere · LKR only
-              </p>
-
-              <div className="border-t border-white/10 pt-4 mt-4">
-                <div className="p-4 rounded-sm border border-rose-500/20 bg-rose-950/10">
-                  <h3 className="text-sm font-medium text-white mb-1">🛠️ Testing & Demo Mode</h3>
-                  <p className="text-xs text-parchment-500 mb-3">
-                    Want to test the invitation link and RSVP system? You can activate the Free Demo Version instantly without payment.
-                  </p>
-                  <Button
-                    id="free-activate-btn"
-                    variant="secondary"
-                    className="w-full text-xs py-2 bg-rose-950/40 hover:bg-rose-900/40 border border-rose-800/40 text-rose-300"
-                    onClick={handleFreeActivate}
-                    disabled={!existingId}
-                    loading={freeLoading}
-                  >
-                    🚀 Activate Free Test Version (Instant Publish with {PACKAGES[selectedPackage].name} Package)
+              {/* PAYMENT ACTIVATION */}
+              <h3 className="text-xs font-bold text-slate-300 border-t border-slate-800/80 pt-3">Activate Package</h3>
+              <div className="bg-slate-900 border border-slate-800/80 p-3 rounded-xl space-y-2">
+                <Select
+                  label="Select Tier"
+                  value={selectedPackage}
+                  onChange={e => setSelectedPackage(e.target.value as any)}
+                  options={[
+                    { value: 'basic', label: 'Basic Plan (Free Test)' },
+                    { value: 'premium', label: 'Premium Plan' },
+                    { value: 'luxury', label: 'Luxury Plan' },
+                  ]}
+                />
+                
+                <div className="flex gap-2 pt-1.5">
+                  <Button variant="primary" className="flex-1 text-xs py-1.5 rounded-lg" onClick={handlePayHere}>
+                    Activate Pro
+                  </Button>
+                  <Button variant="secondary" className="flex-1 text-xs py-1.5 rounded-lg" onClick={handleFreeActivate} loading={freeLoading}>
+                    Free Test
                   </Button>
                 </div>
               </div>
             </div>
           )}
         </div>
+      </div>
 
-        {/* Right: 3D Preview */}
-        <div className="space-y-4">
-          <div className="glass-card overflow-hidden" style={{ height: '480px' }}>
-            <div className="relative h-full">
-              <InvitationScene
-                template={previewTemplate}
-                burstMode={false}
-                className="w-full h-full"
-              />
-              <div className="absolute top-3 left-3 px-2 py-1 bg-black/60 rounded text-xs text-parchment-500 pointer-events-none">
-                Live 3D Preview · Click to interact
-              </div>
-            </div>
+      {/* ── CENTER VIEWPORT CANVAS ── */}
+      <div className="flex-1 flex flex-col bg-[#08090c] overflow-hidden select-none relative h-full">
+        {/* Top canvas controls */}
+        <div className="h-14 bg-[#0c0f13] border-b border-slate-800/80 px-6 flex items-center justify-between z-10 shrink-0">
+          <div className="font-serif text-sm text-slate-300 font-bold tracking-widest hidden md:block">InviteCraft Template Builder</div>
+          
+          {/* Viewport controls */}
+          <div className="flex bg-[#12161e] border border-slate-800 rounded-lg p-0.5">
+            {[
+              { id: 'desktop', icon: '💻' },
+              { id: 'tablet', icon: '📱' },
+              { id: 'mobile', icon: '📞' }
+            ].map(v => (
+              <button
+                key={v.id}
+                onClick={() => setViewport(v.id as Viewport)}
+                className={`p-1.5 rounded-md text-sm transition-all cursor-pointer ${
+                  viewport === v.id ? 'bg-rose-500/10 text-rose-400' : 'text-slate-500 hover:text-slate-300'
+                }`}
+              >
+                {v.icon}
+              </button>
+            ))}
           </div>
 
-          {/* Preview info card */}
-          {form.partner1_name && form.partner2_name && (
-            <div className="glass-card p-4 text-center">
-              <p className="font-serif text-2xl text-white">
-                {form.partner1_name} <span className="text-rose-400">&</span> {form.partner2_name}
-              </p>
-              {form.wedding_date && (
-                <p className="text-sm text-parchment-400 mt-1">
-                  {new Date(form.wedding_date + 'T00:00:00').toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+          <div className="flex items-center gap-2">
+            <span className="text-[10px] bg-green-500/20 text-green-400 border border-green-500/30 px-2 py-0.5 rounded-full font-semibold flex items-center gap-1 scale-90">
+              <span className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse"></span> Preview · Live
+            </span>
+            <Button
+              variant="secondary"
+              className="text-xs py-1 px-3 border-slate-800 bg-[#12161e] rounded-lg cursor-pointer"
+              onClick={handleSave}
+              loading={saveLoading}
+            >
+              💾 Save
+            </Button>
+            <Button
+              variant="primary"
+              className="text-xs py-1 px-3 rounded-lg cursor-pointer"
+              onClick={handleSave}
+              loading={saveLoading}
+            >
+              🚀 Publish
+            </Button>
+          </div>
+        </div>
+
+        {/* Viewport container */}
+        <div className="flex-1 flex items-center justify-center p-6 overflow-y-auto h-full">
+          <div
+            className={`bg-[#0b0b0f] border border-slate-800 rounded-2xl overflow-hidden shadow-2xl relative transition-all duration-300 flex flex-col h-[70vh] ${
+              viewport === 'desktop' ? 'w-full max-w-[800px]' : viewport === 'tablet' ? 'w-[600px]' : 'w-[360px]'
+            }`}
+          >
+            {/* Live customizer style definitions inserted locally in preview */}
+            <style jsx global>{`
+              .preview-font-primary {
+                font-family: '${builderConfig.global.primaryFont}', serif !important;
+              }
+              .preview-font-secondary {
+                font-family: '${builderConfig.global.secondaryFont}', sans-serif !important;
+              }
+              .preview-font-section {
+                font-family: '${activeSectionStyle.fontFamily || builderConfig.global.primaryFont}', serif !important;
+              }
+            `}</style>
+
+            {/* PREVIEW 1: OPEN ANIMATION SPLASH */}
+            {activeSectionId === 'open-animation' && (
+              <div className="relative w-full h-full flex flex-col items-center justify-center text-center px-4 overflow-hidden">
+                {activeSectionStyle.bgType === 'video' && activeSectionStyle.bgUrl ? (
+                  <video src={activeSectionStyle.bgUrl} className="absolute inset-0 object-cover w-full h-full" autoPlay loop muted playsInline />
+                ) : activeSectionStyle.bgType === 'image' && activeSectionStyle.bgUrl ? (
+                  <img src={activeSectionStyle.bgUrl} alt="Background" className="absolute inset-0 object-cover w-full h-full" />
+                ) : (
+                  <div className="absolute inset-0" style={{ backgroundColor: activeSectionStyle.bgColor || '#0b0b0f' }} />
+                )}
+                
+                {/* Overlay color */}
+                <div
+                  className="absolute inset-0"
+                  style={{
+                    backgroundColor: activeSectionStyle.bgOverlayColor || '#000000',
+                    opacity: (activeSectionStyle.bgOverlayOpacity ?? 50) / 100
+                  }}
+                />
+
+                {/* Envelope mock */}
+                <div className="relative z-10 max-w-md space-y-4 pointer-events-none p-4" style={{
+                  paddingTop: `${activeSectionStyle.paddingTop}px`,
+                  paddingBottom: `${activeSectionStyle.paddingBottom}px`,
+                  borderRadius: `${activeSectionStyle.borderRadius || 0}px`,
+                  boxShadow: activeSectionStyle.boxShadow ? '0 10px 50px rgba(0,0,0,0.8)' : 'none'
+                }}>
+                  {/* Rose floral envelope mock details */}
+                  <div className="border border-[#D4AF37]/30 p-8 rounded-xl bg-black/45 backdrop-blur-md">
+                    <p className="text-[9px] uppercase tracking-[0.4em] mb-2 preview-font-secondary" style={{ color: activeSectionStyle.textColor || '#D4AF37' }}>
+                      {activeSection.content.title || 'Together with their families'}
+                    </p>
+                    <h1 className="text-3xl font-bold tracking-wide preview-font-section leading-relaxed" style={{ color: activeSectionStyle.textColor || '#D4AF37' }}>
+                      {form.partner1_name || 'Groom'} <span className="text-xl">&amp;</span> {form.partner2_name || 'Bride'}
+                    </h1>
+                    <p className="text-[10px] mt-3 tracking-widest leading-relaxed opacity-75 preview-font-secondary" style={{ color: activeSectionStyle.textColor || '#ffffff' }}>
+                      {activeSection.content.subtitle || 'Invite you to celebrate their wedding'}
+                    </p>
+                    <div className="h-0.5 w-16 mx-auto bg-[#D4AF37]/40 my-4"></div>
+                    <button className="px-5 py-2.5 rounded-full text-[10px] uppercase font-semibold tracking-wider bg-[#D4AF37]/80 text-slate-950 shadow-md">
+                      {activeSection.content.buttonText || 'Click to Open'}
+                    </button>
+                  </div>
+                </div>
+
+                <div className="absolute bottom-4 left-4 z-10 text-[9px] text-white/40">Previewing Envelope Opening Screen</div>
+              </div>
+            )}
+
+            {/* PREVIEW 2: CINEMATIC INTRO VIDEO */}
+            {activeSectionId === 'intro-animation' && (
+              <div className="relative w-full h-full flex flex-col items-center justify-center text-center px-4 overflow-hidden">
+                {activeSectionStyle.bgType === 'video' && activeSectionStyle.bgUrl ? (
+                  <video src={activeSectionStyle.bgUrl} className="absolute inset-0 object-cover w-full h-full" autoPlay loop muted playsInline />
+                ) : activeSectionStyle.bgType === 'image' && activeSectionStyle.bgUrl ? (
+                  <img src={activeSectionStyle.bgUrl} alt="Background" className="absolute inset-0 object-cover w-full h-full" />
+                ) : (
+                  <div className="absolute inset-0" style={{ backgroundColor: activeSectionStyle.bgColor || '#0b0b0f' }} />
+                )}
+                
+                {/* Overlay color */}
+                <div
+                  className="absolute inset-0"
+                  style={{
+                    backgroundColor: activeSectionStyle.bgOverlayColor || '#000000',
+                    opacity: (activeSectionStyle.bgOverlayOpacity ?? 50) / 100
+                  }}
+                />
+
+                <div className="relative z-10 space-y-2 pointer-events-none p-4" style={{
+                  paddingTop: `${activeSectionStyle.paddingTop}px`,
+                  paddingBottom: `${activeSectionStyle.paddingBottom}px`,
+                  borderRadius: `${activeSectionStyle.borderRadius || 0}px`
+                }}>
+                  <p className="text-[10px] uppercase tracking-widest preview-font-secondary" style={{ color: activeSectionStyle.textColor || '#ffffff' }}>
+                    {activeSection.content.subtitle || 'Intro Showcase'}
+                  </p>
+                  <h1 className="text-2xl tracking-wider font-bold uppercase preview-font-section" style={{ color: activeSectionStyle.textColor || '#D4AF37' }}>
+                    {activeSection.content.title || 'OUR MOVIE INTRO'}
+                  </h1>
+                  <span className="text-[10px] bg-black/40 text-slate-400 px-3 py-1 rounded-full border border-slate-800">
+                    🎬 Video Timeline: 00:03 / 00:08
+                  </span>
+                </div>
+
+                <div className="absolute bottom-4 left-4 z-10 text-[9px] text-white/40">Previewing Cinematic Intro Video Stage</div>
+              </div>
+            )}
+
+            {/* PREVIEW 3: DETAILS CARD SCROLL SECTION */}
+            {activeSectionId === 'details-section' && (
+              <div className="w-full h-full flex flex-col overflow-y-auto px-4 py-8" style={{
+                backgroundColor: activeSectionStyle.bgColor || '#0b0b0f',
+                paddingTop: `${activeSectionStyle.paddingTop}px`,
+                paddingBottom: `${activeSectionStyle.paddingBottom}px`
+              }}>
+                <div className="w-full max-w-sm mx-auto space-y-6 text-center border border-slate-800/80 p-6 rounded-2xl bg-slate-900/40 backdrop-blur-md" style={{
+                  borderRadius: `${activeSectionStyle.borderRadius || 12}px`,
+                  boxShadow: activeSectionStyle.boxShadow ? '0 10px 30px rgba(0,0,0,0.5)' : 'none'
+                }}>
+                  <span className="text-[9px] uppercase tracking-[0.3em] font-semibold text-rose-400 preview-font-secondary">Celebrate With Us</span>
+                  <h2 className="text-2xl font-bold font-serif leading-snug preview-font-section" style={{ color: activeSectionStyle.textColor || '#ffffff' }}>
+                    Wedding Invitation
+                  </h2>
+                  <div className="h-0.5 w-12 mx-auto bg-rose-500/50"></div>
+                  
+                  <div className="space-y-4 text-xs font-light tracking-wide leading-relaxed">
+                    <p className="preview-font-secondary" style={{ color: activeSectionStyle.textColor || '#ffffff' }}>
+                      We joyfully request the pleasure of your company at the wedding ceremony of
+                    </p>
+                    
+                    <div className="py-2">
+                      <div className="text-lg font-bold font-serif preview-font-section" style={{ color: builderConfig.global.accentColor }}>
+                        {form.partner1_name || 'Kamal'}
+                      </div>
+                      <div className="text-xs text-slate-500 my-1 font-serif">&amp;</div>
+                      <div className="text-lg font-bold font-serif preview-font-section" style={{ color: builderConfig.global.accentColor }}>
+                        {form.partner2_name || 'Nisha'}
+                      </div>
+                    </div>
+
+                    <div className="border-t border-b border-slate-800/60 py-3 space-y-1">
+                      <div className="font-bold uppercase tracking-widest preview-font-secondary text-rose-400 text-[10px]">
+                        {form.wedding_date ? new Date(form.wedding_date).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) : 'Date not set'}
+                      </div>
+                      <div className="text-slate-400 preview-font-secondary text-[10px]">
+                        Time: {form.wedding_time}
+                      </div>
+                    </div>
+
+                    <div className="space-y-0.5">
+                      <div className="font-bold text-slate-300 preview-font-secondary text-[11px]">{form.venue_name || 'Venue'}</div>
+                      <div className="text-slate-500 text-[10px] preview-font-secondary">{form.venue_address || 'Address'}</div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="text-center text-[10px] text-slate-500 mt-6">Scrollable details card layout</div>
+              </div>
+            )}
+
+            {/* PREVIEW 4: OTHER SECTIONS */}
+            {!['open-animation', 'intro-animation', 'details-section'].includes(activeSectionId) && (
+              <div className="w-full h-full flex flex-col items-center justify-center p-6 text-center" style={{
+                backgroundColor: activeSectionStyle.bgColor || '#0b0b0f',
+                color: activeSectionStyle.textColor || '#ffffff',
+                paddingTop: `${activeSectionStyle.paddingTop}px`,
+                paddingBottom: `${activeSectionStyle.paddingBottom}px`
+              }}>
+                <div className="max-w-sm mx-auto space-y-4 p-6 border border-slate-850 rounded-xl bg-slate-900/30">
+                  <span className="text-lg">📦</span>
+                  <h2 className="text-lg font-bold font-serif preview-font-section">{activeSection.title}</h2>
+                  <p className="text-xs text-slate-400 leading-relaxed preview-font-secondary">
+                    Custom configuration for the {activeSection.type.toUpperCase()} block. Customize properties in the settings sidebar on the right.
+                  </p>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Bottom Page Section Sequencer */}
+        <div className="h-28 bg-[#0c0f13] border-t border-slate-800/80 px-6 flex items-center z-10 shrink-0 select-none overflow-x-auto whitespace-nowrap scrollbar-none">
+          <div className="text-[10px] uppercase font-bold text-slate-500 mr-4 tracking-widest">Page Sections:</div>
+          <div className="flex items-center gap-3">
+            {builderConfig.sections.map((sec, idx) => (
+              <button
+                key={sec.id}
+                onClick={() => setActiveSectionId(sec.id)}
+                className={`flex flex-col items-start gap-1 p-2.5 rounded-xl border w-[120px] text-left transition-all cursor-pointer ${
+                  activeSectionId === sec.id
+                    ? 'border-rose-500 bg-rose-500/[0.04]'
+                    : 'border-slate-800 bg-[#12161e] hover:border-slate-700'
+                }`}
+              >
+                <span className="text-[9px] bg-slate-800 text-slate-400 px-1.5 py-0.5 rounded leading-none">#{idx + 1}</span>
+                <span className="text-xs font-bold text-slate-200 truncate w-full">{sec.title}</span>
+                <span className="text-[9px] text-slate-500 capitalize leading-none">{sec.visible ? 'visible' : 'hidden'}</span>
+              </button>
+            ))}
+            
+            <button className="flex flex-col items-center justify-center border border-dashed border-slate-800 hover:border-slate-700 bg-transparent rounded-xl w-[120px] h-[72px] text-slate-500 hover:text-slate-300 text-xs gap-1 cursor-pointer">
+              <span>➕</span>
+              <span>Add Section</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* ── RIGHT PANEL (SECTION PROPERTY SETTINGS) ── */}
+      <div className="w-full md:w-[320px] bg-[#0c0f13] border-t md:border-t-0 md:border-l border-slate-800/80 flex flex-col z-10 shrink-0 select-none overflow-y-auto max-h-[45vh] md:max-h-full">
+        <div className="p-4 border-b border-slate-800/80">
+          <label className="text-[9px] uppercase tracking-wider text-slate-500 block mb-1">Editing Settings For:</label>
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-bold text-slate-300 font-serif">{activeSection.title}</span>
+            <span className="text-[9px] bg-slate-800 px-2 py-0.5 rounded font-mono text-slate-400">{activeSection.type.toUpperCase()}</span>
+          </div>
+        </div>
+
+        {/* Section specific tabs */}
+        <div className="grid grid-cols-3 bg-[#090b0e] p-1 border-b border-slate-800/80">
+          {[
+            { id: 'content', label: 'Content' },
+            { id: 'style', label: 'Style' },
+            { id: 'animation', label: 'Motion' }
+          ].map(rt => (
+            <button
+              key={rt.id}
+              onClick={() => setActiveRightTab(rt.id as RightTab)}
+              className={`text-center py-1.5 text-xs rounded-md font-medium transition-all cursor-pointer ${
+                activeRightTab === rt.id
+                  ? 'bg-rose-500/10 text-rose-400 border border-rose-500/10'
+                  : 'text-slate-500 hover:text-slate-300'
+              }`}
+            >
+              {rt.label}
+            </button>
+          ))}
+        </div>
+
+        <div className="flex-1 p-5 space-y-4">
+          {error && (
+            <div className="px-3 py-2 bg-red-900/30 border border-red-700/40 rounded-lg text-[11px] text-red-400 font-mono leading-tight whitespace-normal">
+              ⚠️ {error}
+            </div>
+          )}
+          {success && (
+            <div className="px-3 py-2 bg-green-900/30 border border-green-700/40 rounded-lg text-[11px] text-green-400 font-mono">
+              ✓ {success}
+            </div>
+          )}
+
+          {/* RIGHT TAB 1: SECTION CONTENT */}
+          {activeRightTab === 'content' && (
+            <div className="space-y-4">
+              {activeSection.type === 'open' && (
+                <div className="space-y-3">
+                  <Input
+                    label="Welcome Header"
+                    value={activeSection.content.title || ''}
+                    onChange={e => handleUpdateSectionContent('title', e.target.value)}
+                  />
+                  <Input
+                    label="Welcome Subtitle"
+                    value={activeSection.content.subtitle || ''}
+                    onChange={e => handleUpdateSectionContent('subtitle', e.target.value)}
+                  />
+                  <Input
+                    label="Opening Button Label"
+                    value={activeSection.content.buttonText || ''}
+                    onChange={e => handleUpdateSectionContent('buttonText', e.target.value)}
+                  />
+                </div>
+              )}
+
+              {activeSection.type === 'intro' && (
+                <div className="space-y-3">
+                  <Input
+                    label="Title Header"
+                    value={activeSection.content.title || ''}
+                    onChange={e => handleUpdateSectionContent('title', e.target.value)}
+                  />
+                  <Input
+                    label="Subtitle Description"
+                    value={activeSection.content.subtitle || ''}
+                    onChange={e => handleUpdateSectionContent('subtitle', e.target.value)}
+                  />
+                </div>
+              )}
+
+              {activeSection.type === 'details' && (
+                <div className="space-y-3">
+                  <Input
+                    label="Header Title"
+                    value={activeSection.content.title || ''}
+                    onChange={e => handleUpdateSectionContent('title', e.target.value)}
+                  />
+                  <Input
+                    label="Welcome Label"
+                    value={activeSection.content.subtitle || ''}
+                    onChange={e => handleUpdateSectionContent('subtitle', e.target.value)}
+                  />
+                  <Textarea
+                    label="Event Custom Note"
+                    rows={2}
+                    value={form.custom_message}
+                    onChange={e => setForm(prev => ({ ...prev, custom_message: e.target.value }))}
+                  />
+                </div>
+              )}
+
+              {!['open', 'intro', 'details'].includes(activeSection.type) && (
+                <div className="space-y-3">
+                  <Input
+                    label="Section Title"
+                    value={activeSection.content.title || ''}
+                    onChange={e => handleUpdateSectionContent('title', e.target.value)}
+                  />
+                  <Input
+                    label="Section Subtitle"
+                    value={activeSection.content.subtitle || ''}
+                    onChange={e => handleUpdateSectionContent('subtitle', e.target.value)}
+                  />
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* RIGHT TAB 2: SECTION STYLE CUSTOMIZER */}
+          {activeRightTab === 'style' && (
+            <div className="space-y-4">
+              {/* Background Types */}
+              {['open', 'intro'].includes(activeSection.type) && (
+                <div>
+                  <label className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider block mb-2">Background Media Type</label>
+                  <div className="grid grid-cols-3 bg-[#12161e] border border-slate-800 rounded-lg p-0.5">
+                    {[
+                      { id: 'video', label: '🎬 Video' },
+                      { id: 'image', label: '🖼️ Image' },
+                      { id: 'color', label: '🎨 Color' }
+                    ].map(t => (
+                      <button
+                        key={t.id}
+                        onClick={() => handleUpdateSectionStyle('bgType', t.id)}
+                        className={`text-center py-1 rounded text-[10px] font-medium transition-all cursor-pointer ${
+                          activeSectionStyle.bgType === t.id
+                            ? 'bg-rose-500/10 text-rose-400'
+                            : 'text-slate-500 hover:text-slate-300'
+                        }`}
+                      >
+                        {t.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Background File Upload */}
+              {['open', 'intro'].includes(activeSection.type) && activeSectionStyle.bgType !== 'color' && (
+                <div className="space-y-2">
+                  <label className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider block mb-1">
+                    {activeSectionStyle.bgType === 'video' ? 'Upload Video (Max 50MB)' : 'Upload Background Image (Max 10MB)'}
+                  </label>
+                  <input
+                    type="file"
+                    id="bg-file-upload"
+                    accept={activeSectionStyle.bgType === 'video' ? 'video/*' : 'image/*'}
+                    onChange={e => handleUploadBg(e, 'bg_url')}
+                    className="hidden"
+                  />
+                  
+                  {activeSectionStyle.bgUrl ? (
+                    <div className="bg-slate-900 border border-slate-800 p-2.5 rounded-xl flex items-center justify-between text-xs">
+                      <div className="truncate text-rose-300 font-mono w-[80%]">{activeSectionStyle.bgUrl.split('/').pop()}</div>
+                      <button
+                        onClick={() => handleUpdateSectionStyle('bgUrl', '')}
+                        className="text-xs hover:text-red-400 p-0.5 cursor-pointer"
+                      >
+                        🗑️
+                      </button>
+                    </div>
+                  ) : (
+                    <Button
+                      variant="secondary"
+                      className="w-full text-xs py-2"
+                      onClick={() => document.getElementById('bg-file-upload')?.click()}
+                      loading={!!uploading[activeSection.type === 'open' ? 'cover' : 'video']}
+                    >
+                      ☁️ Upload File
+                    </Button>
+                  )}
+
+                  <div className="pt-2">
+                    <label className="text-[10px] font-medium text-slate-400 block mb-1">Or Paste Direct URL</label>
+                    <Input
+                      placeholder="https://..."
+                      value={activeSectionStyle.bgUrl || ''}
+                      onChange={e => handleUpdateSectionStyle('bgUrl', e.target.value)}
+                    />
+                  </div>
+                </div>
+              )}
+
+              {/* Color pickers */}
+              {(activeSectionStyle.bgType === 'color' || !['open', 'intro'].includes(activeSection.type)) && (
+                <div>
+                  <label className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider block mb-1">Background Color</label>
+                  <div className="flex items-center gap-2 bg-[#12161e] border border-slate-800 p-2 rounded-xl">
+                    <input
+                      type="color"
+                      value={activeSectionStyle.bgColor || '#0b0b0f'}
+                      onChange={e => handleUpdateSectionStyle('bgColor', e.target.value)}
+                      className="w-8 h-6 bg-transparent border-0 cursor-pointer"
+                    />
+                    <span className="text-xs font-mono">{activeSectionStyle.bgColor || '#0b0b0f'}</span>
+                  </div>
+                </div>
+              )}
+
+              {/* Overlay styling for Open and Intro Animations */}
+              {['open', 'intro'].includes(activeSection.type) && (
+                <div className="space-y-3 border-t border-slate-850 pt-3">
+                  <div className="flex items-center justify-between">
+                    <label className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Overlay Opacity</label>
+                    <span className="text-[10px] font-mono font-bold text-rose-400">{activeSectionStyle.bgOverlayOpacity ?? 50}%</span>
+                  </div>
+                  <input
+                    type="range"
+                    min="0"
+                    max="100"
+                    value={activeSectionStyle.bgOverlayOpacity ?? 50}
+                    onChange={e => handleUpdateSectionStyle('bgOverlayOpacity', parseInt(e.target.value))}
+                    className="w-full h-1 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-rose-500"
+                  />
+
+                  <div>
+                    <label className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider block mb-1">Overlay Color</label>
+                    <div className="flex items-center gap-2 bg-[#12161e] border border-slate-800 p-2 rounded-xl">
+                      <input
+                        type="color"
+                        value={activeSectionStyle.bgOverlayColor || '#000000'}
+                        onChange={e => handleUpdateSectionStyle('bgOverlayColor', e.target.value)}
+                        className="w-8 h-6 bg-transparent border-0 cursor-pointer"
+                      />
+                      <span className="text-xs font-mono">{activeSectionStyle.bgOverlayColor || '#000000'}</span>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Fonts overrides */}
+              <div className="border-t border-slate-850 pt-3 space-y-3">
+                <Select
+                  label="Section Font Overrides"
+                  value={activeSectionStyle.fontFamily || ''}
+                  onChange={e => handleUpdateSectionStyle('fontFamily', e.target.value)}
+                  options={[
+                    { value: '', label: 'Inherit Global Font' },
+                    ...GOOGLE_FONTS.map(f => ({ value: f, label: f }))
+                  ]}
+                />
+
+                <div>
+                  <label className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider block mb-1">Text Color Override</label>
+                  <div className="flex items-center gap-2 bg-[#12161e] border border-slate-800 p-2 rounded-xl">
+                    <input
+                      type="color"
+                      value={activeSectionStyle.textColor || '#ffffff'}
+                      onChange={e => handleUpdateSectionStyle('textColor', e.target.value)}
+                      className="w-8 h-6 bg-transparent border-0 cursor-pointer"
+                    />
+                    <span className="text-xs font-mono">{activeSectionStyle.textColor || '#ffffff'}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Spacings */}
+              <div className="border-t border-slate-850 pt-3 space-y-3">
+                <div className="space-y-1">
+                  <div className="flex items-center justify-between">
+                    <label className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Padding Top</label>
+                    <span className="text-[10px] font-mono text-rose-400 font-bold">{activeSectionStyle.paddingTop ?? 80}px</span>
+                  </div>
+                  <input
+                    type="range"
+                    min="0"
+                    max="200"
+                    value={activeSectionStyle.paddingTop ?? 80}
+                    onChange={e => handleUpdateSectionStyle('paddingTop', parseInt(e.target.value))}
+                    className="w-full h-1 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-rose-500"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <div className="flex items-center justify-between">
+                    <label className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Padding Bottom</label>
+                    <span className="text-[10px] font-mono text-rose-400 font-bold">{activeSectionStyle.paddingBottom ?? 80}px</span>
+                  </div>
+                  <input
+                    type="range"
+                    min="0"
+                    max="200"
+                    value={activeSectionStyle.paddingBottom ?? 80}
+                    onChange={e => handleUpdateSectionStyle('paddingBottom', parseInt(e.target.value))}
+                    className="w-full h-1 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-rose-500"
+                  />
+                </div>
+              </div>
+
+              {/* Advanced box border shadow styles */}
+              <div className="border-t border-slate-850 pt-3 space-y-3">
+                <div className="space-y-1">
+                  <div className="flex items-center justify-between">
+                    <label className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Border Radius</label>
+                    <span className="text-[10px] font-mono text-rose-400 font-bold">{activeSectionStyle.borderRadius ?? 8}px</span>
+                  </div>
+                  <input
+                    type="range"
+                    min="0"
+                    max="40"
+                    value={activeSectionStyle.borderRadius ?? 8}
+                    onChange={e => handleUpdateSectionStyle('borderRadius', parseInt(e.target.value))}
+                    className="w-full h-1 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-rose-500"
+                  />
+                </div>
+
+                <div className="flex items-center justify-between pt-1">
+                  <label className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Box Shadow</label>
+                  <button
+                    onClick={() => handleUpdateSectionStyle('boxShadow', !activeSectionStyle.boxShadow)}
+                    className={`text-xs px-2.5 py-1 rounded-md transition-all cursor-pointer font-bold uppercase ${
+                      activeSectionStyle.boxShadow ? 'bg-rose-500/20 text-rose-400 border border-rose-500/20' : 'bg-slate-850 text-slate-500'
+                    }`}
+                  >
+                    {activeSectionStyle.boxShadow ? 'On' : 'Off'}
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* RIGHT TAB 3: ANIMATIONS */}
+          {activeRightTab === 'animation' && (
+            <div className="space-y-4">
+              <label className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider block mb-1">Entrance Transition Effect</label>
+              <Select
+                value={activeSection.styles.borderRadius ? 'fade' : 'none'}
+                onChange={() => {}}
+                options={[
+                  { value: 'fade', label: 'GSAP Fade In Reveal' },
+                  { value: 'slide', label: 'GSAP Slide Up' },
+                  { value: 'zoom', label: 'GSAP Scale/Zoom' },
+                  { value: 'none', label: 'No transition' }
+                ]}
+              />
+
+              <div className="bg-slate-900/50 border border-slate-850 p-3 rounded-xl">
+                <p className="text-[10px] text-slate-400 leading-relaxed">
+                  💡 GSAP is automatically enabled for fluid page entry points. Scroll reveals will animate elements dynamically when loading is completed.
                 </p>
-              )}
-              {form.venue_name && (
-                <p className="text-xs text-parchment-600 mt-1">{form.venue_name}</p>
-              )}
+              </div>
             </div>
           )}
         </div>

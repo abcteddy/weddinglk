@@ -42,10 +42,16 @@ function initScene(
   renderer.toneMapping = THREE.ACESFilmicToneMapping
   renderer.toneMappingExposure = 1.3
 
+  // --- Setup template defaults for safety ---
+  const bgColor = template.bgColor ?? 0x0a0005
+  const keyLightColor = template.keyLightColor ?? 0xff6090
+  const ambientColor = template.ambientColor ?? 0x2a0018
+  const petalHue = template.petalHue ?? 0.92
+
   // --- Scene ---
   const scene = new THREE.Scene()
-  scene.background = new THREE.Color(template.bgColor)
-  scene.fog = new THREE.FogExp2(template.bgColor, isWalkthrough ? 0.04 : 0.035)
+  scene.background = new THREE.Color(bgColor)
+  scene.fog = new THREE.FogExp2(bgColor, isWalkthrough ? 0.04 : 0.035)
 
   // --- Camera ---
   const camera = new THREE.PerspectiveCamera(45, canvas.offsetWidth / canvas.offsetHeight, 0.1, 100)
@@ -56,14 +62,14 @@ function initScene(
   const ambient = new THREE.AmbientLight(0xffffff, isWalkthrough ? 1.8 : 3.0)
   scene.add(ambient)
 
-  const keyLight = new THREE.DirectionalLight(template.keyLightColor, isWalkthrough ? 2.2 : 4.0)
+  const keyLight = new THREE.DirectionalLight(keyLightColor, isWalkthrough ? 2.2 : 4.0)
   keyLight.position.set(5, 8, 5)
   keyLight.castShadow = true
   keyLight.shadow.mapSize.width = 1024
   keyLight.shadow.mapSize.height = 1024
   scene.add(keyLight)
 
-  const softFill = new THREE.PointLight(template.ambientColor, 1.5, 15)
+  const softFill = new THREE.PointLight(ambientColor, 1.5, 15)
   softFill.position.set(-4, 3, 2)
   scene.add(softFill)
 
@@ -83,7 +89,7 @@ function initScene(
   }
 
   // --- Particles ---
-  const petalSystem = new PetalSystem(scene, template.petalHue)
+  const petalSystem = new PetalSystem(scene, petalHue)
   if (burstMode) {
     petalSystem.burst(50)
   } else {

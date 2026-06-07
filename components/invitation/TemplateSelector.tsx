@@ -61,7 +61,7 @@ function TemplateCard({ template, selected, onClick }: {
         </p>
         <div className="flex gap-1 justify-center mt-1">
           <div className="w-2 h-2 rounded-full" style={{ background: template.accentColor }} />
-          <div className="w-2 h-2 rounded-full" style={{ background: template.sealColor.toString(16).padStart(6, '0') ? `#${template.sealColor.toString(16).padStart(6, '0')}` : template.accentColor }} />
+          <div className="w-2 h-2 rounded-full" style={{ background: template.sealColor ? `#${template.sealColor.toString(16).padStart(6, '0')}` : template.accentColor }} />
         </div>
       </div>
 

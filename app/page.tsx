@@ -222,7 +222,10 @@ function TemplatesSection() {
                 <div className="w-24 h-16 relative group-hover:scale-110 transition-transform duration-500">
                   <div
                     className="absolute inset-0 rounded-sm"
-                    style={{ background: `#${template.envelopeColor.toString(16).padStart(6, '0')}`, border: `1px solid ${template.accentColor}30` }}
+                    style={{
+                      background: ['goldenLove', 'elegantWhite', 'greenery', 'lavenderDreams'].includes(template.id) ? '#fbf8f5' : '#15060b',
+                      border: `1px solid ${template.accentColor}30`
+                    }}
                   />
                   {/* Flap */}
                   <div

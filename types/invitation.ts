@@ -1,4 +1,25 @@
-export type TemplateId = 'royalWax' | 'rosePetal' | 'sinhalaTraditional' | 'royalGardenGate' | 'coupleMonogram' | 'classic' | 'modernGold' | 'tropicalGarden' | 'royalBlue'
+export type TemplateId = string // Keep for database compatibility
+
+export interface TemplateConfig {
+  id: string
+  name: string
+  accentColor: string
+  textColor: string
+  fontFamily: string
+  previewGradient: string
+  isPremium?: boolean
+  
+  // Optional legacy Three.js properties to prevent compiler errors on homepage
+  bgColor?: number
+  ambientColor?: number
+  keyLightColor?: number
+  envelopeColor?: number
+  flapColor?: number
+  sealColor?: number
+  sealEmissive?: number
+  petalHue?: number
+}
+
 export type PackageType = 'basic' | 'premium' | 'luxury'
 
 export interface TimelineEvent {
@@ -8,21 +29,48 @@ export interface TimelineEvent {
   photo_url?: string
 }
 
-export interface TemplateConfig {
-  id: TemplateId
-  name: string
-  bgColor: number
-  ambientColor: number
-  keyLightColor: number
-  envelopeColor: number
-  flapColor: number
-  sealColor: number
-  sealEmissive: number
-  petalHue: number
-  fontFamily: string
-  accentColor: string
-  textColor: string
-  previewGradient: string
+export interface SectionStyles {
+  bgType: 'video' | 'image' | 'color'
+  bgUrl?: string
+  bgColor?: string
+  bgOverlayOpacity?: number // 0 to 100
+  bgOverlayColor?: string // hex
+  fontFamily?: string
+  fontWeight?: string
+  textColor?: string
+  paddingTop?: number // in px
+  paddingBottom?: number // in px
+  borderRadius?: number // in px
+  boxShadow?: boolean
+}
+
+export interface SectionContent {
+  title?: string
+  subtitle?: string
+  description?: string
+  buttonText?: string
+  customMessage?: string
+  [key: string]: any
+}
+
+export interface SectionConfig {
+  id: string
+  type: 'open' | 'intro' | 'details' | 'gallery' | 'rsvp' | 'footer'
+  title: string
+  visible: boolean
+  styles: SectionStyles
+  content: SectionContent
+}
+
+export interface BuilderConfig {
+  global: {
+    primaryFont: string
+    secondaryFont: string
+    primaryColor: string
+    accentColor: string
+    bgMusicUrl?: string
+  }
+  sections: SectionConfig[]
 }
 
 export interface Invitation {
@@ -36,7 +84,7 @@ export interface Invitation {
   venue_name: string
   venue_address: string | null
   rsvp_deadline: string | null
-  template_id: TemplateId
+  template_id: string
   custom_message: string | null
   photo_url: string | null
   cover_url: string | null
@@ -49,7 +97,8 @@ export interface Invitation {
   package: PackageType
   created_at: string
   updated_at: string
-  
+  builder_config: BuilderConfig | null
+
   // Bride profile
   bride_photo_url: string | null
   bride_full_name: string | null
@@ -92,4 +141,3 @@ export interface Invitation {
 export interface InvitationWithRSVPs extends Invitation {
   rsvps: import('./rsvp').RSVP[]
 }
-

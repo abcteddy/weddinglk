@@ -11,6 +11,7 @@ import { VideoPlayer } from '@/components/invitation/VideoPlayer'
 import { IntroVideoScreen } from '@/components/invitation/IntroVideoScreen'
 import { PhotoGallery } from '@/components/invitation/PhotoGallery'
 import { createClient } from '@/lib/supabase/client'
+import { GoogleFontLoader } from '@/components/ui/GoogleFontLoader'
 
 type Stage = 'envelope' | 'video' | 'details'
 
@@ -122,7 +123,29 @@ export function InvitationPageClient({ invitation, guest, initialGuestUploads = 
   const [uploadError, setUploadError] = useState('')
   const [guestPhotos, setGuestPhotos] = useState<any[]>(initialGuestUploads)
 
-  const template = TEMPLATES[invitation.template_id] ?? TEMPLATES.classic
+  const builderConfig = invitation.builder_config
+  const openConfig = builderConfig?.sections.find(s => s.type === 'open')
+  const introConfig = builderConfig?.sections.find(s => s.type === 'intro')
+  const detailsConfig = builderConfig?.sections.find(s => s.type === 'details')
+  const galleryConfig = builderConfig?.sections.find(s => s.type === 'gallery')
+  const rsvpConfig = builderConfig?.sections.find(s => s.type === 'rsvp')
+  const footerConfig = builderConfig?.sections.find(s => s.type === 'footer')
+
+  const activeFonts = builderConfig ? [
+    builderConfig.global.primaryFont,
+    builderConfig.global.secondaryFont,
+    ...builderConfig.sections.map(s => s.styles.fontFamily)
+  ].filter(Boolean) as string[] : []
+
+  const template = builderConfig ? {
+    id: invitation.template_id,
+    name: 'Custom Theme',
+    accentColor: builderConfig.global.accentColor || '#D4AF37',
+    textColor: builderConfig.global.primaryColor || '#ffffff',
+    fontFamily: builderConfig.global.primaryFont || 'Playfair Display',
+    previewGradient: ''
+  } : (TEMPLATES[invitation.template_id] ?? TEMPLATES.classic)
+
   const coupleName = `${invitation.partner1_name} & ${invitation.partner2_name}`
   const supabase = createClient()
 
@@ -259,21 +282,60 @@ export function InvitationPageClient({ invitation, guest, initialGuestUploads = 
     )
   }
 
-  const pageTheme = getPageTheme(invitation.template_id)
+  const pageTheme = builderConfig ? {
+    isLight: false,
+    pageBgClass: '',
+    pageBgStyle: detailsConfig?.styles.bgColor || '#0b0b0f',
+    cardBgStyle: 'rgba(15, 23, 42, 0.45)',
+    cardBorderColor: detailsConfig?.styles.textColor ? `${detailsConfig.styles.textColor}22` : 'rgba(255,255,255,0.08)',
+    textPrimary: detailsConfig?.styles.textColor || builderConfig.global.primaryColor || '#ffffff',
+    textSecondary: detailsConfig?.styles.textColor || builderConfig.global.primaryColor || '#ffffff',
+    timerBg: 'rgba(0, 0, 0, 0.45)',
+    timerBorder: 'rgba(255, 255, 255, 0.05)',
+    dividerStyle: `linear-gradient(to right, transparent, ${builderConfig.global.accentColor || '#D4AF37'}, transparent)`,
+  } : getPageTheme(invitation.template_id)
 
   return (
     <div
       className={`min-h-screen relative overflow-x-hidden ${pageTheme.pageBgClass} ${pageTheme.isLight ? (invitation.template_id === 'royalGardenGate' ? 'theme-light-garden' : 'theme-light-rose') : ''}`}
       style={{ backgroundColor: pageTheme.pageBgStyle }}
     >
+      {builderConfig && <GoogleFontLoader fonts={activeFonts} />}
+      
+      {builderConfig && (
+        <style>{`
+          .custom-font-primary {
+            font-family: '${builderConfig.global.primaryFont || 'Playfair Display'}', serif !important;
+          }
+          .custom-font-secondary {
+            font-family: '${builderConfig.global.secondaryFont || 'Montserrat'}', sans-serif !important;
+          }
+          .custom-font-open {
+            font-family: '${openConfig?.styles.fontFamily || builderConfig.global.primaryFont || 'Great Vibes'}', serif !important;
+          }
+          .custom-font-details {
+            font-family: '${detailsConfig?.styles.fontFamily || builderConfig.global.primaryFont || 'Playfair Display'}', serif !important;
+          }
+          .custom-font-gallery {
+            font-family: '${galleryConfig?.styles.fontFamily || builderConfig.global.primaryFont || 'Playfair Display'}', serif !important;
+          }
+          .custom-font-rsvp {
+            font-family: '${rsvpConfig?.styles.fontFamily || builderConfig.global.primaryFont || 'Playfair Display'}', serif !important;
+          }
+          .custom-font-footer {
+            font-family: '${footerConfig?.styles.fontFamily || builderConfig.global.secondaryFont || 'Montserrat'}', sans-serif !important;
+          }
+        `}</style>
+      )}
+
       {/* ═══════════════════════════════════════════
           STAGE 1 & 2: OPENING & CINEMATIC INTRO VIDEOS (with 1.5s cross-fade transition)
       ═══════════════════════════════════════════ */}
       
       {/* ── Intro Video (mounts 1.0s before envelope ends, stays mounted for stage === 'video') ── */}
-      {(startIntro || stage === 'video') && invitation.video_url && (
+      {(startIntro || stage === 'video') && (introConfig?.styles.bgUrl || invitation.video_url) && (
         <IntroVideoScreen
-          videoUrl={invitation.video_url}
+          videoUrl={introConfig?.styles.bgUrl || invitation.video_url || ''}
           coupleNames={coupleName}
           accentColor={template.accentColor}
           onComplete={handleVideoComplete}
@@ -282,14 +344,19 @@ export function InvitationPageClient({ invitation, guest, initialGuestUploads = 
 
       {/* ── Envelope Opening Video (renders on top of intro video, fades out) ── */}
       {envelopeMounted && stage === 'envelope' && (
-        invitation.cover_url ? (
+        (openConfig?.styles.bgUrl || invitation.cover_url) ? (
           <EnvelopeOpeningVideo
-            videoUrl={invitation.cover_url}
+            videoUrl={openConfig?.styles.bgUrl || invitation.cover_url || ''}
             coupleNames={coupleName}
             guestName={guest?.name}
             accentColor={template.accentColor}
             onOpen={handleEnvelopeOpen}
             onFadeOutStart={handleEnvelopeFadeOutStart}
+            titleOverride={openConfig?.content.title}
+            subtitleOverride={openConfig?.content.subtitle}
+            buttonTextOverride={openConfig?.content.buttonText}
+            textColorOverride={openConfig?.styles.textColor}
+            fontFamilyOverride={openConfig?.styles.fontFamily}
           />
         ) : (
           /* ─── Fallback: no cover video — static fullscreen splash ─── */
@@ -357,6 +424,8 @@ export function InvitationPageClient({ invitation, guest, initialGuestUploads = 
             style={{
               background: `linear-gradient(to bottom, ${pageTheme.pageBgStyle}, transparent)`,
               minHeight: '40vh',
+              paddingTop: detailsConfig?.styles.paddingTop ? `${detailsConfig.styles.paddingTop}px` : undefined,
+              paddingBottom: detailsConfig?.styles.paddingBottom ? `${detailsConfig.styles.paddingBottom}px` : undefined,
             }}
           >
             {/* Floating particles */}
@@ -375,13 +444,13 @@ export function InvitationPageClient({ invitation, guest, initialGuestUploads = 
               ))}
             </div>
             <p
-              className="text-[10px] uppercase tracking-[0.55em] mb-4 font-light"
+              className="text-[10px] uppercase tracking-[0.55em] mb-4 font-light custom-font-secondary"
               style={{ color: template.accentColor }}
             >
-              Together With Their Families
+              {detailsConfig?.content.subtitle || 'Together With Their Families'}
             </p>
             <h1
-              className="text-4xl md:text-6xl lg:text-7xl font-serif font-bold leading-tight"
+              className="text-4xl md:text-6xl lg:text-7xl font-bold leading-tight custom-font-details"
               style={{
                 color: pageTheme.textPrimary,
                 textShadow: pageTheme.isLight
@@ -396,14 +465,14 @@ export function InvitationPageClient({ invitation, guest, initialGuestUploads = 
               style={{ background: `linear-gradient(to right, transparent, ${template.accentColor}, transparent)` }}
             />
             <p
-              className="mt-4 text-sm font-light tracking-widest uppercase"
+              className="mt-4 text-sm font-light tracking-widest uppercase custom-font-secondary"
               style={{ color: pageTheme.textSecondary, opacity: 0.7 }}
             >
-              Wedding Invitation
+              {detailsConfig?.content.title || 'Wedding Invitation'}
             </p>
             {/* Scroll cue */}
             <div className="mt-12 flex flex-col items-center gap-2 animate-bounce">
-              <p className="text-[10px] uppercase tracking-widest" style={{ color: template.accentColor, opacity: 0.6 }}>
+              <p className="text-[10px] uppercase tracking-widest custom-font-secondary" style={{ color: template.accentColor, opacity: 0.6 }}>
                 Scroll to explore
               </p>
               <svg className="w-4 h-4" style={{ color: template.accentColor }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -440,36 +509,69 @@ export function InvitationPageClient({ invitation, guest, initialGuestUploads = 
       {stage === 'details' && (
       <>
       <div
-        className="relative px-6 py-8 md:py-16"
+        className="relative px-6"
         style={{
-          background: `linear-gradient(to bottom, transparent, #${template.bgColor.toString(16).padStart(6, '0')}ee)`,
+          backgroundColor: !builderConfig ? undefined : (detailsConfig?.styles.bgColor || '#0b0b0f'),
+          backgroundImage: builderConfig && detailsConfig?.styles.bgType === 'image' && detailsConfig.styles.bgUrl ? `url(${detailsConfig.styles.bgUrl})` : undefined,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          paddingTop: detailsConfig?.styles.paddingTop ? `${detailsConfig.styles.paddingTop}px` : '4rem',
+          paddingBottom: detailsConfig?.styles.paddingBottom ? `${detailsConfig.styles.paddingBottom}px` : '4rem',
+          backgroundAttachment: 'fixed',
         }}
       >
-        {/* Floating particles background */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          {[...Array(8)].map((_, i) => (
-            <div
-              key={i}
-              className="absolute w-1.5 h-1.5 rounded-full opacity-20 animate-float"
-              style={{
-                background: template.accentColor,
-                left: `${10 + i * 11}%`,
-                top: `${5 + (i % 3) * 30}%`,
-                animationDelay: `${i * 0.7}s`,
-                animationDuration: `${3 + i * 0.4}s`,
-              }}
-            />
-          ))}
-        </div>
+        {/* If background is video */}
+        {builderConfig && detailsConfig?.styles.bgType === 'video' && detailsConfig.styles.bgUrl && (
+          <video
+            src={detailsConfig.styles.bgUrl}
+            className="absolute inset-0 object-cover w-full h-full pointer-events-none"
+            autoPlay
+            loop
+            muted
+            playsInline
+          />
+        )}
+        
+        {/* Background overlay */}
+        {builderConfig && detailsConfig?.styles.bgOverlayOpacity !== undefined && (
+          <div
+            className="absolute inset-0 pointer-events-none"
+            style={{
+              backgroundColor: detailsConfig.styles.bgOverlayColor || '#000000',
+              opacity: detailsConfig.styles.bgOverlayOpacity / 100
+            }}
+          />
+        )}
+
+        {/* Floating particles background (legacy only) */}
+        {!builderConfig && (
+          <div className="absolute inset-0 overflow-hidden pointer-events-none">
+            {[...Array(8)].map((_, i) => (
+              <div
+                key={i}
+                className="absolute w-1.5 h-1.5 rounded-full opacity-20 animate-float"
+                style={{
+                  background: template.accentColor,
+                  left: `${10 + i * 11}%`,
+                  top: `${5 + (i % 3) * 30}%`,
+                  animationDelay: `${i * 0.7}s`,
+                  animationDuration: `${3 + i * 0.4}s`,
+                }}
+              />
+            ))}
+          </div>
+        )}
 
         <div className="max-w-2xl mx-auto relative space-y-16">
           {/* 1. Wedding details card */}
           <div
-            className="rounded-sm p-8 md:p-12 border shadow-2xl transition-all"
+            className="p-8 md:p-12 border shadow-2xl transition-all"
             style={{
               background: pageTheme.cardBgStyle,
               backdropFilter: 'blur(20px)',
               borderColor: pageTheme.cardBorderColor,
+              borderRadius: detailsConfig?.styles.borderRadius ? `${detailsConfig.styles.borderRadius}px` : '4px',
+              boxShadow: detailsConfig?.styles.boxShadow ? '0 10px 40px rgba(0,0,0,0.5)' : undefined
             }}
           >
             <CardContent invitation={invitation} visible theme={pageTheme} />
@@ -478,11 +580,13 @@ export function InvitationPageClient({ invitation, guest, initialGuestUploads = 
           {/* 2. Bride & Groom Profiles */}
           {(invitation.bride_full_name || invitation.groom_full_name) && (
             <div
-              className="rounded-sm p-8 md:p-12 border shadow-2xl space-y-8 transition-all"
+              className="p-8 md:p-12 border shadow-2xl space-y-8 transition-all"
               style={{
                 background: pageTheme.cardBgStyle,
                 backdropFilter: 'blur(20px)',
                 borderColor: pageTheme.cardBorderColor,
+                borderRadius: detailsConfig?.styles.borderRadius ? `${detailsConfig.styles.borderRadius}px` : '4px',
+                boxShadow: detailsConfig?.styles.boxShadow ? '0 10px 40px rgba(0,0,0,0.5)' : undefined
               }}
             >
               <div className="text-center">
@@ -550,11 +654,13 @@ export function InvitationPageClient({ invitation, guest, initialGuestUploads = 
           {/* 3. Timeline / Story Journey */}
           {invitation.timeline_events && invitation.timeline_events.length > 0 && (
             <div
-              className="rounded-sm p-8 md:p-12 border shadow-2xl space-y-8 transition-all"
+              className="p-8 md:p-12 border shadow-2xl space-y-8 transition-all"
               style={{
                 background: pageTheme.cardBgStyle,
                 backdropFilter: 'blur(20px)',
                 borderColor: pageTheme.cardBorderColor,
+                borderRadius: detailsConfig?.styles.borderRadius ? `${detailsConfig.styles.borderRadius}px` : '4px',
+                boxShadow: detailsConfig?.styles.boxShadow ? '0 10px 40px rgba(0,0,0,0.5)' : undefined
               }}
             >
               <div className="text-center">
@@ -596,11 +702,13 @@ export function InvitationPageClient({ invitation, guest, initialGuestUploads = 
 
           {/* 4. Event Information & Maps */}
           <div
-            className="rounded-sm p-8 md:p-12 border shadow-2xl space-y-8 transition-all"
+            className="p-8 md:p-12 border shadow-2xl space-y-8 transition-all"
             style={{
               background: pageTheme.cardBgStyle,
               backdropFilter: 'blur(20px)',
               borderColor: pageTheme.cardBorderColor,
+              borderRadius: detailsConfig?.styles.borderRadius ? `${detailsConfig.styles.borderRadius}px` : '4px',
+              boxShadow: detailsConfig?.styles.boxShadow ? '0 10px 40px rgba(0,0,0,0.5)' : undefined
             }}
           >
             <div className="text-center">
@@ -669,11 +777,13 @@ export function InvitationPageClient({ invitation, guest, initialGuestUploads = 
           {/* 5. Invitation Video Player */}
           {invitation.video_url && (
             <div
-              className="rounded-sm p-8 md:p-10 border shadow-2xl transition-all"
+              className="p-8 md:p-10 border shadow-2xl transition-all"
               style={{
                 background: pageTheme.cardBgStyle,
                 backdropFilter: 'blur(20px)',
                 borderColor: pageTheme.cardBorderColor,
+                borderRadius: detailsConfig?.styles.borderRadius ? `${detailsConfig.styles.borderRadius}px` : '4px',
+                boxShadow: detailsConfig?.styles.boxShadow ? '0 10px 40px rgba(0,0,0,0.5)' : undefined
               }}
             >
               <VideoPlayer url={invitation.video_url} accentColor={template.accentColor} />
@@ -683,11 +793,13 @@ export function InvitationPageClient({ invitation, guest, initialGuestUploads = 
           {/* 6. Photo Gallery Carousel */}
           {invitation.gallery_urls && invitation.gallery_urls.length > 0 && (
             <div
-              className="rounded-sm p-8 md:p-10 border shadow-2xl transition-all"
+              className="p-8 md:p-10 border shadow-2xl transition-all"
               style={{
                 background: pageTheme.cardBgStyle,
                 backdropFilter: 'blur(20px)',
                 borderColor: pageTheme.cardBorderColor,
+                borderRadius: detailsConfig?.styles.borderRadius ? `${detailsConfig.styles.borderRadius}px` : '4px',
+                boxShadow: detailsConfig?.styles.boxShadow ? '0 10px 40px rgba(0,0,0,0.5)' : undefined
               }}
             >
               <PhotoGallery urls={invitation.gallery_urls} accentColor={template.accentColor} />
@@ -697,11 +809,13 @@ export function InvitationPageClient({ invitation, guest, initialGuestUploads = 
           {/* 7. Gift Registry Accordion/Card */}
           {(invitation.registry_bank_details || invitation.registry_preferences || invitation.registry_qr_url) && (
             <div
-              className="rounded-sm p-8 md:p-12 border shadow-2xl space-y-6 text-sm transition-all"
+              className="p-8 md:p-12 border shadow-2xl space-y-6 text-sm transition-all"
               style={{
                 background: pageTheme.cardBgStyle,
                 backdropFilter: 'blur(20px)',
                 borderColor: pageTheme.cardBorderColor,
+                borderRadius: detailsConfig?.styles.borderRadius ? `${detailsConfig.styles.borderRadius}px` : '4px',
+                boxShadow: detailsConfig?.styles.boxShadow ? '0 10px 40px rgba(0,0,0,0.5)' : undefined
               }}
             >
               <div className="text-center">
@@ -763,11 +877,13 @@ export function InvitationPageClient({ invitation, guest, initialGuestUploads = 
           {/* 8. Live Stream Card */}
           {invitation.live_stream_active && invitation.live_stream_url && (
             <div
-              className="rounded-sm p-8 border shadow-2xl text-center space-y-4 transition-all"
+              className="p-8 border shadow-2xl text-center space-y-4 transition-all"
               style={{
                 background: pageTheme.cardBgStyle,
                 backdropFilter: 'blur(20px)',
                 borderColor: pageTheme.cardBorderColor,
+                borderRadius: detailsConfig?.styles.borderRadius ? `${detailsConfig.styles.borderRadius}px` : '4px',
+                boxShadow: detailsConfig?.styles.boxShadow ? '0 10px 40px rgba(0,0,0,0.5)' : undefined
               }}
             >
               <div className="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-full bg-red-900/40 border border-red-700/40 text-red-400 text-xs font-semibold animate-pulse">
@@ -792,11 +908,13 @@ export function InvitationPageClient({ invitation, guest, initialGuestUploads = 
           {/* 9. Contact Section */}
           {(invitation.bride_contact || invitation.groom_contact || invitation.family_contact) && (
             <div
-              className="rounded-sm p-8 md:p-12 border shadow-2xl space-y-6 transition-all"
+              className="p-8 md:p-12 border shadow-2xl space-y-6 transition-all"
               style={{
                 background: pageTheme.cardBgStyle,
                 backdropFilter: 'blur(20px)',
                 borderColor: pageTheme.cardBorderColor,
+                borderRadius: detailsConfig?.styles.borderRadius ? `${detailsConfig.styles.borderRadius}px` : '4px',
+                boxShadow: detailsConfig?.styles.boxShadow ? '0 10px 40px rgba(0,0,0,0.5)' : undefined
               }}
             >
               <div className="text-center">
@@ -839,11 +957,13 @@ export function InvitationPageClient({ invitation, guest, initialGuestUploads = 
           {/* 10. Photo Upload Moderation System (Guest Wall) */}
           {(invitation.package === 'luxury' || (invitation as any).package === 'premium') && (
             <div
-              className="rounded-sm p-8 md:p-12 border shadow-2xl space-y-8 transition-all"
+              className="p-8 md:p-12 border shadow-2xl space-y-8 transition-all"
               style={{
                 background: pageTheme.cardBgStyle,
                 backdropFilter: 'blur(20px)',
                 borderColor: pageTheme.cardBorderColor,
+                borderRadius: detailsConfig?.styles.borderRadius ? `${detailsConfig.styles.borderRadius}px` : '4px',
+                boxShadow: detailsConfig?.styles.boxShadow ? '0 10px 40px rgba(0,0,0,0.5)' : undefined
               }}
             >
               <div className="text-center">
@@ -922,11 +1042,13 @@ export function InvitationPageClient({ invitation, guest, initialGuestUploads = 
 
           {/* 11. RSVP Form */}
           <div
-            className="rounded-sm p-8 md:p-10 border shadow-2xl transition-all"
+            className="p-8 md:p-10 border shadow-2xl transition-all"
             style={{
               background: pageTheme.cardBgStyle,
               backdropFilter: 'blur(20px)',
               borderColor: pageTheme.cardBorderColor,
+              borderRadius: detailsConfig?.styles.borderRadius ? `${detailsConfig.styles.borderRadius}px` : '4px',
+              boxShadow: detailsConfig?.styles.boxShadow ? '0 10px 40px rgba(0,0,0,0.5)' : undefined
             }}
           >
             <RSVPForm

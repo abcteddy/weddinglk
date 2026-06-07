@@ -10,6 +10,13 @@ interface EnvelopeOpeningVideoProps {
   accentColor: string
   onOpen: () => void
   onFadeOutStart: () => void
+  
+  // Customizer styling overrides
+  titleOverride?: string
+  subtitleOverride?: string
+  buttonTextOverride?: string
+  textColorOverride?: string
+  fontFamilyOverride?: string
 }
 
 export function EnvelopeOpeningVideo({
@@ -19,6 +26,11 @@ export function EnvelopeOpeningVideo({
   accentColor,
   onOpen,
   onFadeOutStart,
+  titleOverride,
+  subtitleOverride,
+  buttonTextOverride,
+  textColorOverride,
+  fontFamilyOverride,
 }: EnvelopeOpeningVideoProps) {
   const videoRef   = useRef<HTMLVideoElement | null>(null)
   const iframeRef  = useRef<HTMLIFrameElement | null>(null)
@@ -216,19 +228,31 @@ export function EnvelopeOpeningVideo({
           <div className="space-y-2 pointer-events-none select-none">
             <p
               className="text-[10px] sm:text-xs uppercase tracking-[0.55em] font-light"
-              style={{ color: accentColor, opacity: 0.9 }}
+              style={{
+                color: textColorOverride || accentColor,
+                opacity: 0.9,
+                fontFamily: fontFamilyOverride ? `'${fontFamilyOverride}', serif` : undefined
+              }}
             >
-              You Are Cordially Invited
+              {titleOverride || 'You Are Cordially Invited'}
             </p>
             <h1
               className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-serif font-bold text-white drop-shadow-2xl leading-tight"
-              style={{ textShadow: `0 0 60px ${accentColor}50, 0 2px 10px rgba(0,0,0,0.9)` }}
+              style={{
+                textShadow: `0 0 60px ${accentColor}50, 0 2px 10px rgba(0,0,0,0.9)`,
+                fontFamily: fontFamilyOverride ? `'${fontFamilyOverride}', serif` : undefined
+              }}
             >
               {guestName ? `Welcome, ${guestName}` : coupleNames}
             </h1>
-            {guestName && (
-              <p className="text-sm sm:text-base font-serif text-white/55 font-light italic">
-                {coupleNames}
+            {(guestName || subtitleOverride) && (
+              <p
+                className="text-sm sm:text-base font-serif text-white/55 font-light italic"
+                style={{
+                  fontFamily: fontFamilyOverride ? `'${fontFamilyOverride}', serif` : undefined
+                }}
+              >
+                {subtitleOverride || coupleNames}
               </p>
             )}
           </div>
@@ -239,22 +263,25 @@ export function EnvelopeOpeningVideo({
               onClick={handleClick}
               className="relative flex items-center gap-3 px-8 py-4 rounded-full text-sm font-semibold text-white transition-all duration-300 hover:scale-105 active:scale-95"
               style={{
-                background: `linear-gradient(135deg, ${accentColor}33, ${accentColor}55)`,
-                border: `1px solid ${accentColor}60`,
+                background: `linear-gradient(135deg, ${textColorOverride || accentColor}33, ${textColorOverride || accentColor}55)`,
+                border: `1px solid ${textColorOverride || accentColor}60`,
                 backdropFilter: 'blur(12px)',
-                boxShadow: `0 0 40px ${accentColor}30`,
+                boxShadow: `0 0 40px ${textColorOverride || accentColor}30`,
                 animation: 'pulseGlow 2.5s ease-in-out infinite',
               }}
             >
               <span
                 className="absolute inset-0 rounded-full"
-                style={{ border: `1px solid ${accentColor}40`, animation: 'ringPulse 2.5s ease-out infinite' }}
+                style={{
+                  border: `1px solid ${textColorOverride || accentColor}40`,
+                  animation: 'ringPulse 2.5s ease-out infinite'
+                }}
               />
-              <svg className="w-5 h-5" style={{ color: accentColor }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg className="w-5 h-5" style={{ color: textColorOverride || accentColor }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
                   d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
               </svg>
-              Open Your Invitation
+              {buttonTextOverride || 'Open Your Invitation'}
             </button>
             <p className="text-[10px] uppercase tracking-widest text-white/30 font-light">Tap to reveal</p>
           </div>

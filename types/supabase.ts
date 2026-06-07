@@ -31,6 +31,7 @@ export interface Database {
           package: string
           created_at: string
           updated_at: string
+          builder_config: Json | null
         }
         Insert: {
           id?: string
@@ -56,6 +57,7 @@ export interface Database {
           package?: string
           created_at?: string
           updated_at?: string
+          builder_config?: Json | null
         }
         Update: {
           id?: string
@@ -81,6 +83,7 @@ export interface Database {
           package?: string
           created_at?: string
           updated_at?: string
+          builder_config?: Json | null
         }
       }
       rsvps: {
