@@ -31,35 +31,77 @@ function Countdown({
   targetTime?: string; 
   theme: any 
 }) {
+  const [mounted, setMounted] = useState(false)
   const [timeLeft, setTimeLeft] = useState<{ days: number; hours: number; minutes: number; seconds: number } | null>(null)
 
   useEffect(() => {
+    setMounted(true)
+
     function calculateTimeLeft() {
+      if (!targetDate) return null
+
+      // Parse time to 24h format robustly
       const convertTimeTo24h = (timeStr: string) => {
         try {
-          const parts = timeStr.trim().split(/\s+/)
-          if (parts.length < 2) {
-            const timeParts = parts[0].split(':')
-            return `${timeParts[0].padStart(2, '0')}:${(timeParts[1] ?? '00').padStart(2, '0')}:00`
+          if (!timeStr) return '18:00:00'
+          const cleanStr = timeStr.trim().toUpperCase()
+          
+          // Match standard formats: e.g. "6:30 PM", "18:00", "6 PM", "06:00 AM", etc.
+          const match = cleanStr.match(/^(\d{1,2})(?::(\d{2}))?\s*(AM|PM)?$/)
+          if (!match) {
+            const numMatch = cleanStr.match(/(\d{1,2}):(\d{2})/)
+            if (numMatch) {
+              return `${numMatch[1].padStart(2, '0')}:${numMatch[2].padStart(2, '0')}:00`
+            }
+            return '18:00:00'
           }
-          const time = parts[0]
-          const modifier = parts[1].toLowerCase()
-          let [hours, minutes] = time.split(':')
-          if (hours === '12') {
-            hours = '00'
+          
+          let hours = parseInt(match[1], 10)
+          const minutes = match[2] ? match[2] : '00'
+          const ampm = match[3]
+          
+          if (ampm) {
+            if (ampm === 'PM' && hours < 12) {
+              hours += 12
+            } else if (ampm === 'AM' && hours === 12) {
+              hours = 0
+            }
           }
-          if (modifier === 'pm') {
-            hours = String(parseInt(hours, 10) + 12)
-          }
-          return `${hours.padStart(2, '0')}:${(minutes ?? '00').padStart(2, '0')}:00`
+          return `${String(hours).padStart(2, '0')}:${minutes.padStart(2, '0')}:00`
         } catch (e) {
           return '18:00:00'
         }
       }
 
-      const combinedString = `${targetDate}T${convertTimeTo24h(targetTime)}`
-      const targetUtc = new Date(combinedString)
-      const difference = +targetUtc - +new Date()
+      // Extract date parts manually to avoid browser string-parsing discrepancies
+      const dateParts = targetDate.split('-')
+      if (dateParts.length !== 3) {
+        const slashParts = targetDate.split('/')
+        if (slashParts.length === 3) {
+          if (slashParts[0].length === 4) {
+            dateParts.push(slashParts[0], slashParts[1], slashParts[2])
+          } else {
+            dateParts.push(slashParts[2], slashParts[0], slashParts[1])
+          }
+        } else {
+          return null
+        }
+      }
+
+      const year = parseInt(dateParts[0], 10)
+      const month = parseInt(dateParts[1], 10) - 1 // JS months are 0-indexed
+      const day = parseInt(dateParts[2], 10)
+
+      const time24h = convertTimeTo24h(targetTime)
+      const [hours, minutes, seconds] = time24h.split(':').map(x => parseInt(x, 10))
+
+      const targetUtc = new Date(year, month, day, hours, minutes, seconds)
+      
+      if (isNaN(targetUtc.getTime())) {
+        return null
+      }
+
+      const difference = targetUtc.getTime() - Date.now()
       
       if (difference <= 0) {
         return null
@@ -80,6 +122,14 @@ function Countdown({
 
     return () => clearInterval(timer)
   }, [targetDate, targetTime])
+
+  // Don't render anything if targetDate is not set
+  if (!targetDate) return null
+
+  // Prevent layout shift and hydration mismatches during server rendering
+  if (!mounted) {
+    return <div className="h-24" />
+  }
 
   if (!timeLeft) return (
     <div className="text-center mt-4">
