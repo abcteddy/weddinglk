@@ -579,12 +579,14 @@ export default function BuilderPage() {
       ? (activeSection.type === 'open' ? 'cover' : 'video') 
       : (fieldName === 'global_bg_url' ? 'global_bg' : fieldName)
 
-    const uploadSingle = async (file: File) => {
+    const uploadSingle = async (file: File, skipStateUpdate = false) => {
       const fileExt = file.name.split('.').pop()
       const randomId = Math.random().toString(36).substring(2, 10)
       const filePath = `${user.id}/${type}_${randomId}.${fileExt}`
 
-      setUploading(prev => ({ ...prev, [type]: 10 }))
+      if (!skipStateUpdate) {
+        setUploading(prev => ({ ...prev, [type]: 10 }))
+      }
 
       const { error: uploadError } = await supabase.storage
         .from('wedding-assets')
@@ -595,14 +597,16 @@ export default function BuilderPage() {
 
       if (uploadError) throw uploadError
 
-      setUploading(prev => ({ ...prev, [type]: 100 }))
-      setTimeout(() => {
-        setUploading(prev => {
-          const next = { ...prev }
-          delete next[type]
-          return next
-        })
-      }, 1000)
+      if (!skipStateUpdate) {
+        setUploading(prev => ({ ...prev, [type]: 100 }))
+        setTimeout(() => {
+          setUploading(prev => {
+            const next = { ...prev }
+            delete next[type]
+            return next
+          })
+        }, 1000)
+      }
 
       const { data: { publicUrl } } = supabase.storage
         .from('wedding-assets')
@@ -618,13 +622,15 @@ export default function BuilderPage() {
           throw new Error('You can only upload up to 8 gallery photos')
         }
 
+        setUploading(prev => ({ ...prev, gallery: 10 }))
+
         const urls: string[] = []
         for (let i = 0; i < files.length; i++) {
           const file = files[i]
-          if (file.size > 5 * 1024 * 1024) {
-            throw new Error(`File "${file.name}" is too large. Max size is 5MB.`)
+          if (file.size > 15 * 1024 * 1024) {
+            throw new Error(`File "${file.name}" is too large. Max size is 15MB.`)
           }
-          const url = await uploadSingle(file)
+          const url = await uploadSingle(file, true)
           urls.push(url)
         }
 
@@ -632,6 +638,15 @@ export default function BuilderPage() {
           ...prev,
           gallery_urls: [...(prev.gallery_urls ?? []), ...urls]
         }))
+
+        setUploading(prev => ({ ...prev, gallery: 100 }))
+        setTimeout(() => {
+          setUploading(prev => {
+            const next = { ...prev }
+            delete next.gallery
+            return next
+          })
+        }, 1000)
       } else {
         const file = files[0]
         const sizeLimit = (type === 'video' || type === 'cover') ? 50 * 1024 * 1024 : 10 * 1024 * 1024
