@@ -17,6 +17,8 @@ interface EnvelopeOpeningVideoProps {
   buttonTextOverride?: string
   textColorOverride?: string
   fontFamilyOverride?: string
+  hideOverlay?: boolean
+  overlayY?: number
 }
 
 export function EnvelopeOpeningVideo({
@@ -31,6 +33,8 @@ export function EnvelopeOpeningVideo({
   buttonTextOverride,
   textColorOverride,
   fontFamilyOverride,
+  hideOverlay = false,
+  overlayY,
 }: EnvelopeOpeningVideoProps) {
   const videoRef   = useRef<HTMLVideoElement | null>(null)
   const iframeRef  = useRef<HTMLIFrameElement | null>(null)
@@ -219,46 +223,57 @@ export function EnvelopeOpeningVideo({
       {/* ── IDLE: Welcome splash + Open button ── */}
       {phase === 'idle' && (
         <div
-          className="absolute inset-0 flex flex-col items-center justify-center gap-6 px-6 text-center"
+          className="absolute inset-0 flex flex-col items-center justify-between py-12 px-6 text-center"
           style={{
             background: 'linear-gradient(to bottom, rgba(0,0,0,0.40) 0%, rgba(0,0,0,0.18) 50%, rgba(0,0,0,0.55) 100%)',
           }}
           onClick={handleClick}
         >
-          <div className="space-y-2 pointer-events-none select-none">
-            <p
-              className="text-[10px] sm:text-xs uppercase tracking-[0.55em] font-light"
+          <div /> {/* Spacer */}
+
+          {!hideOverlay && (
+            <div 
+              className="absolute inset-x-0 flex flex-col items-center gap-2 px-6 pointer-events-none select-none"
               style={{
-                color: textColorOverride || accentColor,
-                opacity: 0.9,
-                fontFamily: fontFamilyOverride ? `'${fontFamilyOverride}', serif` : undefined
+                top: `${overlayY !== undefined ? overlayY : 45}%`,
+                transform: 'translateY(-50%)',
+                transition: 'top 0.3s ease',
               }}
             >
-              {titleOverride || 'You Are Cordially Invited'}
-            </p>
-            <h1
-              className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-serif font-bold text-white drop-shadow-2xl leading-tight"
-              style={{
-                textShadow: `0 0 60px ${accentColor}50, 0 2px 10px rgba(0,0,0,0.9)`,
-                fontFamily: fontFamilyOverride ? `'${fontFamilyOverride}', serif` : undefined
-              }}
-            >
-              {guestName ? `Welcome, ${guestName}` : coupleNames}
-            </h1>
-            {(guestName || subtitleOverride) && (
               <p
-                className="text-sm sm:text-base font-serif text-white/55 font-light italic"
+                className="text-[10px] sm:text-xs uppercase tracking-[0.55em] font-light"
                 style={{
+                  color: textColorOverride || accentColor,
+                  opacity: 0.9,
                   fontFamily: fontFamilyOverride ? `'${fontFamilyOverride}', serif` : undefined
                 }}
               >
-                {subtitleOverride || coupleNames}
+                {titleOverride || 'You Are Cordially Invited'}
               </p>
-            )}
-          </div>
+              <h1
+                className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-serif font-bold text-white drop-shadow-2xl leading-tight"
+                style={{
+                  textShadow: `0 0 60px ${accentColor}50, 0 2px 10px rgba(0,0,0,0.9)`,
+                  fontFamily: fontFamilyOverride ? `'${fontFamilyOverride}', serif` : undefined
+                }}
+              >
+                {guestName ? `Welcome, ${guestName}` : coupleNames}
+              </h1>
+              {(guestName || subtitleOverride) && (
+                <p
+                  className="text-sm sm:text-base font-serif text-white/55 font-light italic"
+                  style={{
+                    fontFamily: fontFamilyOverride ? `'${fontFamilyOverride}', serif` : undefined
+                  }}
+                >
+                  {subtitleOverride || coupleNames}
+                </p>
+              )}
+            </div>
+          )}
 
           {/* Pulsing CTA */}
-          <div className="flex flex-col items-center gap-3 mt-2">
+          <div className="flex flex-col items-center gap-3 mt-auto relative z-20">
             <button
               onClick={handleClick}
               className="relative flex items-center gap-3 px-8 py-4 rounded-full text-sm font-semibold text-white transition-all duration-300 hover:scale-105 active:scale-95"

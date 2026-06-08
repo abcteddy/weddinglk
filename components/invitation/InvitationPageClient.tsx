@@ -371,6 +371,8 @@ export function InvitationPageClient({ invitation, guest, initialGuestUploads = 
             buttonTextOverride={openConfig?.content.buttonText}
             textColorOverride={openConfig?.styles.textColor}
             fontFamilyOverride={openConfig?.styles.fontFamily}
+            hideOverlay={openConfig?.content.hideOverlay || false}
+            overlayY={openConfig?.styles.overlayY}
           />
         ) : (
           /* ─── Fallback: no cover video — static fullscreen splash ─── */

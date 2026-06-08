@@ -964,7 +964,7 @@ export default function BuilderPage() {
           backgroundImage: secStyle.bgType === 'image' && secStyle.bgUrl ? `url(${secStyle.bgUrl})` : undefined,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
-          minHeight: isFullPage ? 'auto' : '100%'
+          minHeight: isFullPage ? (['open', 'intro'].includes(sec.type) ? '55vh' : 'auto') : '100%'
         }}
       >
         {/* Render backgrounds for video types */}
@@ -995,24 +995,41 @@ export default function BuilderPage() {
 
         <div className="relative z-10 w-full flex flex-col items-center justify-center text-center px-4">
           {isMainOpen && (
-            <div className="max-w-md space-y-4 pointer-events-none p-4" style={{
-              borderRadius: `${secStyle.borderRadius || 0}px`,
-              boxShadow: secStyle.boxShadow ? '0 10px 50px rgba(0,0,0,0.8)' : 'none'
-            }}>
-              <div className="border border-[#D4AF37]/30 p-8 rounded-xl bg-black/45 backdrop-blur-md">
-                <p className="text-[9px] uppercase tracking-[0.4em] mb-2 preview-font-secondary" style={{ color: secStyle.textColor || '#D4AF37' }}>
-                  {sec.content.title || 'Together with their families'}
-                </p>
-                <h1 className="text-3xl font-bold tracking-wide leading-relaxed" style={{ 
-                  color: secStyle.titleColor || secStyle.textColor || '#D4AF37',
-                  fontFamily: `'${secStyle.fontFamily || builderConfig.global.primaryFont}', serif` 
-                }}>
-                  {form.partner1_name || 'Groom'} <span className="text-xl">&amp;</span> {form.partner2_name || 'Bride'}
-                </h1>
-                <p className="text-[10px] mt-3 tracking-widest leading-relaxed opacity-75 preview-font-secondary" style={{ color: secStyle.subtitleColor || secStyle.textColor || '#ffffff' }}>
-                  {sec.content.subtitle || 'Invite you to celebrate their wedding'}
-                </p>
-                <div className="h-0.5 w-16 mx-auto bg-[#D4AF37]/40 my-4"></div>
+            <div className="absolute inset-0 pointer-events-none flex flex-col justify-between p-4">
+              <div />
+              {!sec.content.hideOverlay && (
+                <div 
+                  className="w-full flex flex-col items-center text-center px-2"
+                  style={{
+                    position: 'absolute',
+                    left: 0,
+                    right: 0,
+                    top: `${secStyle.overlayY !== undefined ? secStyle.overlayY : 45}%`,
+                    transform: 'translateY(-50%)'
+                  }}
+                >
+                  <div className="max-w-md space-y-4 pointer-events-none p-4" style={{
+                    borderRadius: `${secStyle.borderRadius || 0}px`,
+                    boxShadow: secStyle.boxShadow ? '0 10px 50px rgba(0,0,0,0.8)' : 'none'
+                  }}>
+                    <div className="border border-[#D4AF37]/30 p-8 rounded-xl bg-black/45 backdrop-blur-md">
+                      <p className="text-[9px] uppercase tracking-[0.4em] mb-2 preview-font-secondary" style={{ color: secStyle.textColor || '#D4AF37' }}>
+                        {sec.content.title || 'Together with their families'}
+                      </p>
+                      <h1 className="text-3xl font-bold tracking-wide leading-relaxed" style={{ 
+                        color: secStyle.titleColor || secStyle.textColor || '#D4AF37',
+                        fontFamily: `'${secStyle.fontFamily || builderConfig.global.primaryFont}', serif` 
+                      }}>
+                        {form.partner1_name || 'Groom'} <span className="text-xl">&amp;</span> {form.partner2_name || 'Bride'}
+                      </h1>
+                      <p className="text-[10px] mt-3 tracking-widest leading-relaxed opacity-75 preview-font-secondary" style={{ color: secStyle.subtitleColor || secStyle.textColor || '#ffffff' }}>
+                        {sec.content.subtitle || 'Invite you to celebrate their wedding'}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+              <div className="self-center mt-auto">
                 <button className="px-5 py-2.5 rounded-full text-[10px] uppercase font-semibold tracking-wider bg-[#D4AF37]/80 text-slate-950 shadow-md">
                   {sec.content.buttonText || 'Click to Open'}
                 </button>
@@ -1227,7 +1244,7 @@ export default function BuilderPage() {
   }
 
   return (
-    <div className="flex flex-col md:flex-row h-screen w-screen bg-[#090b0e] text-slate-200 overflow-hidden font-sans select-none">
+    <div className="flex flex-col md:flex-row h-full w-full bg-[#090b0e] text-slate-200 overflow-hidden font-sans select-none flex-1">
       {/* Load dynamic google fonts */}
       <GoogleFontLoader fonts={activeFonts} />
 
@@ -1967,7 +1984,7 @@ export default function BuilderPage() {
         {/* Viewport container */}
         <div className="flex-1 flex items-center justify-center p-6 overflow-y-auto h-full">
           <div
-            className={`border border-slate-800 rounded-2xl overflow-hidden shadow-2xl relative transition-all duration-300 flex flex-col h-[70vh] ${
+            className={`border border-slate-800 rounded-2xl overflow-hidden shadow-2xl relative transition-all duration-300 flex flex-col h-full ${
               viewport === 'desktop' ? 'w-full max-w-[800px]' : viewport === 'tablet' ? 'w-[600px]' : 'w-[360px]'
             }`}
             style={{
@@ -2016,33 +2033,6 @@ export default function BuilderPage() {
                 {renderSectionPreview(activeSectionId, false)}
               </div>
             )}
-          </div>
-        </div>
-
-        {/* Bottom Page Section Sequencer */}
-        <div className="h-28 bg-[#0c0f13] border-t border-slate-800/80 px-6 flex items-center z-10 shrink-0 select-none overflow-x-auto whitespace-nowrap scrollbar-none">
-          <div className="text-[10px] uppercase font-bold text-slate-500 mr-4 tracking-widest">Page Sections:</div>
-          <div className="flex items-center gap-3">
-            {builderConfig.sections.map((sec, idx) => (
-              <button
-                key={sec.id}
-                onClick={() => setActiveSectionId(sec.id)}
-                className={`flex flex-col items-start gap-1 p-2.5 rounded-xl border w-[120px] text-left transition-all cursor-pointer ${
-                  activeSectionId === sec.id
-                    ? 'border-rose-500 bg-rose-500/[0.04]'
-                    : 'border-slate-800 bg-[#12161e] hover:border-slate-700'
-                }`}
-              >
-                <span className="text-[9px] bg-slate-800 text-slate-400 px-1.5 py-0.5 rounded leading-none">#{idx + 1}</span>
-                <span className="text-xs font-bold text-slate-200 truncate w-full">{sec.title}</span>
-                <span className="text-[9px] text-slate-500 capitalize leading-none">{sec.visible ? 'visible' : 'hidden'}</span>
-              </button>
-            ))}
-            
-            <button className="flex flex-col items-center justify-center border border-dashed border-slate-800 hover:border-slate-700 bg-transparent rounded-xl w-[120px] h-[72px] text-slate-500 hover:text-slate-300 text-xs gap-1 cursor-pointer">
-              <span>➕</span>
-              <span>Add Section</span>
-            </button>
           </div>
         </div>
       </div>
@@ -2109,6 +2099,15 @@ export default function BuilderPage() {
                     label="Opening Button Label"
                     value={activeSection.content.buttonText || ''}
                     onChange={e => handleUpdateSectionContent('buttonText', e.target.value)}
+                  />
+                  <Select
+                    label="Names & Text Overlay"
+                    value={activeSection.content.hideOverlay ? 'true' : 'false'}
+                    onChange={e => handleUpdateSectionContent('hideOverlay', e.target.value === 'true')}
+                    options={[
+                      { value: 'false', label: 'Show Name & Text Overlay' },
+                      { value: 'true', label: 'Hide Name & Text Overlay' }
+                    ]}
                   />
                 </div>
               )}
@@ -2295,17 +2294,19 @@ export default function BuilderPage() {
                     </div>
                   </div>
 
-                  {activeSection.type === 'intro' && (
+                  {['open', 'intro'].includes(activeSection.type) && (
                     <div className="border-t border-slate-800/60 pt-3 space-y-2">
                       <div className="flex items-center justify-between">
                         <label className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Text Vertical Position</label>
-                        <span className="text-[10px] font-mono font-bold text-rose-400">{activeSectionStyle.overlayY ?? 75}%</span>
+                        <span className="text-[10px] font-mono font-bold text-rose-400">
+                          {activeSectionStyle.overlayY ?? (activeSection.type === 'open' ? 45 : 75)}%
+                        </span>
                       </div>
                       <input
                         type="range"
-                        min="10"
-                        max="90"
-                        value={activeSectionStyle.overlayY ?? 75}
+                        min="0"
+                        max="100"
+                        value={activeSectionStyle.overlayY ?? (activeSection.type === 'open' ? 45 : 75)}
                         onChange={e => handleUpdateSectionStyle('overlayY', parseInt(e.target.value))}
                         className="w-full h-1 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-rose-500"
                       />

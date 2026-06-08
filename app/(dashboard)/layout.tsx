@@ -21,7 +21,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
   }
 
   return (
-    <div className="min-h-screen bg-wedding flex flex-col">
+    <div className="h-screen bg-wedding flex flex-col overflow-hidden">
       {/* Header */}
       <header className="sticky top-0 z-40 flex items-center justify-between px-6 md:px-8 py-3 bg-black/60 backdrop-blur-md border-b border-white/10">
         <Link href="/" className="flex items-center gap-2">
@@ -72,7 +72,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
       </div>
 
       {/* Main content */}
-      <main className="flex-1 px-6 md:px-8 py-8 max-w-7xl mx-auto w-full">
+      <main className="flex-1 min-h-0 w-full relative flex flex-col">
         {children}
       </main>
     </div>
