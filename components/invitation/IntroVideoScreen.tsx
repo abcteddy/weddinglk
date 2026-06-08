@@ -9,6 +9,12 @@ interface IntroVideoScreenProps {
   accentColor: string
   onComplete: () => void
   hideOverlay?: boolean
+  titleOverride?: string
+  subtitleOverride?: string
+  fontFamilyOverride?: string
+  titleColorOverride?: string
+  subtitleColorOverride?: string
+  textColorOverride?: string
 }
 
 export function IntroVideoScreen({
@@ -17,6 +23,12 @@ export function IntroVideoScreen({
   accentColor,
   onComplete,
   hideOverlay = false,
+  titleOverride,
+  subtitleOverride,
+  fontFamilyOverride,
+  titleColorOverride,
+  subtitleColorOverride,
+  textColorOverride,
 }: IntroVideoScreenProps) {
   const videoRef    = useRef<HTMLVideoElement | null>(null)
   const [isVisible, setIsVisible]         = useState(false)
@@ -149,19 +161,29 @@ export function IntroVideoScreen({
         >
           <p
             className="text-[9px] sm:text-[11px] uppercase tracking-[0.5em] font-light"
-            style={{ color: accentColor, opacity: 0.85 }}
+            style={{ 
+              color: subtitleColorOverride || textColorOverride || accentColor, 
+              opacity: 0.85,
+              fontFamily: fontFamilyOverride ? `'${fontFamilyOverride}', sans-serif` : undefined
+            }}
           >
-            You Are Invited To Celebrate
+            {subtitleOverride || 'You Are Invited To Celebrate'}
           </p>
           <h2
             className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-serif font-bold text-white drop-shadow-2xl leading-tight"
-            style={{ textShadow: `0 0 60px ${accentColor}40, 0 2px 8px rgba(0,0,0,0.9)` }}
+            style={{ 
+              color: titleColorOverride || textColorOverride || '#ffffff',
+              textShadow: `0 0 60px ${accentColor}40, 0 2px 8px rgba(0,0,0,0.9)`,
+              fontFamily: fontFamilyOverride ? `'${fontFamilyOverride}', serif` : undefined
+            }}
           >
-            {coupleNames}
+            {titleOverride || coupleNames}
           </h2>
-          <p className="text-[9px] sm:text-[11px] uppercase tracking-[0.35em] font-light text-white/40 mt-0.5">
-            Wedding Invitation
-          </p>
+          {(!titleOverride && !subtitleOverride) && (
+            <p className="text-[9px] sm:text-[11px] uppercase tracking-[0.35em] font-light text-white/40 mt-0.5">
+              Wedding Invitation
+            </p>
+          )}
         </div>
       )}
 

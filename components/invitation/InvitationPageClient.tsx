@@ -346,6 +346,12 @@ export function InvitationPageClient({ invitation, guest, initialGuestUploads = 
           accentColor={template.accentColor}
           onComplete={handleVideoComplete}
           hideOverlay={introConfig?.content.hideOverlay || false}
+          titleOverride={introConfig?.content.title}
+          subtitleOverride={introConfig?.content.subtitle}
+          fontFamilyOverride={introConfig?.styles.fontFamily}
+          titleColorOverride={introConfig?.styles.titleColor}
+          subtitleColorOverride={introConfig?.styles.subtitleColor}
+          textColorOverride={introConfig?.styles.textColor}
         />
       )}
 
