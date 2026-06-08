@@ -1007,15 +1007,23 @@ export default function BuilderPage() {
             <div className="space-y-2 pointer-events-none p-4" style={{
               borderRadius: `${secStyle.borderRadius || 0}px`
             }}>
-              <p className="text-[10px] uppercase tracking-widest preview-font-secondary" style={{ color: secStyle.subtitleColor || secStyle.textColor || '#ffffff' }}>
-                {sec.content.subtitle || 'Intro Showcase'}
-              </p>
-              <h1 className="text-2xl tracking-wider font-bold uppercase" style={{ 
-                color: secStyle.titleColor || secStyle.textColor || '#D4AF37',
-                fontFamily: `'${secStyle.fontFamily || builderConfig.global.primaryFont}', serif`
-              }}>
-                {sec.content.title || 'OUR MOVIE INTRO'}
-              </h1>
+              {sec.content.hideOverlay ? (
+                <div className="text-xs text-rose-400 font-medium italic py-2">
+                  [Overlay text is hidden on video screen]
+                </div>
+              ) : (
+                <>
+                  <p className="text-[10px] uppercase tracking-widest preview-font-secondary" style={{ color: secStyle.subtitleColor || secStyle.textColor || '#ffffff' }}>
+                    {sec.content.subtitle || 'Intro Showcase'}
+                  </p>
+                  <h1 className="text-2xl tracking-wider font-bold uppercase" style={{ 
+                    color: secStyle.titleColor || secStyle.textColor || '#D4AF37',
+                    fontFamily: `'${secStyle.fontFamily || builderConfig.global.primaryFont}', serif`
+                  }}>
+                    {sec.content.title || 'OUR MOVIE INTRO'}
+                  </h1>
+                </>
+              )}
               <span className="text-[10px] bg-black/40 text-slate-400 px-3 py-1 rounded-full border border-slate-800 inline-block mt-2">
                 🎬 Video Timeline: 00:03 / 00:08
               </span>
@@ -2055,6 +2063,15 @@ export default function BuilderPage() {
                     label="Subtitle Description"
                     value={activeSection.content.subtitle || ''}
                     onChange={e => handleUpdateSectionContent('subtitle', e.target.value)}
+                  />
+                  <Select
+                    label="Names & Text Overlay"
+                    value={activeSection.content.hideOverlay ? 'true' : 'false'}
+                    onChange={e => handleUpdateSectionContent('hideOverlay', e.target.value === 'true')}
+                    options={[
+                      { value: 'false', label: 'Show Name & Text Overlay' },
+                      { value: 'true', label: 'Hide Name & Text Overlay' }
+                    ]}
                   />
                 </div>
               )}

@@ -8,6 +8,7 @@ interface IntroVideoScreenProps {
   coupleNames: string
   accentColor: string
   onComplete: () => void
+  hideOverlay?: boolean
 }
 
 export function IntroVideoScreen({
@@ -15,6 +16,7 @@ export function IntroVideoScreen({
   coupleNames,
   accentColor,
   onComplete,
+  hideOverlay = false,
 }: IntroVideoScreenProps) {
   const videoRef    = useRef<HTMLVideoElement | null>(null)
   const [isVisible, setIsVisible]         = useState(false)
@@ -135,31 +137,33 @@ export function IntroVideoScreen({
       <div className="absolute top-0 inset-x-0 h-16 bg-gradient-to-b from-black/75 to-transparent pointer-events-none" />
       <div className="absolute bottom-0 inset-x-0 h-24 bg-gradient-to-t from-black/90 to-transparent pointer-events-none" />
 
-      {/* ── Couple name overlay — always visible over iframe ── */}
-      <div
-        className="absolute bottom-10 sm:bottom-14 inset-x-0 flex flex-col items-center gap-1.5 px-6 pointer-events-none text-center"
-        style={{
-          opacity: isVisible ? 1 : 0,
-          transform: isVisible ? 'translateY(0)' : 'translateY(20px)',
-          transition: 'opacity 1.2s ease 0.8s, transform 1.2s ease 0.8s',
-        }}
-      >
-        <p
-          className="text-[9px] sm:text-[11px] uppercase tracking-[0.5em] font-light"
-          style={{ color: accentColor, opacity: 0.85 }}
+      {/* ── Couple name overlay — always visible over iframe (if not hidden) ── */}
+      {!hideOverlay && (
+        <div
+          className="absolute bottom-10 sm:bottom-14 inset-x-0 flex flex-col items-center gap-1.5 px-6 pointer-events-none text-center"
+          style={{
+            opacity: isVisible ? 1 : 0,
+            transform: isVisible ? 'translateY(0)' : 'translateY(20px)',
+            transition: 'opacity 1.2s ease 0.8s, transform 1.2s ease 0.8s',
+          }}
         >
-          You Are Invited To Celebrate
-        </p>
-        <h2
-          className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-serif font-bold text-white drop-shadow-2xl leading-tight"
-          style={{ textShadow: `0 0 60px ${accentColor}40, 0 2px 8px rgba(0,0,0,0.9)` }}
-        >
-          {coupleNames}
-        </h2>
-        <p className="text-[9px] sm:text-[11px] uppercase tracking-[0.35em] font-light text-white/40 mt-0.5">
-          Wedding Invitation
-        </p>
-      </div>
+          <p
+            className="text-[9px] sm:text-[11px] uppercase tracking-[0.5em] font-light"
+            style={{ color: accentColor, opacity: 0.85 }}
+          >
+            You Are Invited To Celebrate
+          </p>
+          <h2
+            className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-serif font-bold text-white drop-shadow-2xl leading-tight"
+            style={{ textShadow: `0 0 60px ${accentColor}40, 0 2px 8px rgba(0,0,0,0.9)` }}
+          >
+            {coupleNames}
+          </h2>
+          <p className="text-[9px] sm:text-[11px] uppercase tracking-[0.35em] font-light text-white/40 mt-0.5">
+            Wedding Invitation
+          </p>
+        </div>
+      )}
 
       {/* ── Progress bar (direct video only) ── */}
       {!isEmbed && (

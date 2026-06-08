@@ -345,6 +345,7 @@ export function InvitationPageClient({ invitation, guest, initialGuestUploads = 
           coupleNames={coupleName}
           accentColor={template.accentColor}
           onComplete={handleVideoComplete}
+          hideOverlay={introConfig?.content.hideOverlay || false}
         />
       )}
 
