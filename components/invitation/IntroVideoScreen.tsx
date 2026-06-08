@@ -15,6 +15,7 @@ interface IntroVideoScreenProps {
   titleColorOverride?: string
   subtitleColorOverride?: string
   textColorOverride?: string
+  overlayY?: number
 }
 
 export function IntroVideoScreen({
@@ -29,6 +30,7 @@ export function IntroVideoScreen({
   titleColorOverride,
   subtitleColorOverride,
   textColorOverride,
+  overlayY,
 }: IntroVideoScreenProps) {
   const videoRef    = useRef<HTMLVideoElement | null>(null)
   const [isVisible, setIsVisible]         = useState(false)
@@ -152,11 +154,12 @@ export function IntroVideoScreen({
       {/* ── Couple name overlay — always visible over iframe (if not hidden) ── */}
       {!hideOverlay && (
         <div
-          className="absolute bottom-10 sm:bottom-14 inset-x-0 flex flex-col items-center gap-1.5 px-6 pointer-events-none text-center"
+          className="absolute inset-x-0 flex flex-col items-center gap-1.5 px-6 pointer-events-none text-center"
           style={{
+            top: `${overlayY !== undefined ? overlayY : 75}%`,
             opacity: isVisible ? 1 : 0,
-            transform: isVisible ? 'translateY(0)' : 'translateY(20px)',
-            transition: 'opacity 1.2s ease 0.8s, transform 1.2s ease 0.8s',
+            transform: isVisible ? 'translateY(-50%)' : 'translateY(-50%) translateY(20px)',
+            transition: 'opacity 1.2s ease 0.8s, transform 1.2s ease 0.8s, top 0.3s ease',
           }}
         >
           <p

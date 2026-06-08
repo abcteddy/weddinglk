@@ -1021,29 +1021,41 @@ export default function BuilderPage() {
           )}
 
           {isIntro && (
-            <div className="space-y-2 pointer-events-none p-4" style={{
-              borderRadius: `${secStyle.borderRadius || 0}px`
-            }}>
-              {sec.content.hideOverlay ? (
-                <div className="text-xs text-rose-400 font-medium italic py-2">
-                  [Overlay text is hidden on video screen]
-                </div>
-              ) : (
-                <>
-                  <p className="text-[10px] uppercase tracking-widest preview-font-secondary" style={{ color: secStyle.subtitleColor || secStyle.textColor || '#ffffff' }}>
-                    {sec.content.subtitle || 'Intro Showcase'}
-                  </p>
-                  <h1 className="text-2xl tracking-wider font-bold uppercase" style={{ 
-                    color: secStyle.titleColor || secStyle.textColor || '#D4AF37',
-                    fontFamily: `'${secStyle.fontFamily || builderConfig.global.primaryFont}', serif`
-                  }}>
-                    {sec.content.title || 'OUR MOVIE INTRO'}
-                  </h1>
-                </>
-              )}
-              <span className="text-[10px] bg-black/40 text-slate-400 px-3 py-1 rounded-full border border-slate-800 inline-block mt-2">
-                🎬 Video Timeline: 00:03 / 00:08
-              </span>
+            <div className="absolute inset-0 pointer-events-none flex flex-col justify-between p-4">
+              <div />
+              <div 
+                className="w-full flex flex-col items-center text-center px-2"
+                style={{
+                  position: 'absolute',
+                  left: 0,
+                  right: 0,
+                  top: `${secStyle.overlayY !== undefined ? secStyle.overlayY : 75}%`,
+                  transform: 'translateY(-50%)'
+                }}
+              >
+                {sec.content.hideOverlay ? (
+                  <div className="text-[10px] text-rose-400 font-medium italic py-1 px-3 bg-black/40 rounded-full border border-slate-800/80">
+                    [Overlay text is hidden on video screen]
+                  </div>
+                ) : (
+                  <div className="space-y-1">
+                    <p className="text-[9px] uppercase tracking-widest preview-font-secondary" style={{ color: secStyle.subtitleColor || secStyle.textColor || '#ffffff', opacity: 0.85 }}>
+                      {sec.content.subtitle || 'Intro Showcase'}
+                    </p>
+                    <h1 className="text-xl tracking-wider font-bold uppercase" style={{ 
+                      color: secStyle.titleColor || secStyle.textColor || '#D4AF37',
+                      fontFamily: `'${secStyle.fontFamily || builderConfig.global.primaryFont}', serif`
+                    }}>
+                      {sec.content.title || 'OUR MOVIE INTRO'}
+                    </h1>
+                  </div>
+                )}
+              </div>
+              <div className="self-center mt-auto">
+                <span className="text-[10px] bg-black/40 text-slate-400 px-3 py-1 rounded-full border border-slate-800 inline-block">
+                  🎬 Video Timeline: 00:03 / 00:08
+                </span>
+              </div>
             </div>
           )}
 
@@ -2282,6 +2294,23 @@ export default function BuilderPage() {
                       <span className="text-xs font-mono">{activeSectionStyle.bgOverlayColor || '#000000'}</span>
                     </div>
                   </div>
+
+                  {activeSection.type === 'intro' && (
+                    <div className="border-t border-slate-800/60 pt-3 space-y-2">
+                      <div className="flex items-center justify-between">
+                        <label className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Text Vertical Position</label>
+                        <span className="text-[10px] font-mono font-bold text-rose-400">{activeSectionStyle.overlayY ?? 75}%</span>
+                      </div>
+                      <input
+                        type="range"
+                        min="10"
+                        max="90"
+                        value={activeSectionStyle.overlayY ?? 75}
+                        onChange={e => handleUpdateSectionStyle('overlayY', parseInt(e.target.value))}
+                        className="w-full h-1 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-rose-500"
+                      />
+                    </div>
+                  )}
                 </div>
               )}
 

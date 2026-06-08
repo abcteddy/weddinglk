@@ -352,6 +352,7 @@ export function InvitationPageClient({ invitation, guest, initialGuestUploads = 
           titleColorOverride={introConfig?.styles.titleColor}
           subtitleColorOverride={introConfig?.styles.subtitleColor}
           textColorOverride={introConfig?.styles.textColor}
+          overlayY={introConfig?.styles.overlayY}
         />
       )}
 

@@ -44,6 +44,7 @@ export interface SectionStyles {
   paddingBottom?: number // in px
   borderRadius?: number // in px
   boxShadow?: boolean
+  overlayY?: number
 }
 
 export interface SectionContent {
