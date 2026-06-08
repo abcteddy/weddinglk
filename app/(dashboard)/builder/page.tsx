@@ -1919,14 +1919,33 @@ export default function BuilderPage() {
               .preview-font-section {
                 font-family: '${activeSectionStyle.fontFamily || builderConfig.global.primaryFont}', serif !important;
               }
+              /* Custom scrollbars for viewport preview */
+              .preview-scroll-container::-webkit-scrollbar {
+                width: 6px !important;
+                height: 6px !important;
+                display: block !important;
+              }
+              .preview-scroll-container::-webkit-scrollbar-track {
+                background: rgba(255, 255, 255, 0.03) !important;
+                border-radius: 3px !important;
+              }
+              .preview-scroll-container::-webkit-scrollbar-thumb {
+                background: rgba(244, 63, 94, 0.35) !important; /* rose-500 */
+                border-radius: 3px !important;
+              }
+              .preview-scroll-container::-webkit-scrollbar-thumb:hover {
+                background: rgba(244, 63, 94, 0.6) !important;
+              }
             `}</style>
 
             {previewMode === 'full' ? (
-              <div className="w-full h-full overflow-y-auto divide-y divide-slate-900/50">
+              <div className="w-full h-full overflow-y-auto divide-y divide-slate-900/50 preview-scroll-container">
                 {builderConfig.sections.map(sec => renderSectionPreview(sec.id, true))}
               </div>
             ) : (
-              renderSectionPreview(activeSectionId, false)
+              <div className="w-full h-full overflow-y-auto preview-scroll-container">
+                {renderSectionPreview(activeSectionId, false)}
+              </div>
             )}
           </div>
         </div>
