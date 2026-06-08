@@ -216,6 +216,7 @@ export default function BuilderPage() {
     custom_message: '',
     couple_phone: '',
     cover_url: '',
+    photo_url: '',
     music_url: '',
     video_url: '',
     gallery_urls: [] as string[],
@@ -288,6 +289,7 @@ export default function BuilderPage() {
           custom_message: data.custom_message ?? '',
           couple_phone: (data as any).couple_phone ?? '',
           cover_url: data.cover_url ?? '',
+          photo_url: data.photo_url ?? '',
           music_url: data.music_url ?? '',
           video_url: data.video_url ?? '',
           gallery_urls: data.gallery_urls ?? [],
@@ -560,7 +562,7 @@ export default function BuilderPage() {
   }
 
   // Upload handler updated for builder section backgrounds
-  const handleUploadBg = async (e: React.ChangeEvent<HTMLInputElement>, fieldName: 'cover' | 'music' | 'video' | 'gallery' | 'groom_photo' | 'bride_photo' | 'registry_qr' | 'bg_url' | 'global_bg_url') => {
+  const handleUploadBg = async (e: React.ChangeEvent<HTMLInputElement>, fieldName: 'cover' | 'music' | 'video' | 'gallery' | 'groom_photo' | 'bride_photo' | 'photo' | 'registry_qr' | 'bg_url' | 'global_bg_url') => {
     const files = e.target.files
     if (!files || files.length === 0) return
 
@@ -663,7 +665,7 @@ export default function BuilderPage() {
   }
 
   // Delete file action
-  const handleDeleteFile = async (type: 'cover' | 'music' | 'video' | 'gallery' | 'groom_photo' | 'bride_photo' | 'registry_qr', index?: number) => {
+  const handleDeleteFile = async (type: 'cover' | 'music' | 'video' | 'gallery' | 'groom_photo' | 'bride_photo' | 'photo' | 'registry_qr', index?: number) => {
     setError('')
     setSuccess('')
 
@@ -1642,6 +1644,38 @@ export default function BuilderPage() {
                     loading={!!uploading.bride_photo}
                   >
                     Upload Bride Photo
+                  </Button>
+                )}
+              </div>
+
+              <h3 className="text-xs font-bold text-slate-300 border-t border-slate-800/80 pt-3">👩‍❤️‍👨 Couple Cover Photo</h3>
+              <div className="space-y-2">
+                <input
+                  type="file"
+                  id="couple-photo-upload"
+                  accept="image/*"
+                  onChange={e => handleUploadBg(e, 'photo')}
+                  className="hidden"
+                />
+                {form.photo_url ? (
+                  <div className="relative h-28 w-44 rounded-lg overflow-hidden border border-slate-700 bg-slate-900 group">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={form.photo_url} alt="Couple Cover" className="object-cover w-full h-full" />
+                    <button
+                      onClick={() => handleDeleteFile('photo')}
+                      className="absolute inset-0 bg-black/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity text-xs cursor-pointer text-red-400"
+                    >
+                      Delete
+                    </button>
+                  </div>
+                ) : (
+                  <Button
+                    variant="secondary"
+                    className="w-full text-xs py-2"
+                    onClick={() => document.getElementById('couple-photo-upload')?.click()}
+                    loading={!!uploading.photo}
+                  >
+                    Upload Couple Cover Photo
                   </Button>
                 )}
               </div>

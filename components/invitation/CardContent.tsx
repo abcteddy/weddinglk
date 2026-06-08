@@ -136,14 +136,14 @@ export function CardContent({ invitation, visible = true, theme }: CardContentPr
       } as React.CSSProperties}
     >
       {/* Cover Image */}
-      {invitation.cover_url && (
+      {invitation.photo_url && (
         <div
           className="w-full aspect-[16/9] mb-8 rounded-sm overflow-hidden border shadow-lg bg-black/25"
           style={{ borderColor: template.accentColor + '20' }}
         >
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            src={invitation.cover_url}
+            src={invitation.photo_url}
             alt="Couple Cover Photo"
             className="w-full h-full object-cover animate-fade-in"
           />
