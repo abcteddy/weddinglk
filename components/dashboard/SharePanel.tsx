@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/Button'
 
 interface SharePanelProps {
@@ -11,7 +11,16 @@ interface SharePanelProps {
 
 export function SharePanel({ slug, coupleName, isPublished }: SharePanelProps) {
   const [copied, setCopied] = useState(false)
-  const url = `${process.env.NEXT_PUBLIC_APP_URL ?? 'https://weddinglk.com'}/inv/${slug}`
+  const [origin, setOrigin] = useState('')
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      setOrigin(window.location.origin)
+    }
+  }, [])
+
+  const baseUrl = origin || process.env.NEXT_PUBLIC_APP_URL || 'https://weddinglk.com'
+  const url = `${baseUrl}/inv/${slug}`
 
   const handleCopy = async () => {
     try {
