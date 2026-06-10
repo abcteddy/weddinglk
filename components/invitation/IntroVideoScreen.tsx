@@ -106,42 +106,34 @@ export function IntroVideoScreen({
         pointerEvents: exiting ? 'none' : 'auto',
       }}
     >
-      {/* ── Video layer — fullscreen, no borders ── */}
-      {isEmbed ? (
-        /*
-          Iframe scaled 110% + translateY trick: hides the YouTube/Vimeo
-          thin top/bottom bars that some platforms inject.
-          pointer-events: none prevents the iframe from capturing clicks (skip still works).
-        */
-        <div
-          className="absolute"
-          style={{
-            top: '-5%',
-            left: '-5%',
-            width: '110%',
-            height: '110%',
-          }}
-        >
+      {/* ── Video layer — 9:16 aspect ratio scaled to cover fullscreen, no borders ── */}
+      <div
+        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 overflow-hidden flex items-center justify-center pointer-events-none"
+        style={{
+          minWidth: '100vw',
+          minHeight: '100vh',
+          aspectRatio: '9 / 16',
+        }}
+      >
+        {isEmbed ? (
           <iframe
             src={video.embedUrl}
-            className="w-full h-full"
-            style={{ border: 'none', outline: 'none' }}
+            className="w-full h-full border-none outline-none scale-[1.05]"
             allow="autoplay; fullscreen; encrypted-media"
             allowFullScreen={false}
             title="Intro video"
           />
-        </div>
-      ) : (
-        <video
-          ref={videoRef}
-          src={videoUrl}
-          className="absolute inset-0 w-full h-full"
-          style={{ objectFit: 'contain', objectPosition: 'center' }}
-          playsInline
-          preload="auto"
-          muted={false}
-        />
-      )}
+        ) : (
+          <video
+            ref={videoRef}
+            src={videoUrl}
+            className="w-full h-full object-cover"
+            playsInline
+            preload="auto"
+            muted={false}
+          />
+        )}
+      </div>
 
       {/* ── Cinematic edges ── */}
       <div
