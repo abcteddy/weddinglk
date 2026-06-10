@@ -936,10 +936,15 @@ export default function BuilderPage() {
     const isRsvp = sectionId === 'rsvp-section'
     const isFooter = sectionId === 'footer-section'
 
-    // Resolve bg media for open and intro
+    const introSection = builderConfig.sections.find(s => s.type === 'intro')
+    const showIntroLoopOnDetails = isDetails && introSection?.content.loopAtTop && (introSection.styles.bgUrl || form.video_url)
+
+    // Resolve bg media for open and intro (or details if looping intro video is enabled)
     const videoInfo = (isMainOpen || isIntro) && secStyle.bgType === 'video' && secStyle.bgUrl 
       ? resolveVideo(secStyle.bgUrl, { autoplay: true, muted: true, loop: true, controls: false }) 
-      : null;
+      : (showIntroLoopOnDetails
+          ? resolveVideo(introSection.styles.bgUrl || form.video_url || '', { autoplay: true, muted: true, loop: true, controls: false })
+          : null);
 
     return (
       <div 
@@ -968,7 +973,7 @@ export default function BuilderPage() {
         }}
       >
         {/* Render backgrounds for video types */}
-        {secStyle.bgType === 'video' && secStyle.bgUrl && (
+        {((secStyle.bgType === 'video' && secStyle.bgUrl) || showIntroLoopOnDetails) && (
           videoInfo ? (
             videoInfo.type === 'direct' ? (
               <video src={videoInfo.embedUrl} className="absolute inset-0 object-cover w-full h-full pointer-events-none" autoPlay loop muted playsInline />
@@ -983,12 +988,14 @@ export default function BuilderPage() {
         )}
 
         {/* Overlay Color for media types */}
-        {['video', 'image'].includes(secStyle.bgType || '') && (
+        {((['video', 'image'].includes(secStyle.bgType || '')) || showIntroLoopOnDetails) && (
           <div
             className="absolute inset-0 pointer-events-none"
             style={{
-              backgroundColor: secStyle.bgOverlayColor || '#000000',
-              opacity: (secStyle.bgOverlayOpacity ?? 50) / 100
+              backgroundColor: showIntroLoopOnDetails ? '#000000' : (secStyle.bgOverlayColor || '#000000'),
+              opacity: showIntroLoopOnDetails 
+                ? ((introSection?.styles.bgOverlayOpacity ?? 50) / 100)
+                : ((secStyle.bgOverlayOpacity ?? 50) / 100)
             }}
           />
         )}
@@ -2131,6 +2138,15 @@ export default function BuilderPage() {
                     options={[
                       { value: 'false', label: 'Show Name & Text Overlay' },
                       { value: 'true', label: 'Hide Name & Text Overlay' }
+                    ]}
+                  />
+                  <Select
+                    label="Loop Video at Details Top"
+                    value={activeSection.content.loopAtTop ? 'true' : 'false'}
+                    onChange={e => handleUpdateSectionContent('loopAtTop', e.target.value === 'true')}
+                    options={[
+                      { value: 'false', label: 'Play Once on Intro' },
+                      { value: 'true', label: 'Loop as Details Top Background' }
                     ]}
                   />
                 </div>

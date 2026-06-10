@@ -12,6 +12,7 @@ import { IntroVideoScreen } from '@/components/invitation/IntroVideoScreen'
 import { PhotoGallery } from '@/components/invitation/PhotoGallery'
 import { createClient } from '@/lib/supabase/client'
 import { GoogleFontLoader } from '@/components/ui/GoogleFontLoader'
+import { resolveVideo } from '@/lib/utils/videoEmbed'
 
 type Stage = 'envelope' | 'video' | 'details'
 
@@ -438,62 +439,114 @@ export function InvitationPageClient({ invitation, guest, initialGuestUploads = 
           <div
             className="w-full py-20 px-6 flex flex-col items-center justify-center text-center relative overflow-hidden"
             style={{
-              background: `linear-gradient(to bottom, ${pageTheme.pageBgStyle}, transparent)`,
-              minHeight: '40vh',
+              minHeight: '50vh',
               paddingTop: detailsConfig?.styles.paddingTop ? `${detailsConfig.styles.paddingTop}px` : undefined,
               paddingBottom: detailsConfig?.styles.paddingBottom ? `${detailsConfig.styles.paddingBottom}px` : undefined,
             }}
           >
-            {/* Floating particles */}
-            <div className="absolute inset-0 overflow-hidden pointer-events-none">
-              {[...Array(12)].map((_, i) => (
+            {/* Background Video (if loopAtTop is enabled) */}
+            {introConfig?.content.loopAtTop && (introConfig?.styles.bgUrl || invitation.video_url) ? (
+              <>
+                <div className="absolute inset-0 z-0">
+                  {(() => {
+                    const videoInfo = resolveVideo(introConfig.styles.bgUrl || invitation.video_url || '', {
+                      autoplay: true,
+                      muted: true,
+                      loop: true,
+                      controls: false,
+                    })
+                    if (videoInfo.type === 'direct') {
+                      return (
+                        <video
+                          src={videoInfo.embedUrl}
+                          className="w-full h-full object-cover"
+                          autoPlay
+                          loop
+                          muted
+                          playsInline
+                        />
+                      )
+                    } else {
+                      return (
+                        <iframe
+                          src={videoInfo.embedUrl}
+                          className="w-full h-full border-none pointer-events-none scale-[1.35] origin-center"
+                          allow="autoplay; mute"
+                        />
+                      )
+                    }
+                  })()}
+                </div>
+                {/* Overlay color for readability */}
                 <div
-                  key={i}
-                  className="absolute w-1 h-1 rounded-full opacity-30"
+                  className="absolute inset-0 z-0 bg-black"
                   style={{
-                    background: template.accentColor,
-                    left: `${8 + i * 8}%`,
-                    top: `${10 + (i % 4) * 22}%`,
-                    animation: `float ${3 + i * 0.3}s ease-in-out ${i * 0.4}s infinite alternate`,
+                    opacity: (introConfig.styles.bgOverlayOpacity ?? 50) / 100,
                   }}
                 />
-              ))}
-            </div>
-            <p
-              className="text-[10px] uppercase tracking-[0.55em] mb-4 font-light custom-font-secondary"
-              style={{ color: detailsConfig?.styles.subtitleColor || detailsConfig?.styles.textColor || template.accentColor }}
-            >
-              {detailsConfig?.content.subtitle || 'Together With Their Families'}
-            </p>
-            <h1
-              className="text-4xl md:text-6xl lg:text-7xl font-bold leading-tight custom-font-details"
-              style={{
-                color: detailsConfig?.styles.titleColor || detailsConfig?.styles.textColor || pageTheme.textPrimary,
-                textShadow: pageTheme.isLight
-                  ? 'none'
-                  : `0 0 80px ${template.accentColor}30, 0 2px 10px rgba(0,0,0,0.5)`,
-              }}
-            >
-              {coupleName}
-            </h1>
-            <div
-              className="h-px w-24 mx-auto mt-6"
-              style={{ background: `linear-gradient(to right, transparent, ${detailsConfig?.styles.subtitleColor || template.accentColor}, transparent)` }}
-            />
-            <p
-              className="mt-4 text-sm font-light tracking-widest uppercase custom-font-secondary"
-              style={{ color: detailsConfig?.styles.textColor || pageTheme.textSecondary, opacity: 0.7 }}
-            >
-              {detailsConfig?.content.title || 'Wedding Invitation'}
-            </p>
-            {/* Scroll cue */}
-            <div className="mt-12 flex flex-col items-center gap-2 animate-bounce">
-              <p className="text-[10px] uppercase tracking-widest custom-font-secondary" style={{ color: detailsConfig?.styles.subtitleColor || detailsConfig?.styles.textColor || template.accentColor, opacity: 0.6 }}>
-                Scroll to explore
+              </>
+            ) : (
+              // Standard static background
+              <div
+                className="absolute inset-0 z-0"
+                style={{
+                  background: `linear-gradient(to bottom, ${pageTheme.pageBgStyle}, transparent)`,
+                }}
+              />
+            )}
+
+            <div className="relative z-10 w-full flex flex-col items-center justify-center">
+              {/* Floating particles */}
+              <div className="absolute inset-0 overflow-hidden pointer-events-none">
+                {[...Array(12)].map((_, i) => (
+                  <div
+                    key={i}
+                    className="absolute w-1 h-1 rounded-full opacity-30"
+                    style={{
+                      background: template.accentColor,
+                      left: `${8 + i * 8}%`,
+                      top: `${10 + (i % 4) * 22}%`,
+                      animation: `float ${3 + i * 0.3}s ease-in-out ${i * 0.4}s infinite alternate`,
+                    }}
+                  />
+                ))}
+              </div>
+              <p
+                className="text-[10px] uppercase tracking-[0.55em] mb-4 font-light custom-font-secondary"
+                style={{ color: detailsConfig?.styles.subtitleColor || detailsConfig?.styles.textColor || template.accentColor }}
+              >
+                {detailsConfig?.content.subtitle || 'Together With Their Families'}
               </p>
-              <svg className="w-4 h-4" style={{ color: detailsConfig?.styles.subtitleColor || detailsConfig?.styles.textColor || template.accentColor }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-              </svg>
+              <h1
+                className="text-4xl md:text-6xl lg:text-7xl font-bold leading-tight custom-font-details"
+                style={{
+                  color: detailsConfig?.styles.titleColor || detailsConfig?.styles.textColor || pageTheme.textPrimary,
+                  textShadow: pageTheme.isLight
+                    ? 'none'
+                    : `0 0 80px ${template.accentColor}30, 0 2px 10px rgba(0,0,0,0.5)`,
+                }}
+              >
+                {coupleName}
+              </h1>
+              <div
+                className="h-px w-24 mx-auto mt-6"
+                style={{ background: `linear-gradient(to right, transparent, ${detailsConfig?.styles.subtitleColor || template.accentColor}, transparent)` }}
+              />
+              <p
+                className="mt-4 text-sm font-light tracking-widest uppercase custom-font-secondary"
+                style={{ color: detailsConfig?.styles.textColor || pageTheme.textSecondary, opacity: 0.7 }}
+              >
+                {detailsConfig?.content.title || 'Wedding Invitation'}
+              </p>
+              {/* Scroll cue */}
+              <div className="mt-12 flex flex-col items-center gap-2 animate-bounce">
+                <p className="text-[10px] uppercase tracking-widest custom-font-secondary" style={{ color: detailsConfig?.styles.subtitleColor || detailsConfig?.styles.textColor || template.accentColor, opacity: 0.6 }}>
+                  Scroll to explore
+                </p>
+                <svg className="w-4 h-4" style={{ color: detailsConfig?.styles.subtitleColor || detailsConfig?.styles.textColor || template.accentColor }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </div>
             </div>
           </div>
         </div>
