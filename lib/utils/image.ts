@@ -4,7 +4,13 @@
  */
 export function getOptimizedImageUrl(
   url: string | null | undefined,
-  options: { width?: number; height?: number; quality?: number; format?: 'origin' | 'webp' | 'avif' | 'auto' } = {}
+  options: { 
+    width?: number; 
+    height?: number; 
+    quality?: number; 
+    format?: 'origin' | 'webp' | 'avif' | 'auto';
+    resize?: 'cover' | 'contain' | 'fill';
+  } = {}
 ): string {
   if (!url) return ''
   
@@ -27,6 +33,9 @@ export function getOptimizedImageUrl(
   
   // Set quality (defaults to 75 for optimal compression-to-quality ratio)
   params.set('quality', String(options.quality ?? 75))
+
+  // Set resize mode (defaults to 'contain' to maintain aspect ratio when only width or height is provided)
+  params.set('resize', options.resize ?? 'contain')
   
   // If format is specified and is NOT 'auto', append it.
   // We omit 'auto' because the project's Supabase instance does not support 'auto' format and throws a 400.
