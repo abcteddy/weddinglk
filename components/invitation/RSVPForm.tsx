@@ -53,6 +53,7 @@ export function RSVPForm({
     message: '',
   })
   const [errors, setErrors] = useState<Record<string, string>>({})
+  const [errorMessage, setErrorMessage] = useState<string>('')
 
   const validate = (): boolean => {
     const errs: Record<string, string> = {}
@@ -90,8 +91,9 @@ export function RSVPForm({
       const data = await res.json()
       if (!res.ok) throw new Error(data.error ?? 'RSVP failed')
       setStep('success')
-    } catch (err) {
+    } catch (err: any) {
       console.error('RSVP error:', err)
+      setErrorMessage(err.message ?? 'Something went wrong. Please try again.')
       setStep('error')
     }
   }
@@ -143,7 +145,7 @@ export function RSVPForm({
   if (step === 'error') {
     return (
       <div className="text-center py-8 animate-fade-up">
-        <p className="text-red-400 mb-4">Something went wrong. Please try again.</p>
+        <p className="text-red-400 mb-4">{errorMessage}</p>
         <Button onClick={() => setStep('form')} variant="secondary">Try Again</Button>
       </div>
     )

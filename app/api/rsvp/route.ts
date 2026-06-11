@@ -13,39 +13,63 @@ export async function POST(req: Request) {
 
     const supabase = await createClient()
 
-    // Rate limit: check if same phone already RSVPd this invitation
-    if (phone) {
-      const { data: existing } = await (supabase.from('rsvps') as any)
+    let existingRSVP: any = null
+
+    // 1. If guestId is provided, look up by guest_id
+    if (guestId) {
+      const { data } = await (supabase.from('rsvps') as any)
         .select('id')
         .eq('invitation_id', invitationId)
-        .eq('guest_phone', phone)
-        .single() as { data: any | null }
-
-      if (existing) {
-        return NextResponse.json(
-          { error: 'You have already RSVPd to this invitation' },
-          { status: 429 },
-        )
-      }
+        .eq('guest_id', guestId)
+        .maybeSingle() as { data: any | null }
+      existingRSVP = data
+    } 
+    // 2. If no guestId but name and phone are provided, look up by name and phone
+    else if (guestName && phone) {
+      const { data } = await (supabase.from('rsvps') as any)
+        .select('id')
+        .eq('invitation_id', invitationId)
+        .eq('guest_name', guestName.trim())
+        .eq('guest_phone', phone.trim())
+        .maybeSingle() as { data: any | null }
+      existingRSVP = data
     }
 
-    // Insert RSVP
-    const { data: rsvp, error: rsvpError } = await (supabase.from('rsvps') as any)
-      .insert({
-        invitation_id: invitationId,
-        guest_name: guestName,
-        guest_phone: phone ?? null,
-        attending: attending === 'yes' || attending === 'maybe',
-        guest_count: guestCount ?? 1,
-        meal_preference: meal ?? null,
-        message: message ?? null,
-        guest_id: guestId ?? null,
-        attendance_status: attending,
-        dietary_notes: dietaryNotes ?? null,
-        email: email ?? null,
-      })
-      .select()
-      .single() as { data: any | null; error: any }
+    let rsvp: any = null
+    let rsvpError: any = null
+
+    const rsvpPayload = {
+      invitation_id: invitationId,
+      guest_name: guestName,
+      guest_phone: phone ?? null,
+      attending: attending === 'yes' || attending === 'maybe',
+      guest_count: guestCount ?? 1,
+      meal_preference: meal ?? null,
+      message: message ?? null,
+      guest_id: guestId ?? null,
+      attendance_status: attending,
+      dietary_notes: dietaryNotes ?? null,
+      email: email ?? null,
+    }
+
+    if (existingRSVP) {
+      // Update existing RSVP
+      const { data, error } = await (supabase.from('rsvps') as any)
+        .update(rsvpPayload)
+        .eq('id', existingRSVP.id)
+        .select()
+        .single() as { data: any | null; error: any }
+      rsvp = data
+      rsvpError = error
+    } else {
+      // Insert new RSVP
+      const { data, error } = await (supabase.from('rsvps') as any)
+        .insert(rsvpPayload)
+        .select()
+        .single() as { data: any | null; error: any }
+      rsvp = data
+      rsvpError = error
+    }
 
     if (rsvpError) {
       console.error('[RSVP] Insert error:', rsvpError)

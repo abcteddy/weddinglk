@@ -19,7 +19,32 @@ const MEAL_EMOJI: Record<string, string> = {
 export function GuestList({ initialRsvps, invitationId }: GuestListProps) {
   const [rsvps, setRsvps] = useState<RSVP[]>(initialRsvps)
   const [filter, setFilter] = useState<'all' | 'attending' | 'declined' | 'maybe'>('all')
+  const [deletingId, setDeletingId] = useState<string | null>(null)
   const supabase = createClient()
+
+  const handleDeleteRSVP = async (rsvpId: string) => {
+    if (!confirm('Are you sure you want to delete this RSVP? This cannot be undone.')) return
+    
+    setDeletingId(rsvpId)
+    try {
+      const res = await fetch('/api/rsvp/delete', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ rsvpId })
+      })
+
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error ?? 'Failed to delete RSVP')
+
+      // Update local state
+      setRsvps(prev => prev.filter(r => r.id !== rsvpId))
+    } catch (err: any) {
+      console.error('Delete RSVP error:', err)
+      alert(err.message ?? 'Something went wrong. Please try again.')
+    } finally {
+      setDeletingId(null)
+    }
+  }
 
   useEffect(() => {
     const channel = supabase
@@ -34,6 +59,18 @@ export function GuestList({ initialRsvps, invitationId }: GuestListProps) {
         },
         payload => {
           setRsvps(prev => [payload.new as RSVP, ...prev])
+        },
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'DELETE',
+          schema: 'public',
+          table: 'rsvps',
+          filter: `invitation_id=eq.${invitationId}`,
+        },
+        payload => {
+          setRsvps(prev => prev.filter(r => r.id !== (payload.old as any).id))
         },
       )
       .subscribe()
@@ -202,6 +239,7 @@ export function GuestList({ initialRsvps, invitationId }: GuestListProps) {
                 <th className="px-4 py-3 text-left font-medium text-parchment-500 uppercase tracking-wider">Dietary Requirements</th>
                 <th className="px-4 py-3 text-left font-medium text-parchment-500 uppercase tracking-wider">Message</th>
                 <th className="px-4 py-3 text-left font-medium text-parchment-500 uppercase tracking-wider">Date</th>
+                <th className="px-4 py-3 text-right font-medium text-parchment-500 uppercase tracking-wider no-print">Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -262,6 +300,15 @@ export function GuestList({ initialRsvps, invitationId }: GuestListProps) {
                     </td>
                     <td className="px-4 py-3 text-parchment-600 whitespace-nowrap">
                       {formatDate(rsvp.created_at)}
+                    </td>
+                    <td className="px-4 py-3 text-right whitespace-nowrap no-print">
+                      <button
+                        onClick={() => handleDeleteRSVP(rsvp.id)}
+                        disabled={deletingId === rsvp.id}
+                        className="text-red-400 hover:text-red-300 transition-colors cursor-pointer text-[10px] font-medium bg-red-950/20 hover:bg-red-900/30 px-2 py-1 rounded border border-red-900/30 disabled:opacity-50"
+                      >
+                        {deletingId === rsvp.id ? 'Deleting...' : 'Delete'}
+                      </button>
                     </td>
                   </tr>
                 )
