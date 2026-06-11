@@ -77,6 +77,12 @@ export interface BuilderConfig {
     bgColor?: string
     timelineTitle?: string
     timelineSubtitle?: string
+    groomPhotoX?: string
+    groomPhotoY?: string
+    groomPhotoScale?: string
+    bridePhotoX?: string
+    bridePhotoY?: string
+    bridePhotoScale?: string
   }
   sections: SectionConfig[]
 }

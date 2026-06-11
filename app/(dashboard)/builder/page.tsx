@@ -1647,14 +1647,75 @@ export default function BuilderPage() {
                   className="hidden"
                 />
                 {form.groom_photo_url ? (
-                  <div className="relative h-28 w-24 rounded-lg overflow-hidden border border-slate-700 bg-slate-900 group">
-                    <img src={form.groom_photo_url} alt="Groom" className="object-cover w-full h-full" />
-                    <button
-                      onClick={() => handleDeleteFile('groom_photo')}
-                      className="absolute inset-0 bg-black/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity text-xs cursor-pointer text-red-400"
-                    >
-                      Delete
-                    </button>
+                  <div className="space-y-3">
+                    <div className="relative h-28 w-24 rounded-lg overflow-hidden border border-slate-700 bg-slate-900 group">
+                      <img 
+                        src={form.groom_photo_url} 
+                        alt="Groom" 
+                        className="object-cover w-full h-full" 
+                        style={{
+                          objectPosition: `${builderConfig.global.groomPhotoX ?? 50}% ${builderConfig.global.groomPhotoY ?? 50}%`,
+                          transform: `scale(${builderConfig.global.groomPhotoScale ?? 1})`,
+                          transformOrigin: `${builderConfig.global.groomPhotoX ?? 50}% ${builderConfig.global.groomPhotoY ?? 50}%`
+                        }}
+                      />
+                      <button
+                        onClick={() => handleDeleteFile('groom_photo')}
+                        className="absolute inset-0 bg-black/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity text-xs cursor-pointer text-red-400"
+                      >
+                        Delete
+                      </button>
+                    </div>
+
+                    <div className="bg-slate-900/40 p-2.5 rounded-lg border border-slate-800 space-y-2 text-xs">
+                      <div className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold text-[#d4af37]">Align & Zoom Photo</div>
+                      
+                      <div className="space-y-1">
+                        <div className="flex justify-between text-slate-400">
+                          <span>Vertical Position (Y)</span>
+                          <span>{builderConfig.global.groomPhotoY ?? 50}%</span>
+                        </div>
+                        <input
+                          type="range"
+                          min="0"
+                          max="100"
+                          value={builderConfig.global.groomPhotoY ?? 50}
+                          onChange={e => handleUpdateGlobalStyle('groomPhotoY', e.target.value)}
+                          className="w-full accent-rose-500"
+                        />
+                      </div>
+
+                      <div className="space-y-1">
+                        <div className="flex justify-between text-slate-400">
+                          <span>Horizontal Position (X)</span>
+                          <span>{builderConfig.global.groomPhotoX ?? 50}%</span>
+                        </div>
+                        <input
+                          type="range"
+                          min="0"
+                          max="100"
+                          value={builderConfig.global.groomPhotoX ?? 50}
+                          onChange={e => handleUpdateGlobalStyle('groomPhotoX', e.target.value)}
+                          className="w-full accent-rose-500"
+                        />
+                      </div>
+
+                      <div className="space-y-1">
+                        <div className="flex justify-between text-slate-400">
+                          <span>Zoom Scale</span>
+                          <span>{builderConfig.global.groomPhotoScale ?? 1.0}x</span>
+                        </div>
+                        <input
+                          type="range"
+                          min="1"
+                          max="2.5"
+                          step="0.05"
+                          value={builderConfig.global.groomPhotoScale ?? 1.0}
+                          onChange={e => handleUpdateGlobalStyle('groomPhotoScale', e.target.value)}
+                          className="w-full accent-rose-500"
+                        />
+                      </div>
+                    </div>
                   </div>
                 ) : (
                   <Button
@@ -1678,14 +1739,75 @@ export default function BuilderPage() {
                   className="hidden"
                 />
                 {form.bride_photo_url ? (
-                  <div className="relative h-28 w-24 rounded-lg overflow-hidden border border-slate-700 bg-slate-900 group">
-                    <img src={form.bride_photo_url} alt="Bride" className="object-cover w-full h-full" />
-                    <button
-                      onClick={() => handleDeleteFile('bride_photo')}
-                      className="absolute inset-0 bg-black/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity text-xs cursor-pointer text-red-400"
-                    >
-                      Delete
-                    </button>
+                  <div className="space-y-3">
+                    <div className="relative h-28 w-24 rounded-lg overflow-hidden border border-slate-700 bg-slate-900 group">
+                      <img 
+                        src={form.bride_photo_url} 
+                        alt="Bride" 
+                        className="object-cover w-full h-full" 
+                        style={{
+                          objectPosition: `${builderConfig.global.bridePhotoX ?? 50}% ${builderConfig.global.bridePhotoY ?? 50}%`,
+                          transform: `scale(${builderConfig.global.bridePhotoScale ?? 1})`,
+                          transformOrigin: `${builderConfig.global.bridePhotoX ?? 50}% ${builderConfig.global.bridePhotoY ?? 50}%`
+                        }}
+                      />
+                      <button
+                        onClick={() => handleDeleteFile('bride_photo')}
+                        className="absolute inset-0 bg-black/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity text-xs cursor-pointer text-red-400"
+                      >
+                        Delete
+                      </button>
+                    </div>
+
+                    <div className="bg-slate-900/40 p-2.5 rounded-lg border border-slate-800 space-y-2 text-xs">
+                      <div className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold text-[#d4af37]">Align & Zoom Photo</div>
+                      
+                      <div className="space-y-1">
+                        <div className="flex justify-between text-slate-400">
+                          <span>Vertical Position (Y)</span>
+                          <span>{builderConfig.global.bridePhotoY ?? 50}%</span>
+                        </div>
+                        <input
+                          type="range"
+                          min="0"
+                          max="100"
+                          value={builderConfig.global.bridePhotoY ?? 50}
+                          onChange={e => handleUpdateGlobalStyle('bridePhotoY', e.target.value)}
+                          className="w-full accent-rose-500"
+                        />
+                      </div>
+
+                      <div className="space-y-1">
+                        <div className="flex justify-between text-slate-400">
+                          <span>Horizontal Position (X)</span>
+                          <span>{builderConfig.global.bridePhotoX ?? 50}%</span>
+                        </div>
+                        <input
+                          type="range"
+                          min="0"
+                          max="100"
+                          value={builderConfig.global.bridePhotoX ?? 50}
+                          onChange={e => handleUpdateGlobalStyle('bridePhotoX', e.target.value)}
+                          className="w-full accent-rose-500"
+                        />
+                      </div>
+
+                      <div className="space-y-1">
+                        <div className="flex justify-between text-slate-400">
+                          <span>Zoom Scale</span>
+                          <span>{builderConfig.global.bridePhotoScale ?? 1.0}x</span>
+                        </div>
+                        <input
+                          type="range"
+                          min="1"
+                          max="2.5"
+                          step="0.05"
+                          value={builderConfig.global.bridePhotoScale ?? 1.0}
+                          onChange={e => handleUpdateGlobalStyle('bridePhotoScale', e.target.value)}
+                          className="w-full accent-rose-500"
+                        />
+                      </div>
+                    </div>
                   </div>
                 ) : (
                   <Button

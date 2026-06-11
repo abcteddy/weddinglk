@@ -675,7 +675,16 @@ export function InvitationPageClient({ invitation, guest, initialGuestUploads = 
                     {invitation.groom_photo_url ? (
                       <div className="w-32 h-32 rounded-full overflow-hidden border-2 shadow-md bg-black/20" style={{ borderColor: template.accentColor }}>
                         {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={invitation.groom_photo_url} alt="Groom" className="w-full h-full object-cover" />
+                        <img 
+                          src={invitation.groom_photo_url} 
+                          alt="Groom" 
+                          className="w-full h-full object-cover" 
+                          style={{
+                            objectPosition: `${builderConfig?.global.groomPhotoX ?? 50}% ${builderConfig?.global.groomPhotoY ?? 50}%`,
+                            transform: `scale(${builderConfig?.global.groomPhotoScale ?? 1})`,
+                            transformOrigin: `${builderConfig?.global.groomPhotoX ?? 50}% ${builderConfig?.global.groomPhotoY ?? 50}%`
+                          }}
+                        />
                       </div>
                     ) : (
                       <div className="w-32 h-32 rounded-full flex items-center justify-center border border-dashed text-4xl bg-white/5" style={{ borderColor: template.accentColor }}>
@@ -701,7 +710,16 @@ export function InvitationPageClient({ invitation, guest, initialGuestUploads = 
                     {invitation.bride_photo_url ? (
                       <div className="w-32 h-32 rounded-full overflow-hidden border-2 shadow-md bg-black/20" style={{ borderColor: template.accentColor }}>
                         {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={invitation.bride_photo_url} alt="Bride" className="w-full h-full object-cover" />
+                        <img 
+                          src={invitation.bride_photo_url} 
+                          alt="Bride" 
+                          className="w-full h-full object-cover" 
+                          style={{
+                            objectPosition: `${builderConfig?.global.bridePhotoX ?? 50}% ${builderConfig?.global.bridePhotoY ?? 50}%`,
+                            transform: `scale(${builderConfig?.global.bridePhotoScale ?? 1})`,
+                            transformOrigin: `${builderConfig?.global.bridePhotoX ?? 50}% ${builderConfig?.global.bridePhotoY ?? 50}%`
+                          }}
+                        />
                       </div>
                     ) : (
                       <div className="w-32 h-32 rounded-full flex items-center justify-center border border-dashed text-4xl bg-white/5" style={{ borderColor: template.accentColor }}>
