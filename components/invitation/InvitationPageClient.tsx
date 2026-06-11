@@ -676,16 +676,20 @@ export function InvitationPageClient({ invitation, guest, initialGuestUploads = 
                     {invitation.groom_photo_url ? (
                       <div className="w-32 h-32 rounded-full overflow-hidden border-2 shadow-md bg-black/20" style={{ borderColor: template.accentColor }}>
                         {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img 
-                          src={getOptimizedImageUrl(invitation.groom_photo_url, { width: 300 })} 
-                          alt="Groom" 
-                          className="w-full h-full object-cover" 
-                          style={{
-                            objectPosition: `${builderConfig?.global.groomPhotoX ?? 50}% ${builderConfig?.global.groomPhotoY ?? 50}%`,
-                            transform: `scale(${builderConfig?.global.groomPhotoScale ?? 1})`,
-                            transformOrigin: `${builderConfig?.global.groomPhotoX ?? 50}% ${builderConfig?.global.groomPhotoY ?? 50}%`
-                          }}
-                        />
+                        <picture>
+                          <source srcSet={getOptimizedImageUrl(invitation.groom_photo_url, { width: 300, format: 'avif' })} type="image/avif" />
+                          <source srcSet={getOptimizedImageUrl(invitation.groom_photo_url, { width: 300, format: 'webp' })} type="image/webp" />
+                          <img 
+                            src={getOptimizedImageUrl(invitation.groom_photo_url, { width: 300, format: 'origin' })} 
+                            alt="Groom" 
+                            className="w-full h-full object-cover" 
+                            style={{
+                              objectPosition: `${builderConfig?.global.groomPhotoX ?? 50}% ${builderConfig?.global.groomPhotoY ?? 50}%`,
+                              transform: `scale(${builderConfig?.global.groomPhotoScale ?? 1})`,
+                              transformOrigin: `${builderConfig?.global.groomPhotoX ?? 50}% ${builderConfig?.global.groomPhotoY ?? 50}%`
+                            }}
+                          />
+                        </picture>
                       </div>
                     ) : (
                       <div className="w-32 h-32 rounded-full flex items-center justify-center border border-dashed text-4xl bg-white/5" style={{ borderColor: template.accentColor }}>
@@ -715,16 +719,20 @@ export function InvitationPageClient({ invitation, guest, initialGuestUploads = 
                     {invitation.bride_photo_url ? (
                       <div className="w-32 h-32 rounded-full overflow-hidden border-2 shadow-md bg-black/20" style={{ borderColor: template.accentColor }}>
                         {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img 
-                          src={getOptimizedImageUrl(invitation.bride_photo_url, { width: 300 })} 
-                          alt="Bride" 
-                          className="w-full h-full object-cover" 
-                          style={{
-                            objectPosition: `${builderConfig?.global.bridePhotoX ?? 50}% ${builderConfig?.global.bridePhotoY ?? 50}%`,
-                            transform: `scale(${builderConfig?.global.bridePhotoScale ?? 1})`,
-                            transformOrigin: `${builderConfig?.global.bridePhotoX ?? 50}% ${builderConfig?.global.bridePhotoY ?? 50}%`
-                          }}
-                        />
+                        <picture>
+                          <source srcSet={getOptimizedImageUrl(invitation.bride_photo_url, { width: 300, format: 'avif' })} type="image/avif" />
+                          <source srcSet={getOptimizedImageUrl(invitation.bride_photo_url, { width: 300, format: 'webp' })} type="image/webp" />
+                          <img 
+                            src={getOptimizedImageUrl(invitation.bride_photo_url, { width: 300, format: 'origin' })} 
+                            alt="Bride" 
+                            className="w-full h-full object-cover" 
+                            style={{
+                              objectPosition: `${builderConfig?.global.bridePhotoX ?? 50}% ${builderConfig?.global.bridePhotoY ?? 50}%`,
+                              transform: `scale(${builderConfig?.global.bridePhotoScale ?? 1})`,
+                              transformOrigin: `${builderConfig?.global.bridePhotoX ?? 50}% ${builderConfig?.global.bridePhotoY ?? 50}%`
+                            }}
+                          />
+                        </picture>
                       </div>
                     ) : (
                       <div className="w-32 h-32 rounded-full flex items-center justify-center border border-dashed text-4xl bg-white/5" style={{ borderColor: template.accentColor }}>
@@ -794,7 +802,11 @@ export function InvitationPageClient({ invitation, guest, initialGuestUploads = 
                       {event.photo_url && (
                         <div className="w-full max-w-[240px] aspect-[4/3] rounded-sm overflow-hidden border border-white/10 mt-2">
                           {/* eslint-disable-next-line @next/next/no-img-element */}
-                          <img src={getOptimizedImageUrl(event.photo_url, { width: 400 })} alt={event.title} className="w-full h-full object-cover" />
+                          <picture>
+                            <source srcSet={getOptimizedImageUrl(event.photo_url, { width: 400, format: 'avif' })} type="image/avif" />
+                            <source srcSet={getOptimizedImageUrl(event.photo_url, { width: 400, format: 'webp' })} type="image/webp" />
+                            <img src={getOptimizedImageUrl(event.photo_url, { width: 400, format: 'origin' })} alt={event.title} className="w-full h-full object-cover" />
+                          </picture>
                         </div>
                       )}
                     </div>
@@ -969,7 +981,11 @@ export function InvitationPageClient({ invitation, guest, initialGuestUploads = 
                     <h4 className="font-medium text-xs uppercase tracking-wider opacity-75" style={{ color: detailsConfig?.styles.titleColor || '#ffffff' }}>Scan to Gift</h4>
                     <div className="w-40 h-40 border border-white/10 rounded-sm overflow-hidden bg-white p-2">
                       {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src={getOptimizedImageUrl(invitation.registry_qr_url, { width: 300 })} alt="Registry Payment QR" className="w-full h-full object-contain" />
+                      <picture>
+                        <source srcSet={getOptimizedImageUrl(invitation.registry_qr_url, { width: 300, format: 'avif' })} type="image/avif" />
+                        <source srcSet={getOptimizedImageUrl(invitation.registry_qr_url, { width: 300, format: 'webp' })} type="image/webp" />
+                        <img src={getOptimizedImageUrl(invitation.registry_qr_url, { width: 300, format: 'origin' })} alt="Registry Payment QR" className="w-full h-full object-contain" />
+                      </picture>
                     </div>
                     <p className="text-[10px] font-light" style={{ color: detailsConfig?.styles.textColor || '#ead8b8' }}>Scan using any local bank app</p>
                   </div>
@@ -1128,7 +1144,11 @@ export function InvitationPageClient({ invitation, guest, initialGuestUploads = 
                     {guestPhotos.map(photo => (
                       <div key={photo.id} className="relative aspect-square rounded-sm overflow-hidden border border-white/10 group bg-black/20">
                         {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={getOptimizedImageUrl(photo.url, { width: 300 })} alt={`Shared by ${photo.guest_name}`} className="w-full h-full object-cover hover:scale-105 transition-transform duration-300" />
+                        <picture>
+                          <source srcSet={getOptimizedImageUrl(photo.url, { width: 300, format: 'avif' })} type="image/avif" />
+                          <source srcSet={getOptimizedImageUrl(photo.url, { width: 300, format: 'webp' })} type="image/webp" />
+                          <img src={getOptimizedImageUrl(photo.url, { width: 300, format: 'origin' })} alt={`Shared by ${photo.guest_name}`} className="w-full h-full object-cover hover:scale-105 transition-transform duration-300" />
+                        </picture>
                         <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-2 text-left pointer-events-none">
                           <p className="text-[10px] text-white font-medium truncate">{photo.guest_name}</p>
                         </div>

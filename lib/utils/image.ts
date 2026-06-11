@@ -4,7 +4,7 @@
  */
 export function getOptimizedImageUrl(
   url: string | null | undefined,
-  options: { width?: number; height?: number; quality?: number } = {}
+  options: { width?: number; height?: number; quality?: number; format?: 'origin' | 'webp' | 'avif' | 'auto' } = {}
 ): string {
   if (!url) return ''
   
@@ -28,8 +28,11 @@ export function getOptimizedImageUrl(
   // Set quality (defaults to 75 for optimal compression-to-quality ratio)
   params.set('quality', String(options.quality ?? 75))
   
-  // 'auto' format automatically detects support for AVIF, WebP, etc.
-  params.set('format', 'auto')
+  // If format is specified and is NOT 'auto', append it.
+  // We omit 'auto' because the project's Supabase instance does not support 'auto' format and throws a 400.
+  if (options.format && options.format !== 'auto') {
+    params.set('format', options.format)
+  }
 
   const separator = optimizedUrl.includes('?') ? '&' : '?'
   return `${optimizedUrl}${separator}${params.toString()}`

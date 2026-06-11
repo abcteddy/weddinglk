@@ -193,11 +193,15 @@ export function CardContent({ invitation, visible = true, theme }: CardContentPr
           style={{ borderColor: template.accentColor + '20' }}
         >
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={getOptimizedImageUrl(invitation.photo_url, { width: 800 })}
-            alt="Couple Cover Photo"
-            className="w-full h-full object-cover animate-fade-in"
-          />
+          <picture>
+            <source srcSet={getOptimizedImageUrl(invitation.photo_url, { width: 800, format: 'avif' })} type="image/avif" />
+            <source srcSet={getOptimizedImageUrl(invitation.photo_url, { width: 800, format: 'webp' })} type="image/webp" />
+            <img
+              src={getOptimizedImageUrl(invitation.photo_url, { width: 800, format: 'origin' })}
+              alt="Couple Cover Photo"
+              className="w-full h-full object-cover animate-fade-in"
+            />
+          </picture>
         </div>
       )}
 

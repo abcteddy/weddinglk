@@ -44,12 +44,16 @@ export function PhotoGallery({ urls, accentColor }: PhotoGalleryProps) {
         style={{ borderColor: accentColor + '20' }}
       >
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={getOptimizedImageUrl(urls[activeIndex], { width: 800 })}
-          alt={`Gallery image ${activeIndex + 1}`}
-          className="w-full h-full object-cover cursor-zoom-in transition-all duration-300"
-          onClick={() => setLightboxIndex(activeIndex)}
-        />
+        <picture>
+          <source srcSet={getOptimizedImageUrl(urls[activeIndex], { width: 800, format: 'avif' })} type="image/avif" />
+          <source srcSet={getOptimizedImageUrl(urls[activeIndex], { width: 800, format: 'webp' })} type="image/webp" />
+          <img
+            src={getOptimizedImageUrl(urls[activeIndex], { width: 800, format: 'origin' })}
+            alt={`Gallery image ${activeIndex + 1}`}
+            className="w-full h-full object-cover cursor-zoom-in transition-all duration-300"
+            onClick={() => setLightboxIndex(activeIndex)}
+          />
+        </picture>
 
         {/* Prev Arrow */}
         <button
@@ -96,7 +100,11 @@ export function PhotoGallery({ urls, accentColor }: PhotoGalleryProps) {
             }}
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={getOptimizedImageUrl(url, { width: 120 })} alt={`Thumbnail ${idx + 1}`} className="w-full h-full object-cover" />
+            <picture>
+              <source srcSet={getOptimizedImageUrl(url, { width: 120, format: 'avif' })} type="image/avif" />
+              <source srcSet={getOptimizedImageUrl(url, { width: 120, format: 'webp' })} type="image/webp" />
+              <img src={getOptimizedImageUrl(url, { width: 120, format: 'origin' })} alt={`Thumbnail ${idx + 1}`} className="w-full h-full object-cover" />
+            </picture>
           </button>
         ))}
       </div>
@@ -118,11 +126,15 @@ export function PhotoGallery({ urls, accentColor }: PhotoGalleryProps) {
           {/* Lightbox Image Container */}
           <div className="relative max-w-4xl max-h-[80vh] aspect-auto select-none" onClick={e => e.stopPropagation()}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={getOptimizedImageUrl(urls[lightboxIndex], { width: 1200 })}
-              alt={`Zoomed image ${lightboxIndex + 1}`}
-              className="max-w-full max-h-[80vh] object-contain rounded-sm shadow-2xl"
-            />
+            <picture>
+              <source srcSet={getOptimizedImageUrl(urls[lightboxIndex], { width: 1200, format: 'avif' })} type="image/avif" />
+              <source srcSet={getOptimizedImageUrl(urls[lightboxIndex], { width: 1200, format: 'webp' })} type="image/webp" />
+              <img
+                src={getOptimizedImageUrl(urls[lightboxIndex], { width: 1200, format: 'origin' })}
+                alt={`Zoomed image ${lightboxIndex + 1}`}
+                className="max-w-full max-h-[80vh] object-contain rounded-sm shadow-2xl"
+              />
+            </picture>
 
             {/* Lightbox Prev Arrow */}
             <button
