@@ -1556,6 +1556,12 @@ export default function BuilderPage() {
                   onChange={e => setForm(prev => ({ ...prev, wedding_time: e.target.value }))}
                 />
                 <Input
+                  label="Reception Time"
+                  placeholder="e.g. 7:00 PM (Leave empty if none)"
+                  value={form.reception_time}
+                  onChange={e => setForm(prev => ({ ...prev, reception_time: e.target.value }))}
+                />
+                <Input
                   label="Venue Name"
                   placeholder="Shangri-La Hotel Colombo"
                   value={form.venue_name}
