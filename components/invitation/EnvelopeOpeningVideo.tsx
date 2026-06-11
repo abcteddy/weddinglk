@@ -19,6 +19,10 @@ interface EnvelopeOpeningVideoProps {
   fontFamilyOverride?: string
   hideOverlay?: boolean
   overlayY?: number
+  titleColorOverride?: string
+  subtitleColorOverride?: string
+  borderRadius?: number
+  boxShadow?: boolean
 }
 
 export function EnvelopeOpeningVideo({
@@ -35,6 +39,10 @@ export function EnvelopeOpeningVideo({
   fontFamilyOverride,
   hideOverlay = false,
   overlayY,
+  titleColorOverride,
+  subtitleColorOverride,
+  borderRadius,
+  boxShadow,
 }: EnvelopeOpeningVideoProps) {
   const videoRef   = useRef<HTMLVideoElement | null>(null)
   const iframeRef  = useRef<HTMLIFrameElement | null>(null)
@@ -240,35 +248,50 @@ export function EnvelopeOpeningVideo({
                 transition: 'top 0.3s ease',
               }}
             >
-              <p
-                className="text-[10px] sm:text-xs uppercase tracking-[0.55em] font-light"
+              <div 
+                className="max-w-md space-y-4 pointer-events-none p-4" 
                 style={{
-                  color: textColorOverride || accentColor,
-                  opacity: 0.9,
-                  fontFamily: fontFamilyOverride ? `'${fontFamilyOverride}', serif` : undefined
+                  borderRadius: `${borderRadius || 12}px`,
+                  boxShadow: boxShadow ? '0 10px 50px rgba(0,0,0,0.8)' : 'none'
                 }}
               >
-                {titleOverride || 'You Are Cordially Invited'}
-              </p>
-              <h1
-                className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-serif font-bold text-white drop-shadow-2xl leading-tight"
-                style={{
-                  textShadow: `0 0 60px ${accentColor}50, 0 2px 10px rgba(0,0,0,0.9)`,
-                  fontFamily: fontFamilyOverride ? `'${fontFamilyOverride}', serif` : undefined
-                }}
-              >
-                {guestName ? `Welcome, ${guestName}` : coupleNames}
-              </h1>
-              {(guestName || subtitleOverride) && (
-                <p
-                  className="text-sm sm:text-base font-serif text-white/55 font-light italic"
+                <div 
+                  className="border p-8 rounded-xl bg-black/45 backdrop-blur-md"
                   style={{
-                    fontFamily: fontFamilyOverride ? `'${fontFamilyOverride}', serif` : undefined
+                    borderColor: `${textColorOverride || accentColor}30`
                   }}
                 >
-                  {subtitleOverride || coupleNames}
-                </p>
-              )}
+                  <p 
+                    className="text-[9px] uppercase tracking-[0.4em] mb-2" 
+                    style={{ 
+                      color: textColorOverride || accentColor,
+                      fontFamily: fontFamilyOverride ? `'${fontFamilyOverride}', serif` : undefined
+                    }}
+                  >
+                    {titleOverride || 'Together with their families'}
+                  </p>
+                  <h1 
+                    className="text-3xl font-bold tracking-wide leading-relaxed" 
+                    style={{ 
+                      color: titleColorOverride || textColorOverride || accentColor,
+                      fontFamily: fontFamilyOverride ? `'${fontFamilyOverride}', serif` : undefined
+                    }}
+                  >
+                    {guestName ? `Welcome, ${guestName}` : coupleNames}
+                  </h1>
+                  {(guestName || subtitleOverride) && (
+                    <p 
+                      className="text-[10px] mt-3 tracking-widest leading-relaxed opacity-75" 
+                      style={{ 
+                        color: subtitleColorOverride || textColorOverride || '#ffffff',
+                        fontFamily: fontFamilyOverride ? `'${fontFamilyOverride}', serif` : undefined
+                      }}
+                    >
+                      {subtitleOverride || coupleNames}
+                    </p>
+                  )}
+                </div>
+              </div>
             </div>
           )}
 
