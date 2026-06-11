@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { getOptimizedImageUrl } from '@/lib/utils/image'
 
 interface PhotoGalleryProps {
   urls: string[]
@@ -44,7 +45,7 @@ export function PhotoGallery({ urls, accentColor }: PhotoGalleryProps) {
       >
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
-          src={urls[activeIndex]}
+          src={getOptimizedImageUrl(urls[activeIndex], { width: 800 })}
           alt={`Gallery image ${activeIndex + 1}`}
           className="w-full h-full object-cover cursor-zoom-in transition-all duration-300"
           onClick={() => setLightboxIndex(activeIndex)}
@@ -95,7 +96,7 @@ export function PhotoGallery({ urls, accentColor }: PhotoGalleryProps) {
             }}
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={url} alt={`Thumbnail ${idx + 1}`} className="w-full h-full object-cover" />
+            <img src={getOptimizedImageUrl(url, { width: 120 })} alt={`Thumbnail ${idx + 1}`} className="w-full h-full object-cover" />
           </button>
         ))}
       </div>
@@ -118,7 +119,7 @@ export function PhotoGallery({ urls, accentColor }: PhotoGalleryProps) {
           <div className="relative max-w-4xl max-h-[80vh] aspect-auto select-none" onClick={e => e.stopPropagation()}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src={urls[lightboxIndex]}
+              src={getOptimizedImageUrl(urls[lightboxIndex], { width: 1200 })}
               alt={`Zoomed image ${lightboxIndex + 1}`}
               className="max-w-full max-h-[80vh] object-contain rounded-sm shadow-2xl"
             />

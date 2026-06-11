@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { Invitation } from '@/types/invitation'
 import { formatWeddingDate, getDaysUntil } from '@/lib/utils/slug'
 import { TEMPLATES } from '@/lib/templates'
+import { getOptimizedImageUrl } from '@/lib/utils/image'
 
 interface CardContentProps {
   invitation: Invitation
@@ -193,7 +194,7 @@ export function CardContent({ invitation, visible = true, theme }: CardContentPr
         >
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            src={invitation.photo_url}
+            src={getOptimizedImageUrl(invitation.photo_url, { width: 800 })}
             alt="Couple Cover Photo"
             className="w-full h-full object-cover animate-fade-in"
           />
