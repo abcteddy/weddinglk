@@ -696,7 +696,11 @@ export function InvitationPageClient({ invitation, guest, initialGuestUploads = 
                       <h4 className="font-serif text-lg font-bold" style={{ color: detailsConfig?.styles.titleColor || '#ffffff' }}>{invitation.groom_full_name}</h4>
                       <p className="text-xs opacity-75 mt-0.5" style={{ color: detailsConfig?.styles.subtitleColor || template.accentColor }}>The Groom</p>
                       {invitation.groom_parents && (
-                        <p className="text-[11px] mt-1 italic" style={{ color: detailsConfig?.styles.textColor || '#ead8b8', opacity: 0.8 }}>Son of {invitation.groom_parents}</p>
+                        <p className="text-[11px] mt-1 italic" style={{ color: detailsConfig?.styles.textColor || '#ead8b8', opacity: 0.8 }}>
+                          {invitation.groom_parents.toLowerCase().trim().startsWith('son of')
+                            ? invitation.groom_parents
+                            : `Son of ${invitation.groom_parents}`}
+                        </p>
                       )}
                     </div>
                     {invitation.groom_bio && (
@@ -731,7 +735,11 @@ export function InvitationPageClient({ invitation, guest, initialGuestUploads = 
                       <h4 className="font-serif text-lg font-bold" style={{ color: detailsConfig?.styles.titleColor || '#ffffff' }}>{invitation.bride_full_name}</h4>
                       <p className="text-xs opacity-75 mt-0.5" style={{ color: detailsConfig?.styles.subtitleColor || template.accentColor }}>The Bride</p>
                       {invitation.bride_parents && (
-                        <p className="text-[11px] mt-1 italic" style={{ color: detailsConfig?.styles.textColor || '#ead8b8', opacity: 0.8 }}>Daughter of {invitation.bride_parents}</p>
+                        <p className="text-[11px] mt-1 italic" style={{ color: detailsConfig?.styles.textColor || '#ead8b8', opacity: 0.8 }}>
+                          {invitation.bride_parents.toLowerCase().trim().startsWith('daughter of')
+                            ? invitation.bride_parents
+                            : `Daughter of ${invitation.bride_parents}`}
+                        </p>
                       )}
                     </div>
                     {invitation.bride_bio && (
