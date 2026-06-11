@@ -1631,6 +1631,38 @@ export default function BuilderPage() {
                   onChange={e => setForm(prev => ({ ...prev, google_maps_embed_url: e.target.value }))}
                 />
               </div>
+
+              <h3 className="text-xs font-bold text-slate-300 border-t border-slate-800/80 pt-3">📞 Contact Organizers</h3>
+              <div className="space-y-3">
+                <div className="grid grid-cols-2 gap-3">
+                  <Input
+                    label="Bride Contact Number"
+                    placeholder="e.g. 0711111111"
+                    value={form.bride_contact}
+                    onChange={e => setForm(prev => ({ ...prev, bride_contact: e.target.value }))}
+                  />
+                  <Input
+                    label="Groom Contact Number"
+                    placeholder="e.g. 0711111111"
+                    value={form.groom_contact}
+                    onChange={e => setForm(prev => ({ ...prev, groom_contact: e.target.value }))}
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <Input
+                    label="Family Contact Number"
+                    placeholder="e.g. 0711111111"
+                    value={form.family_contact}
+                    onChange={e => setForm(prev => ({ ...prev, family_contact: e.target.value }))}
+                  />
+                  <Input
+                    label="WhatsApp RSVP Number"
+                    placeholder="e.g. 94711111111"
+                    value={form.whatsapp_number}
+                    onChange={e => setForm(prev => ({ ...prev, whatsapp_number: e.target.value }))}
+                  />
+                </div>
+              </div>
             </div>
           )}
 
