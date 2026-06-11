@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react'
 import { Invitation } from '@/types/invitation'
-import { TEMPLATES } from '@/lib/three/templates'
+import { TEMPLATES } from '@/lib/templates'
 import { EnvelopeOpeningVideo } from '@/components/invitation/EnvelopeOpeningVideo'
 import { CardContent } from '@/components/invitation/CardContent'
 import { RSVPForm } from '@/components/invitation/RSVPForm'
@@ -737,8 +737,12 @@ export function InvitationPageClient({ invitation, guest, initialGuestUploads = 
               }}
             >
               <div className="text-center">
-                <p className="text-xs uppercase tracking-[0.35em] mb-1" style={{ color: detailsConfig?.styles.subtitleColor || template.accentColor }}>Our Journey</p>
-                <h3 className="text-2xl font-serif font-medium" style={{ color: detailsConfig?.styles.titleColor || '#ffffff' }}>Love Story</h3>
+                <p className="text-xs uppercase tracking-[0.35em] mb-1" style={{ color: detailsConfig?.styles.subtitleColor || template.accentColor }}>
+                  {builderConfig?.global.timelineSubtitle || 'Our Journey'}
+                </p>
+                <h3 className="text-2xl font-serif font-medium" style={{ color: detailsConfig?.styles.titleColor || '#ffffff' }}>
+                  {builderConfig?.global.timelineTitle || 'Love Story'}
+                </h3>
                 <div className="h-px w-16 bg-white/20 mx-auto mt-3" />
               </div>
 

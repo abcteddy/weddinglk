@@ -62,17 +62,7 @@ export const TEMPLATES: Record<string, TemplateConfig> = {
     textColor: '#ffffff',
     fontFamily: 'Playfair Display',
     previewGradient: 'linear-gradient(135deg, #0b0b0f 0%, #1a1a1f 50%, #0b0b0f 100%)',
-    isPremium: false,
-    
-    // Legacy 3D coordinates for landing page rendering
-    bgColor: 0x0a0005,
-    ambientColor: 0x2a0018,
-    keyLightColor: 0xff6090,
-    envelopeColor: 0x1a0010,
-    flapColor: 0x250015,
-    sealColor: 0x8b3a5a,
-    sealEmissive: 0x3a1020,
-    petalHue: 0.92,
+    isPremium: false
   }
 }
 

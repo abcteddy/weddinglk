@@ -1,7 +1,7 @@
 'use client'
 
 import { TemplateId, TemplateConfig } from '@/types/invitation'
-import { TEMPLATE_LIST } from '@/lib/three/templates'
+import { TEMPLATE_LIST } from '@/lib/templates'
 import { cn } from '@/lib/utils/cn'
 
 interface TemplateSelectorProps {

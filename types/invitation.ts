@@ -75,6 +75,8 @@ export interface BuilderConfig {
     bgType?: 'color' | 'image'
     bgUrl?: string
     bgColor?: string
+    timelineTitle?: string
+    timelineSubtitle?: string
   }
   sections: SectionConfig[]
 }

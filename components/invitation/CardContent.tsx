@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { Invitation } from '@/types/invitation'
 import { formatWeddingDate, getDaysUntil } from '@/lib/utils/slug'
-import { TEMPLATES } from '@/lib/three/templates'
+import { TEMPLATES } from '@/lib/templates'
 
 interface CardContentProps {
   invitation: Invitation

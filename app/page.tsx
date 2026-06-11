@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
-import { TEMPLATE_LIST } from '@/lib/three/templates'
-import { HeroScene } from '@/components/3d/HeroScene'
+import { TEMPLATE_LIST } from '@/lib/templates'
+import { HeroMockup } from '@/components/invitation/HeroMockup'
 
 export const metadata: Metadata = {
   title: 'WeddingLK — 3D Wedding Invitations for Sri Lanka',
@@ -112,9 +112,9 @@ function HeroSection() {
         </div>
       </div>
 
-      {/* Right: 3D Scene */}
+      {/* Right: Interactive 2D Mockup */}
       <div className="relative lg:w-[55%] w-full h-[500px] lg:h-screen animate-fade-in">
-        <HeroScene />
+        <HeroMockup />
         {/* Click hint */}
         <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 animate-bounce-gentle pointer-events-none">
           <p className="text-xs text-parchment-500 uppercase tracking-widest">Click to open</p>

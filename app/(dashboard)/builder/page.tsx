@@ -6,7 +6,7 @@ import dynamic from 'next/dynamic'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/Button'
 import { Input, Textarea, Select } from '@/components/ui/Input'
-import { TEMPLATES } from '@/lib/three/templates'
+import { TEMPLATES } from '@/lib/templates'
 import { generateSlug } from '@/lib/utils/slug'
 import { Invitation, TimelineEvent, BuilderConfig, SectionConfig, TemplateConfig } from '@/types/invitation'
 import { PACKAGES } from '@/lib/payhere'
@@ -1266,7 +1266,7 @@ export default function BuilderPage() {
             { id: 'styles', label: 'Styles', icon: '✨' },
             { id: 'content', label: 'Content', icon: '✍️' },
             { id: 'photos', label: 'Photos', icon: '🖼️' },
-            { id: 'animations', label: 'Transitions', icon: '🎬' },
+            { id: 'animations', label: 'Timeline', icon: '⏳' },
             { id: 'settings', label: 'Guests', icon: '👥' },
           ].map(t => (
             <button
@@ -1772,6 +1772,26 @@ export default function BuilderPage() {
             <div className="space-y-4">
               <h3 className="text-xs font-bold text-slate-300">Wedding Timeline/Story</h3>
               <p className="text-xs text-slate-400">Add milestones or schedules to show on the details scroll section.</p>
+
+              <div className="space-y-3 bg-slate-900 border border-slate-800/80 p-3.5 rounded-xl">
+                <h4 className="text-xs font-semibold text-[#d4af37]">Custom Titles</h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <Input
+                    label="Section Title"
+                    placeholder="e.g. Love Story, Our Timeline"
+                    value={builderConfig.global.timelineTitle ?? 'Love Story'}
+                    onChange={e => handleUpdateGlobalStyle('timelineTitle', e.target.value)}
+                  />
+                  <Input
+                    label="Section Subtitle"
+                    placeholder="e.g. Our Journey, Event Schedule"
+                    value={builderConfig.global.timelineSubtitle ?? 'Our Journey'}
+                    onChange={e => handleUpdateGlobalStyle('timelineSubtitle', e.target.value)}
+                  />
+                </div>
+              </div>
+              
+              <h4 className="text-xs font-semibold text-slate-300 pt-2">Add Timeline Milestone</h4>
               
               <form onSubmit={handleAddTimelineEvent} className="space-y-2.5 bg-slate-900 border border-slate-800/80 p-3 rounded-xl">
                 <Input
