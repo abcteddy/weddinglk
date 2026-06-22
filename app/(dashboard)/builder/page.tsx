@@ -649,8 +649,8 @@ export default function BuilderPage() {
         }, 1000)
       } else {
         const file = files[0]
-        const sizeLimit = (type === 'video' || type === 'cover') ? 50 * 1024 * 1024 : 10 * 1024 * 1024
-        const sizeLimitStr = (type === 'video' || type === 'cover') ? '50MB' : '10MB'
+        const sizeLimit = (type === 'video' || type === 'cover') ? 50 * 1024 * 1024 : 15 * 1024 * 1024
+        const sizeLimitStr = (type === 'video' || type === 'cover') ? '50MB' : '15MB'
         if (file.size > sizeLimit) {
           throw new Error(`File size is too large. Max size is ${sizeLimitStr}`)
         }
