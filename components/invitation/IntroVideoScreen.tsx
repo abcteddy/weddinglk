@@ -158,24 +158,31 @@ export function IntroVideoScreen({
             className="text-[9px] sm:text-[11px] uppercase tracking-[0.5em] font-light"
             style={{ 
               color: subtitleColorOverride || textColorOverride || accentColor, 
-              opacity: 0.85,
+              opacity: 0.95,
+              textShadow: '0 2px 6px rgba(0,0,0,0.95), -1px -1px 0 rgba(0,0,0,0.85), 1px -1px 0 rgba(0,0,0,0.85), -1px 1px 0 rgba(0,0,0,0.85), 1px 1px 0 rgba(0,0,0,0.85)',
               fontFamily: fontFamilyOverride ? `'${fontFamilyOverride}', sans-serif` : undefined
             }}
           >
             {subtitleOverride || 'You Are Invited To Celebrate'}
           </p>
           <h2
-            className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-serif font-bold text-white drop-shadow-2xl leading-tight"
+            className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-serif font-bold text-white leading-tight"
             style={{ 
               color: titleColorOverride || textColorOverride || '#ffffff',
-              textShadow: `0 0 60px ${accentColor}40, 0 2px 8px rgba(0,0,0,0.9)`,
+              textShadow: `0 4px 16px rgba(0,0,0,0.95), 0 0 30px rgba(0,0,0,0.6), -1.5px -1.5px 0 rgba(0,0,0,0.9), 1.5px -1.5px 0 rgba(0,0,0,0.9), -1.5px 1.5px 0 rgba(0,0,0,0.9), 1.5px 1.5px 0 rgba(0,0,0,0.9)`,
+              WebkitTextStroke: '1.2px rgba(0, 0, 0, 0.9)',
               fontFamily: fontFamilyOverride ? `'${fontFamilyOverride}', serif` : undefined
             }}
           >
             {titleOverride || coupleNames}
           </h2>
           {(!titleOverride && !subtitleOverride) && (
-            <p className="text-[9px] sm:text-[11px] uppercase tracking-[0.35em] font-light text-white/40 mt-0.5">
+            <p 
+              className="text-[9px] sm:text-[11px] uppercase tracking-[0.35em] font-light text-white/70 mt-0.5"
+              style={{
+                textShadow: '0 2px 6px rgba(0,0,0,0.95), -1px -1px 0 rgba(0,0,0,0.85), 1px -1px 0 rgba(0,0,0,0.85), -1px 1px 0 rgba(0,0,0,0.85), 1px 1px 0 rgba(0,0,0,0.85)',
+              }}
+            >
               Wedding Invitation
             </p>
           )}
