@@ -1107,7 +1107,14 @@ export function InvitationPageClient({ invitation, guest, initialGuestUploads = 
 
               {/* Upload Form */}
               <div className="p-6 bg-white/5 border border-white/10 rounded-sm space-y-4">
-                <h4 className="text-xs font-semibold uppercase tracking-wider" style={{ color: detailsConfig?.styles.titleColor || '#ffffff' }}>Upload a photo or selfie</h4>
+                <div className="space-y-1">
+                  <h4 className="text-xs font-semibold uppercase tracking-wider" style={{ color: detailsConfig?.styles.titleColor || '#ffffff' }}>
+                    Upload a photo or selfie <span className="text-[10px] lowercase font-normal opacity-70">(Optional)</span>
+                  </h4>
+                  <p className="text-[11px] opacity-70" style={{ color: detailsConfig?.styles.textColor || '#ead8b8' }}>
+                    This is completely optional. You can RSVP below without uploading a photo.
+                  </p>
+                </div>
                 
                 <div className="space-y-4">
                   <div className="grid grid-cols-1 gap-3">
