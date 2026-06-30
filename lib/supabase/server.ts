@@ -26,3 +26,20 @@ export async function createClient() {
     },
   )
 }
+
+export async function createAdminClient() {
+  return createServerClient<Database>(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    {
+      cookies: {
+        getAll() {
+          return []
+        },
+        setAll() {
+          // No-op for admin/service-role client
+        },
+      },
+    },
+  )
+}
