@@ -148,6 +148,9 @@ export function EnvelopeOpeningVideo({
   const handleClick = () => {
     if (phase !== 'idle') return
 
+    // Dispatch synchronous event to play background music instantly on user click
+    window.dispatchEvent(new CustomEvent('play-wedding-music'))
+
     if (isEmbed) {
       // For iframe embeds: clicking starts the embed (autoplay takes over)
       setPhase('playing')

@@ -25,6 +25,26 @@ export function MusicPlayer({ url, autoPlayTrigger }: MusicPlayerProps) {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [autoPlayTrigger])
 
+  // Play music synchronously when custom window event is dispatched
+  useEffect(() => {
+    const playMusic = () => {
+      if (audioRef.current && !isPlaying) {
+        audioRef.current.play()
+          .then(() => {
+            setIsPlaying(true)
+          })
+          .catch(err => {
+            console.warn('Synchronous play blocked or failed:', err)
+          })
+      }
+    }
+
+    window.addEventListener('play-wedding-music', playMusic)
+    return () => {
+      window.removeEventListener('play-wedding-music', playMusic)
+    }
+  }, [isPlaying])
+
   const togglePlay = () => {
     if (!audioRef.current) return
     if (isPlaying) {

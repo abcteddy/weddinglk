@@ -163,6 +163,9 @@ export function InvitationPageClient({ invitation, guest, initialGuestUploads = 
 
   // When envelope opens: if there is an intro video, go to video stage; otherwise go straight to details
   const handleEnvelopeOpen = () => {
+    // Dispatch custom event to play music synchronously in click handler
+    window.dispatchEvent(new CustomEvent('play-wedding-music'))
+
     setEnvelopeMounted(false)
     if (invitation.video_url) {
       setStage('video')
