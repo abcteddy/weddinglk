@@ -526,12 +526,12 @@ export function InvitationPageClient({ invitation, guest, initialGuestUploads = 
                 {detailsConfig?.content.subtitle || 'Together With Their Families'}
               </p>
               <h1
-                className="text-4xl md:text-6xl lg:text-7xl font-bold leading-tight custom-font-details"
+                className="text-4xl md:text-6xl lg:text-7xl font-bold leading-tight custom-font-details uppercase tracking-wide"
                 style={{
                   color: detailsConfig?.styles.titleColor || detailsConfig?.styles.textColor || pageTheme.textPrimary,
                   textShadow: pageTheme.isLight
-                    ? 'none'
-                    : `0 0 80px ${template.accentColor}30, 0 2px 10px rgba(0,0,0,0.5)`,
+                    ? '1.5px 2px 4px rgba(0,0,0,0.22)'
+                    : `0 0 80px ${template.accentColor}30, 2px 2px 6px rgba(0,0,0,0.6)`,
                 }}
               >
                 {coupleName}
