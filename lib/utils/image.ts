@@ -14,6 +14,11 @@ export function getOptimizedImageUrl(
 ): string {
   if (!url) return ''
   
+  // Supabase Free Tier does not support Image Transformation (throws 404/400 at /render/image/public/).
+  // We return the original public URL directly to ensure all photos load successfully.
+  return url
+
+  /*
   // Only optimize Supabase storage URLs
   if (!url.includes('/storage/v1/object/public/')) {
     return url
@@ -45,4 +50,5 @@ export function getOptimizedImageUrl(
 
   const separator = optimizedUrl.includes('?') ? '&' : '?'
   return `${optimizedUrl}${separator}${params.toString()}`
+  */
 }
