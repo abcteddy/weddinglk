@@ -1063,12 +1063,22 @@ export default function BuilderPage() {
                   </div>
                 ) : (
                   <div className="space-y-1">
-                    <p className="text-[9px] uppercase tracking-widest preview-font-secondary" style={{ color: secStyle.subtitleColor || secStyle.textColor || '#ffffff', opacity: 0.85 }}>
+                    <p className="text-[9px] uppercase tracking-widest preview-font-secondary" style={{ 
+                      color: secStyle.subtitleColor || secStyle.textColor || '#ffffff', 
+                      opacity: 0.85,
+                      textShadow: secStyle.textShadow === false
+                        ? 'none'
+                        : `0 2px ${Math.min(8, secStyle.textShadowBlur ?? 8)}px ${secStyle.textShadowColor || 'rgba(0,0,0,0.75)'}`
+                    }}>
                       {sec.content.subtitle || 'Intro Showcase'}
                     </p>
                     <h1 className="text-xl tracking-wider font-bold uppercase" style={{ 
                       color: secStyle.titleColor || secStyle.textColor || '#D4AF37',
-                      fontFamily: `'${secStyle.fontFamily || builderConfig.global.primaryFont}', serif`
+                      fontFamily: `'${secStyle.fontFamily || builderConfig.global.primaryFont}', serif`,
+                      WebkitTextStroke: secStyle.textBorder ? `${secStyle.textBorderSize ?? 1.2}px ${secStyle.textBorderColor || '#000000'}` : undefined,
+                      textShadow: secStyle.textShadow === false
+                        ? 'none'
+                        : `${secStyle.textBorder ? `-${secStyle.textBorderSize ?? 1.2}px -${secStyle.textBorderSize ?? 1.2}px 0 ${secStyle.textBorderColor || '#000000'}, ${secStyle.textBorderSize ?? 1.2}px -${secStyle.textBorderSize ?? 1.2}px 0 ${secStyle.textBorderColor || '#000000'}, -${secStyle.textBorderSize ?? 1.2}px ${secStyle.textBorderSize ?? 1.2}px 0 ${secStyle.textBorderColor || '#000000'}, ${secStyle.textBorderSize ?? 1.2}px ${secStyle.textBorderSize ?? 1.2}px 0 ${secStyle.textBorderColor || '#000000'}, ` : ''}0 ${(secStyle.textShadowBlur ?? 8)/2}px ${secStyle.textShadowBlur ?? 8}px ${secStyle.textShadowColor || 'rgba(0,0,0,0.75)'}`
                     }}>
                       {sec.content.title || 'OUR MOVIE INTRO'}
                     </h1>
@@ -2491,7 +2501,7 @@ export default function BuilderPage() {
                   </div>
 
                   {['open', 'intro'].includes(activeSection.type) && (
-                    <div className="border-t border-slate-800/60 pt-3 space-y-2">
+                    <div className="border-t border-slate-800/60 pt-3 space-y-3">
                       <div className="flex items-center justify-between">
                         <label className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Text Vertical Position</label>
                         <span className="text-[10px] font-mono font-bold text-rose-400">
@@ -2506,6 +2516,97 @@ export default function BuilderPage() {
                         onChange={e => handleUpdateSectionStyle('overlayY', parseInt(e.target.value))}
                         className="w-full h-1 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-rose-500"
                       />
+
+                      {/* Text Border (Outline) Customizer */}
+                      <div className="border-t border-slate-800/40 pt-3 space-y-3">
+                        <div className="flex items-center justify-between">
+                          <label className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Enable Text Outline (Border)</label>
+                          <input
+                            type="checkbox"
+                            checked={activeSectionStyle.textBorder ?? false}
+                            onChange={e => handleUpdateSectionStyle('textBorder', e.target.checked)}
+                            className="rounded border-slate-800 bg-[#12161e] text-rose-500 focus:ring-0 focus:ring-offset-0 cursor-pointer"
+                          />
+                        </div>
+
+                        {activeSectionStyle.textBorder && (
+                          <div className="space-y-3 pl-3 border-l-2 border-slate-800/80 animate-fade-in">
+                            <div>
+                              <div className="flex items-center justify-between mb-1">
+                                <label className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider">Outline Thickness</label>
+                                <span className="text-[10px] font-mono font-bold text-rose-400">{(activeSectionStyle.textBorderSize ?? 1.2)}px</span>
+                              </div>
+                              <input
+                                type="range"
+                                min="0.5"
+                                max="3"
+                                step="0.1"
+                                value={activeSectionStyle.textBorderSize ?? 1.2}
+                                onChange={e => handleUpdateSectionStyle('textBorderSize', parseFloat(e.target.value))}
+                                className="w-full h-1 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-rose-500"
+                              />
+                            </div>
+
+                            <div>
+                              <label className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider block mb-1">Outline Color</label>
+                              <div className="flex items-center gap-2 bg-[#12161e] border border-slate-850 p-1.5 rounded-lg">
+                                <input
+                                  type="color"
+                                  value={activeSectionStyle.textBorderColor || '#000000'}
+                                  onChange={e => handleUpdateSectionStyle('textBorderColor', e.target.value)}
+                                  className="w-8 h-6 bg-transparent border-0 cursor-pointer"
+                                />
+                                <span className="text-xs font-mono">{activeSectionStyle.textBorderColor || '#000000'}</span>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Text Shadow Customizer */}
+                      <div className="border-t border-slate-800/40 pt-3 space-y-3">
+                        <div className="flex items-center justify-between">
+                          <label className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Enable Text Shadow</label>
+                          <input
+                            type="checkbox"
+                            checked={activeSectionStyle.textShadow ?? true}
+                            onChange={e => handleUpdateSectionStyle('textShadow', e.target.checked)}
+                            className="rounded border-slate-800 bg-[#12161e] text-rose-500 focus:ring-0 focus:ring-offset-0 cursor-pointer"
+                          />
+                        </div>
+
+                        {(activeSectionStyle.textShadow ?? true) && (
+                          <div className="space-y-3 pl-3 border-l-2 border-slate-800/80 animate-fade-in">
+                            <div>
+                              <div className="flex items-center justify-between mb-1">
+                                <label className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider">Shadow Blur</label>
+                                <span className="text-[10px] font-mono font-bold text-rose-400">{(activeSectionStyle.textShadowBlur ?? 8)}px</span>
+                              </div>
+                              <input
+                                type="range"
+                                min="0"
+                                max="30"
+                                value={activeSectionStyle.textShadowBlur ?? 8}
+                                onChange={e => handleUpdateSectionStyle('textShadowBlur', parseInt(e.target.value))}
+                                className="w-full h-1 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-rose-500"
+                              />
+                            </div>
+
+                            <div>
+                              <label className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider block mb-1">Shadow Color</label>
+                              <div className="flex items-center gap-2 bg-[#12161e] border border-slate-850 p-1.5 rounded-lg">
+                                <input
+                                  type="color"
+                                  value={activeSectionStyle.textShadowColor || '#000000'}
+                                  onChange={e => handleUpdateSectionStyle('textShadowColor', e.target.value)}
+                                  className="w-8 h-6 bg-transparent border-0 cursor-pointer"
+                                />
+                                <span className="text-xs font-mono">{activeSectionStyle.textShadowColor || '#000000'}</span>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                      </div>
                     </div>
                   )}
                 </div>

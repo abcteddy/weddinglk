@@ -16,6 +16,12 @@ interface IntroVideoScreenProps {
   subtitleColorOverride?: string
   textColorOverride?: string
   overlayY?: number
+  textBorder?: boolean
+  textBorderColor?: string
+  textBorderSize?: number
+  textShadow?: boolean
+  textShadowColor?: string
+  textShadowBlur?: number
 }
 
 export function IntroVideoScreen({
@@ -31,6 +37,12 @@ export function IntroVideoScreen({
   subtitleColorOverride,
   textColorOverride,
   overlayY,
+  textBorder,
+  textBorderColor,
+  textBorderSize,
+  textShadow,
+  textShadowColor,
+  textShadowBlur,
 }: IntroVideoScreenProps) {
   const videoRef    = useRef<HTMLVideoElement | null>(null)
   const [isVisible, setIsVisible]         = useState(false)
@@ -93,6 +105,37 @@ export function IntroVideoScreen({
 
   const handleTapToPlay = () => {
     videoRef.current?.play().then(() => setAutoplayBlocked(false)).catch(() => {})
+  }
+
+  // 1. Build text-stroke / outline border for title
+  const titleStroke = textBorder 
+    ? `${textBorderSize ?? 1.2}px ${textBorderColor || '#000000'}`
+    : undefined
+
+  // 2. Build text-shadow for title
+  let titleShadow = undefined
+  if (textShadow === false) {
+    titleShadow = 'none'
+  } else {
+    const shadowColor = textShadowColor || 'rgba(0,0,0,0.75)'
+    const blur = textShadowBlur ?? 15
+    titleShadow = `0 ${Math.max(2, blur/4)}px ${blur}px ${shadowColor}, 0 1px 2px rgba(0,0,0,0.6)`
+    
+    if (textBorder) {
+      const bColor = textBorderColor || '#000000'
+      const bSize = textBorderSize ?? 1.2
+      titleShadow += `, -${bSize}px -${bSize}px 0 ${bColor}, ${bSize}px -${bSize}px 0 ${bColor}, -${bSize}px ${bSize}px 0 ${bColor}, ${bSize}px ${bSize}px 0 ${bColor}`
+    }
+  }
+
+  // 3. Build text-shadow for subtitle/captions
+  let captionShadow = undefined
+  if (textShadow === false) {
+    captionShadow = 'none'
+  } else {
+    const shadowColor = textShadowColor || 'rgba(0,0,0,0.75)'
+    const blur = Math.min(8, textShadowBlur ?? 8)
+    captionShadow = `0 2px ${blur}px ${shadowColor}, 0 1px 2px rgba(0,0,0,0.5)`
   }
 
   return (
@@ -159,7 +202,7 @@ export function IntroVideoScreen({
             style={{ 
               color: subtitleColorOverride || textColorOverride || accentColor, 
               opacity: 0.95,
-              textShadow: '0 2px 4px rgba(0,0,0,0.7), 0 1px 2px rgba(0,0,0,0.5)',
+              textShadow: captionShadow,
               fontFamily: fontFamilyOverride ? `'${fontFamilyOverride}', sans-serif` : undefined
             }}
           >
@@ -169,7 +212,8 @@ export function IntroVideoScreen({
             className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-serif font-bold text-white leading-tight uppercase tracking-wider"
             style={{ 
               color: titleColorOverride || textColorOverride || '#ffffff',
-              textShadow: '0 4px 15px rgba(0,0,0,0.75), 0 2px 4px rgba(0,0,0,0.6)',
+              textShadow: titleShadow,
+              WebkitTextStroke: titleStroke,
               fontFamily: fontFamilyOverride ? `'${fontFamilyOverride}', serif` : undefined
             }}
           >
@@ -179,7 +223,7 @@ export function IntroVideoScreen({
             <p 
               className="text-[9px] sm:text-[11px] uppercase tracking-[0.35em] font-light text-white/70 mt-0.5"
               style={{
-                textShadow: '0 2px 4px rgba(0,0,0,0.7), 0 1px 2px rgba(0,0,0,0.5)',
+                textShadow: captionShadow,
               }}
             >
               Wedding Invitation

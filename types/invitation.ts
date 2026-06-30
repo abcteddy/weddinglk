@@ -45,6 +45,12 @@ export interface SectionStyles {
   borderRadius?: number // in px
   boxShadow?: boolean
   overlayY?: number
+  textBorder?: boolean
+  textBorderColor?: string
+  textBorderSize?: number
+  textShadow?: boolean
+  textShadowColor?: string
+  textShadowBlur?: number
 }
 
 export interface SectionContent {
