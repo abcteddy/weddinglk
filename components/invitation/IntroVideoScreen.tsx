@@ -159,18 +159,17 @@ export function IntroVideoScreen({
             style={{ 
               color: subtitleColorOverride || textColorOverride || accentColor, 
               opacity: 0.95,
-              textShadow: '0 2px 6px rgba(0,0,0,0.95), -1px -1px 0 rgba(0,0,0,0.85), 1px -1px 0 rgba(0,0,0,0.85), -1px 1px 0 rgba(0,0,0,0.85), 1px 1px 0 rgba(0,0,0,0.85)',
+              textShadow: '0 2px 4px rgba(0,0,0,0.7), 0 1px 2px rgba(0,0,0,0.5)',
               fontFamily: fontFamilyOverride ? `'${fontFamilyOverride}', sans-serif` : undefined
             }}
           >
             {subtitleOverride || 'You Are Invited To Celebrate'}
           </p>
           <h2
-            className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-serif font-bold text-white leading-tight"
+            className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-serif font-bold text-white leading-tight uppercase tracking-wider"
             style={{ 
               color: titleColorOverride || textColorOverride || '#ffffff',
-              textShadow: `0 4px 16px rgba(0,0,0,0.95), 0 0 30px rgba(0,0,0,0.6), -1.5px -1.5px 0 rgba(0,0,0,0.9), 1.5px -1.5px 0 rgba(0,0,0,0.9), -1.5px 1.5px 0 rgba(0,0,0,0.9), 1.5px 1.5px 0 rgba(0,0,0,0.9)`,
-              WebkitTextStroke: '1.2px rgba(0, 0, 0, 0.9)',
+              textShadow: '0 4px 15px rgba(0,0,0,0.75), 0 2px 4px rgba(0,0,0,0.6)',
               fontFamily: fontFamilyOverride ? `'${fontFamilyOverride}', serif` : undefined
             }}
           >
@@ -180,7 +179,7 @@ export function IntroVideoScreen({
             <p 
               className="text-[9px] sm:text-[11px] uppercase tracking-[0.35em] font-light text-white/70 mt-0.5"
               style={{
-                textShadow: '0 2px 6px rgba(0,0,0,0.95), -1px -1px 0 rgba(0,0,0,0.85), 1px -1px 0 rgba(0,0,0,0.85), -1px 1px 0 rgba(0,0,0,0.85), 1px 1px 0 rgba(0,0,0,0.85)',
+                textShadow: '0 2px 4px rgba(0,0,0,0.7), 0 1px 2px rgba(0,0,0,0.5)',
               }}
             >
               Wedding Invitation
